@@ -885,3 +885,6 @@ FodyWeavers.xsd
 # End of https://www.toptal.com/developers/gitignore/api/python,django,venv,macos,linux,windows,sublimetext,visualstudio,visualstudiocode,xcode,pycharm+all
 
 *:Zone.Identifier
+*/*:Zone.Identifier
+*/*/*:Zone.Identifier
+*/*/*/*:Zone.Identifier
