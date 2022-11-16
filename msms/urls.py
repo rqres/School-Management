@@ -20,4 +20,5 @@ from lessons import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),  # path for the home page
+    path('sign_up', views.sign_up, name='sign_up'),  # path for the sign-up page
 ]
