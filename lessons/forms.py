@@ -1,9 +1,9 @@
 from django import forms
-from .models import User
+from .models import Student
 
 class SignUpForm(forms.ModelForm):
     class Meta:
-        model = User
+        model = Student
         fields = ['first_name', 'last_name', 'email', 'school_name']
 
     password = forms.CharField(label='Password', widget=forms.PasswordInput())
