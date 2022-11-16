@@ -8,3 +8,4 @@ class User(AbstractUser):
     last_name = models.CharField(max_length= 50, blank = False)
     email = models.EmailField(unique = True)
     school_name = models.CharField(max_length= 200)
+    user_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
