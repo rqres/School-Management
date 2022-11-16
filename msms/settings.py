@@ -124,4 +124,4 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Student model
-AUTH_USER_MODEL = "lessons.User"
+AUTH_USER_MODEL = "lessons.Student"
