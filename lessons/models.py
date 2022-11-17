@@ -42,7 +42,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, blank=False)
     is_student = models.BooleanField(default=False)
     # TODO: implement later
     is_teacher = models.BooleanField(default=False)
@@ -84,7 +84,7 @@ class User(AbstractBaseUser):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for students here:
-    school_name = models.CharField(max_length=100)
+    school_name = models.CharField(max_length=100, blank=False)
 
 
 class Director(models.Model):

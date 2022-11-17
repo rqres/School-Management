@@ -28,12 +28,15 @@ class StudentSignUpForm(UserCreationForm):
         # password = forms.CharField(label='Password', widget=forms.PasswordInput())
         # password_confirm = forms.CharField(label='Re-enter password', widget=forms.PasswordInput())
         user.is_student = True
-        
+
         user.save()
-        student = Student.objects.create(user=user)
-        student.school_name = self.cleaned_data.get("school_name")
+        Student.objects.create(
+            user=user, school_name=self.cleaned_data.get("school_name")
+        )
+        # student.school_name = self.cleaned_data.get("school_name")
         return user
-        
+
+
 class LogInForm(forms.Form):
-    email = forms.CharField(label = "Email")
-    password = forms.CharField(label='Password', widget=forms.PasswordInput())
+    email = forms.CharField(label="Email")
+    password = forms.CharField(label="Password", widget=forms.PasswordInput())
