@@ -13,6 +13,7 @@ class StudentModelTestCase(TestCase):
             last_name="Doe",
             password="TestPassword123",
         )
+        self.user.is_student = True
 
         self.student = Student.objects.create(user=self.user, school_name="Test School")
 
@@ -47,6 +48,12 @@ class StudentModelTestCase(TestCase):
         self.student.school_name = "School2"
 
         self._assert_student_is_valid()
+
+    def test_student_has_only_student_flag_set(self):
+        self.assertTrue(self.student.user.is_student)
+        self.assertFalse(self.student.user.is_admin)
+        self.assertFalse(self.student.user.is_teacher)
+        self.assertFalse(self.student.user.is_parent)
 
     def test_valid_student(self):
         self._assert_student_is_valid()

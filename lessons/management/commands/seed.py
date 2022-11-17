@@ -10,7 +10,7 @@ class Command(BaseCommand):
         self.faker = Faker("en_GB")
 
     def handle(self, *args, **options):
-        for i in range(101):
+        for i in range(51):
             fname = self.faker.first_name()
             lname = self.faker.last_name()
 
@@ -45,5 +45,4 @@ class Command(BaseCommand):
 
             user.save()
 
-            student = Student.objects.create(user=user)
-            student.school_name = school
+            Student.objects.create(user=user, school_name=school)
