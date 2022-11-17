@@ -18,8 +18,11 @@ from django.urls import path
 from lessons import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', views.home, name = 'home'),  # path for the home page
-    path('sign_up', views.sign_up, name = 'sign_up'),  # path for the sign-up page
-    path('log_in', views.log_in, name = 'log_in') # path to log-in page
+    path("admin/", admin.site.urls),
+    path("", views.home, name="home"),  # path for the home page
+    path("sign_up", views.sign_up, name="sign_up"),  # path for the signup page
+    path(
+        "sign_up/student", views.sign_up_student, name="sign_up_student"
+    ),  # path for the student sign-up page
+    path("log_in", views.log_in, name="log_in"),  # path to log-in page
 ]
