@@ -24,4 +24,4 @@ urlpatterns = [
     path(
         "sign_up/student", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
-]
+    path('log_in', views.log_in, name = 'log_in'), # path to log-in page
