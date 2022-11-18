@@ -91,11 +91,19 @@ class Director(models.Model):
 
 class Invoice(models.Model):
     # TODO:implement invoice with unique reference number
-    pass
+    urn = models.CharField(max_length=50, blank=False)
+
 class Booking(models.Model):
     # Have access to Request model 
     # Each booking has an invoice attached to it 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)    
-    timePeriod = models.TimeField()
-    bookingCreatedAt = models.TimeField(auto_created=True)
+    startTime = models.TimeField()
+    endTime = models.TimeField()
+    bookingCreatedAt = models.TimeField(auto_now_add=True)
+
+    class Meta:
+        #Model options
+
+        ordering  = ['-bookingCreatedAt']
+    
