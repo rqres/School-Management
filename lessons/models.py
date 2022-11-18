@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # # Create your models here.
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         """
@@ -90,3 +89,14 @@ class Student(models.Model):
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
+
+class Invoice():
+    # TODO:implement invoice with unique reference number
+    pass
+class Booking(models.Model):
+    # Have access to Request model 
+    # Each booking has an invoice attached to it 
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
+    
+
