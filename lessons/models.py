@@ -11,12 +11,13 @@ class Student(AbstractUser):
     school_name = models.CharField(max_length= 200)
     user_id = models.UUIDField(primary_key = True, default = uuid.uuid4, editable = False)
 
-class Invoice():
+class Invoice(models.Model):
     # TODO:implement invoice with unique reference number
     pass
 class Booking(models.Model):
     # Have access to Request model 
     # Each booking has an invoice attached to it 
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
-    
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)    
+    timePeriod = models.TimeField()
+    bookingCreatedAt = models.TimeField(auto_created=True)
