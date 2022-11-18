@@ -1,0 +1,17 @@
+<html>
+
+<head>
+  <title>Fox_student_sign_up_page</title>
+</head>
+
+<body>
+  <h1>Sign up to Fox as a student</h1>
+  <p>Please sign up by filling the sign up form below</p>
+  <form action="{% url 'sign_up_student' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Sign up">
+  </form>
+</body>
+
+</html>
