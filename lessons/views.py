@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from .forms import StudentSignUpForm
 from .forms import LogInForm
@@ -31,3 +32,8 @@ def sign_up_student(request):
 def log_in(request):
     form = LogInForm()
     return render(request, "log_in.html", {"form": form})
+
+
+@login_required
+def account_bookings_list(request):
+    return render(request, "account_bookings_list.html")
