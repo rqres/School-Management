@@ -9,11 +9,9 @@
   <h2><i>Your bookings</i></h2>
 
   <ul>
-    <li>placeholder booking 1</li>
-    <li>placeholder booking 2</li>
-    <li>placeholder booking 3</li>
-    <li>placeholder booking 4</li>
-    <li>placeholder booking 5</li>
+    {% for booking in bookings_list %}
+    <li>{{booking}}</li>
+    {% endfor %}
   </ul>
 
 </body>

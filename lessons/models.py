@@ -108,5 +108,10 @@ class Booking(models.Model):
 
     class Meta:
         # Model options
-
         ordering = ["-bookingCreatedAt"]
+
+    def __str__(self):
+        return (
+            f"Booking from {self.startTime.strftime('%H:%M')} until {self.endTime.strftime('%H:%M')}."
+            f" This booking was created at {self.bookingCreatedAt.strftime('%H:%M')}"
+        )
