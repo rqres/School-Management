@@ -37,9 +37,6 @@ def log_in(request):
 
 
 @login_required
-def account_bookings_list(request):
-    print(request.user.first_name)
-    bookings_list = Booking.objects.filter(student=request.user)
-    return render(
-        request, "account_bookings_list.html", {"bookings_list": bookings_list}
-    )
+def bookings_list(request):
+    bookings = Booking.objects.filter(student=request.user)
+    return render(request, "bookings_list.html", {"bookings": bookings})

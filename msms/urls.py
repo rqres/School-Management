@@ -28,6 +28,6 @@ urlpatterns = [
     # todo: add path to account overview
     # path("account", views.account, name="account")
     path(
-        "account/bookings", views.account_bookings_list, name="account_bookings_list"
+        "account/bookings", views.bookings_list, name="bookings_list"
     ),  # path to view my bookings
 ]
