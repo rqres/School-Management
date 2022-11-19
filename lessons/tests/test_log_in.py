@@ -9,13 +9,14 @@ class LogInTest(TestCase):
     def setUp(self):
         self.sample_email = "sample@text.com"
         self.url = reverse('log_in')
-        user = User.objects.create_user(
+        user = User.objects.create_user (
             username = self.sample_email,
             email = self.sample_email,
             password = "password",
-            first_name = "Real", 
-            last_name = "Person",
-            school_name = "Queen's Trade School Waitangi")
+            # first_name = "Real", 
+            # last_name = "Person",
+            # school_name = "Queen's Trade School Waitangi"
+        )
         user.save()
     
     def test_url(self):
