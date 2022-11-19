@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.test import Client
-from lessons.models import Student
+from lessons.models import User, Student
 from lessons.forms import LogInForm
 
 # Create your tests here.
@@ -9,15 +9,13 @@ class LogInTest(TestCase):
     def setUp(self):
         self.sample_email = "sample@text.com"
         self.url = reverse('log_in')
-        user = Student.objects.create_user (
-            username = self.sample_email,
+        user = User.objects.create_user(
             email = self.sample_email,
-            password = "password",
             first_name = "Real", 
             last_name = "Person",
-            school_name = "Queen's Trade School Waitangi"
-        )
+            password = "password")
         user.save()
+        self.student = Student.objects.create(user = user, school_name="Queen's Trade School Waitangi")
     
     def test_url(self):
         self.assertEqual(self.url, '/log_in')
