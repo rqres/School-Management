@@ -3,9 +3,10 @@ from django.urls import reverse
 from django.test import Client
 from lessons.models import User, Student
 from lessons.forms import LogInForm
+from .helpers import LogInTester
 
 # Create your tests here.
-class LogInTest(TestCase):
+class LogInTest(TestCase, LogInTester):
     def setUp(self):
         self.sample_email = "sample@text.com"
         self.url = reverse('log_in')
@@ -22,15 +23,15 @@ class LogInTest(TestCase):
         
     def test_failed_login_pass(self):
         invalid_pass = (self.sample_email, "passwor")
-        cli = Client()
-        self.assertFalse(cli.login(username = invalid_pass[0], password = invalid_pass[1]))
+        self.assertFalse(self.client.login(username = invalid_pass[0], password = invalid_pass[1]))
+        self.assertFalse(self.is_logged_in())
     
     def test_failed_login_email(self):
         invalid_pass = ("notAnEmail", "password")
-        cli = Client()
-        self.assertFalse(cli.login(username = invalid_pass[0], password = invalid_pass[1]))
+        self.assertFalse(self.client.login(username = invalid_pass[0], password = invalid_pass[1]))
+        self.assertFalse(self.is_logged_in())
         
     def test_successful_login(self):
         valid_pass = (self.sample_email, "password")
-        cli = Client()
-        self.assertTrue(cli.login(username = valid_pass[0], password = valid_pass[1]))
+        self.assertTrue(self.client.login(username = valid_pass[0], password = valid_pass[1]))
+        self.assertTrue(self.is_logged_in())
