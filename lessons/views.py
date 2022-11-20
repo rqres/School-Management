@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from lessons.models import Booking
-from .forms import StudentSignUpForm
+from .forms import RequestForLessonsForm, StudentSignUpForm
 from .forms import LogInForm
 
 # # Create your views here.
@@ -40,3 +40,16 @@ def log_in(request):
 def bookings_list(request):
     bookings = Booking.objects.filter(student=request.user)
     return render(request, "bookings_list.html", {"bookings": bookings})
+
+
+@login_required
+def create_request(request):
+    if request.method == "POST":
+        form = RequestForLessonsForm(request.POST, usr=request.user)
+        if form.is_valid():
+            req = form.save()
+            print(req)
+            return redirect("home")
+
+    form = RequestForLessonsForm(usr=request.user)
+    return render(request, "create_request.html", {"form": form})

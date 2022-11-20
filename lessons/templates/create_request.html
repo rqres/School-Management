@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Create a request for music lessons</title>
+  <meta charset="UTF-8">
+</head>
+
+<body>
+  <h1>Complete the form below to create a new request for music lessons!</h1>
+
+
+  <form action="{% url 'create_request' %}" method="post">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+  </form>
+</body>
+
+</html>
