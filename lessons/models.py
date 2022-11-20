@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.exceptions import ValidationError
 
 # # Create your models here.
 
@@ -96,14 +97,20 @@ class Invoice(models.Model):
 class Booking(models.Model):
     # Have access to Request model 
     # Each booking has an invoice attached to it 
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)    
-    startTime = models.TimeField()
-    endTime = models.TimeField()
+    student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,blank=False)    
+    startTime = models.DateTimeField(blank=False)
+    endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
+    # Add description of booking field
 
+    def clean(self):
+        if (self.startTime is not None and self.endTime is not None):
+            duration = self.endTime - self.startTime
+            minutes = duration.total_seconds()/60
+            if not(minutes == 30 or minutes == 45 or minutes == 60):
+                raise ValidationError('Length of lesson sholud be 30 or 45 or 60 minutes')
     class Meta:
         #Model options
-
         ordering  = ['-bookingCreatedAt']
     
