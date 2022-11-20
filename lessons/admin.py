@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 # from .models import Student
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from lessons.models import User
+from lessons.models import User, Booking
 
 # Register your models here.
 
@@ -66,3 +66,11 @@ admin.site.unregister(Group)
 #         "last_name",
 #         "is_active",
 #     ]
+
+# Admin can edit bookings and create them
+@admin.register(Booking)
+class BookingAdmin(admin.ModelAdmin):
+    list_display = ("student","startTime","endTime","invoice")
+    # TODO: Have a function to view invoice of that Booking
+    def view_invoice_link(self, obj):
+        pass
