@@ -129,9 +129,10 @@ class RequestForLessons(models.Model):
     #     ("THU", "Thursday"),
     #     ("FRI", "Friday"),
     #     ("SAT", "Saturday"),
-    #     ("SUN", "Sunday"),
-    # ]
+    #     ("SUN", "Sunday"), ]
     # availability = models.MultipleChoiceField()
+    fulfilled = models.BooleanField(default=False)
+
     no_of_lessons = models.IntegerField(
         default=10,  # default is 10 lessons (per year?)
         blank=False,
@@ -148,7 +149,11 @@ class RequestForLessons(models.Model):
             )
         ],
     )
-    lesson_duration = models.DurationField(
-        default=datetime.timedelta(hours=1), blank=False  # default lesson is 1 hour
+    lesson_duration = models.IntegerField(
+        default=60,
+        blank=False,
+        validators=[
+            MinValueValidator(15, message="A lesson must be at least 15 minutes")
+        ],
     )
     other_info = models.CharField(max_length=500, blank=True)

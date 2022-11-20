@@ -31,6 +31,9 @@ urlpatterns = [
         "account/bookings", views.bookings_list, name="bookings_list"
     ),  # path to view my bookings
     path(
+        "account/requests", views.requests_list, name="requests_list"
+    ),  # path to view my requests for lessons
+    path(
         "account/requests/create", views.create_request, name="create_request"
     ),  # path to create new request
 ]
