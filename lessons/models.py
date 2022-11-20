@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # # Create your models here.
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         """
@@ -85,25 +86,32 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
+
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
+
 
 class Invoice(models.Model):
     # TODO:implement invoice with unique reference number
     urn = models.CharField(max_length=50, blank=False)
 
+
 class Booking(models.Model):
-    # Have access to Request model 
-    # Each booking has an invoice attached to it 
+    # Have access to Request model
+    # Each booking has an invoice attached to it
     student = models.ForeignKey(User, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)    
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     startTime = models.TimeField()
     endTime = models.TimeField()
     bookingCreatedAt = models.TimeField(auto_now_add=True)
 
     class Meta:
-        #Model options
+        # Model options
+        ordering = ["-bookingCreatedAt"]
 
-        ordering  = ['-bookingCreatedAt']
-    
+    def __str__(self):
+        return (
+            f"Booking from {self.startTime.strftime('%H:%M')} until {self.endTime.strftime('%H:%M')}."
+            f" This booking was created at {self.bookingCreatedAt.strftime('%H:%M')}"
+        )

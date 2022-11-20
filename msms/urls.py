@@ -26,4 +26,9 @@ urlpatterns = [
     ),  # path for the student sign-up page
     path("log_in", views.log_in, name="log_in"),  # path to log-in page
     path("log_out", views.log_out, name="log_out") # path to log-out page
+    # todo: add path to account overview
+    # path("account", views.account, name="account")
+    path(
+        "account/bookings", views.bookings_list, name="bookings_list"
+    ),  # path to view my bookings
 ]

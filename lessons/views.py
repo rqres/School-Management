@@ -1,5 +1,7 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from lessons.models import Booking
 from .forms import StudentSignUpForm
 from .forms import LogInForm
 
@@ -42,3 +44,9 @@ def log_in(request):
 def log_out(request):
     logout(request)
     return redirect(home)
+
+
+@login_required
+def bookings_list(request):
+    bookings = Booking.objects.filter(student=request.user)
+    return render(request, "bookings_list.html", {"bookings": bookings})
