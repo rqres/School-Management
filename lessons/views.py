@@ -1,10 +1,12 @@
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from lessons.models import Booking, RequestForLessons
 from .forms import RequestForLessonsForm, StudentSignUpForm
 
 from django.contrib.auth import authenticate, login, logout
 from .forms import LogInForm
+from .models import Booking
 
 
 #  Create your views here.
@@ -50,6 +52,16 @@ def log_in(request):
     print("user is none")
     return render(request, "log_in.html", {"form": form})
 
+    
+@login_required
+def show_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+    except ObjectDoesNotExist:
+        return redirect('bookings')
+    else:
+        return render(request, 'show_booking.html', {'booking' : booking})
+
 
 def log_out(request):
     logout(request)
@@ -79,3 +91,4 @@ def create_request(request):
 
     form = RequestForLessonsForm(usr=request.user)
     return render(request, "create_request.html", {"form": form})
+
