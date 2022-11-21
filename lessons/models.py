@@ -1,8 +1,12 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.exceptions import ValidationError
+import datetime
+
 
 # # Create your models here.
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -86,6 +90,7 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for teachers here:
@@ -95,12 +100,13 @@ class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
 
+
 class Invoice(models.Model):
     # TODO:implement invoice with unique reference number
     urn = models.CharField(max_length=50, blank=False)
 
+
 class Booking(models.Model):
-    
     name =  models.CharField(max_length=50, blank=False,unique=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
@@ -119,4 +125,50 @@ class Booking(models.Model):
     class Meta:
         #Model options
         ordering  = ['-bookingCreatedAt']
-    
+  
+
+    def __str__(self):
+        return (
+            f"Booking from {self.startTime.strftime('%H:%M')} until {self.endTime.strftime('%H:%M')}."
+            f" This booking was created at {self.bookingCreatedAt.strftime('%H:%M')}"
+        )
+
+
+class RequestForLessons(models.Model):
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    # todo: availability field
+    # WEEKDAYS = [
+    #     ("MON", "Monday"),
+    #     ("TUE", "Tuesday"),
+    #     ("WED", "Wednesday"),
+    #     ("THU", "Thursday"),
+    #     ("FRI", "Friday"),
+    #     ("SAT", "Saturday"),
+    #     ("SUN", "Sunday"), ]
+    # availability = models.MultipleChoiceField()
+    fulfilled = models.BooleanField(default=False)
+
+    no_of_lessons = models.IntegerField(
+        default=10,  # default is 10 lessons (per year?)
+        blank=False,
+        validators=[
+            MinValueValidator(1, message="Number of lessons must be greater than 1!")
+        ],
+    )
+    days_between_lessons = models.IntegerField(
+        default=7,  # default is one week between each lesson
+        blank=False,
+        validators=[
+            MinValueValidator(
+                1, message="Number of days between lessons must be greater than 1!"
+            )
+        ],
+    )
+    lesson_duration = models.IntegerField(
+        default=60,
+        blank=False,
+        validators=[
+            MinValueValidator(15, message="A lesson must be at least 15 minutes")
+        ],
+    )
+    other_info = models.CharField(max_length=500, blank=True)

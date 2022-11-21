@@ -1,21 +1,20 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from .forms import StudentSignUpForm
+from lessons.models import Booking, RequestForLessons
+from .forms import RequestForLessonsForm, StudentSignUpForm
+
+from django.contrib.auth import authenticate, login, logout
 from .forms import LogInForm
 from .models import Booking
 
 # # Create your views here.
-
-
 def home(request):
     return render(request, "home.html")
-
 
 def sign_up(request):
     # form = SignUpForm()
     return render(request, "sign_up.html")
-
 
 def sign_up_student(request):
     if request.method == "POST":
@@ -48,3 +47,33 @@ def show_booking(request, booking_id):
         return redirect('bookings')
     else:
         return render(request, 'show_booking.html', {'booking' : booking})
+
+def log_out(request):
+    logout(request)
+    return redirect(home)
+
+
+@login_required
+def bookings_list(request):
+    bookings = Booking.objects.filter(student=request.user)
+    return render(request, "bookings_list.html", {"bookings": bookings})
+    
+    
+@login_required
+def requests_list(request):
+    requests = RequestForLessons.objects.filter(student=request.user)
+    return render(request, "requests_list.html", {"requests": requests})
+
+
+@login_required
+def create_request(request):
+    if request.method == "POST":
+        form = RequestForLessonsForm(request.POST, usr=request.user)
+        if form.is_valid():
+            req = form.save()
+            print(req)
+            return redirect("home")
+
+    form = RequestForLessonsForm(usr=request.user)
+    return render(request, "create_request.html", {"form": form})
+

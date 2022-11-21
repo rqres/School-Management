@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>My Requests</title>
+  <style>
+    div {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <h1>Fox</h1>
+  </div>
+  <div>
+    <h2><i>Your requests</i></h2>
+  </div>
+
+  <div>
+    <ol>
+      <h4>Unfulfilled requests:</h4>
+      {% for request in requests %}
+      {% if request.fulfilled is False %}
+      <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+        {{request.days_between_lessons}} days between lessons</li>
+      {% endif %}
+      {% endfor %}
+    </ol>
+  </div>
+
+  <div>
+    <ul>
+      <h4> Fulfilled requests: </h4>
+      {% for request in requests %}
+      {% if request.fulfilled is True %}
+      <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+        {{request.days_between_lessons}} days between lessons</li>
+      {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+
+</body>
+
+</html>
