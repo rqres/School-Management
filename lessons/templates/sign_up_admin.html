@@ -1,0 +1,15 @@
+//changed
+<html>
+    <head>
+        <title>Fox_sign_up_admin_page</title>
+    </head>
+    <body>
+        <h1>Sign up an admin to Fox</h1>
+        <p>Please sign up an admin by filling the sign up form below</p>
+        <form action="{% url 'sign_up_admin' %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Sign up admin">
+        </form>
+    </body>
+</html>
