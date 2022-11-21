@@ -29,7 +29,7 @@ def sign_up_student(request):
 
 #changed
 def sign_up_admin(request):
-    amdinform=
+    #amdinform=
     return render(request, 'sign_up_admin.html', {'form': form})
 
 def log_in(request):
@@ -55,8 +55,8 @@ def log_out(request):
 def bookings_list(request):
     bookings = Booking.objects.filter(student=request.user)
     return render(request, "bookings_list.html", {"bookings": bookings})
-    
-    
+
+
 @login_required
 def requests_list(request):
     requests = RequestForLessons.objects.filter(student=request.user)
