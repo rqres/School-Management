@@ -1,7 +1,9 @@
+from django.contrib.admin.options import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
 
 from lessons.models import Booking, RequestForLessons, Student
 from lessons.forms import RequestForLessonsForm, StudentSignUpForm, LogInForm
@@ -65,6 +67,7 @@ def show_booking(request, booking_id):
 
 @login_required
 def bookings_list(request):
+
     student = Student.objects.get(user=request.user)
     bookings = Booking.objects.filter(student=student)
     return render(request, "bookings_list.html", {"bookings": bookings})
@@ -78,12 +81,28 @@ def requests_list(request):
 
 
 @login_required
+def show_request(request, lessons_request_id):
+    # https://github.com/testdrivenio/django-ajax-xhr
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if is_ajax:
+        booking = get_object_or_404(RequestForLessons, id=lessons_request_id)
+        if request.method == "DELETE":
+            booking.delete()
+            return JsonResponse({"status": "Booking deleted!"})
+        return JsonResponse({"status": "Invalid request"}, status=400)
+    else:
+        # todo: display the request
+        pass
+
+
+@login_required
 def create_request(request):
     if request.method == "POST":
         form = RequestForLessonsForm(request.POST, usr=request.user)
         if form.is_valid():
             form.save()
-            return redirect("home")
+            return redirect("requests_list")
 
     else:
         form = RequestForLessonsForm(usr=request.user)

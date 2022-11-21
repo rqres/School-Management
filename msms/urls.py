@@ -40,4 +40,9 @@ urlpatterns = [
     path(
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
+    path(
+        "account/requests/<int:lessons_request_id>/",
+        views.show_request,
+        name="show_request",
+    ),
 ]
