@@ -27,6 +27,10 @@ def sign_up_student(request):
         form = StudentSignUpForm()
     return render(request, "sign_up_student.html", {"form": form})
 
+#changed
+def sign_up_admin(request):
+    amdinform=
+    return render(request, 'sign_up_admin.html', {'form': form})
 
 def log_in(request):
     if request.method == "POST":
