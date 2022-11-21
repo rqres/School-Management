@@ -22,7 +22,7 @@ class BookingListTest(TestCase):
         )
 
     def test_bookings_list_url(self):
-        self.assertEqual(self.url, "/bookings/")
+        self.assertEqual(self.url, "/account/bookings/")
 
     def create_test_bookings(self, booking_count):
         for booking_id in range(booking_count):
