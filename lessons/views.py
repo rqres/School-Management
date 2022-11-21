@@ -1,11 +1,10 @@
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from lessons.models import Booking, RequestForLessons, Student
-from .forms import RequestForLessonsForm, StudentSignUpForm
 
-from django.contrib.auth import authenticate, login, logout
-from .forms import LogInForm
+from lessons.models import Booking, RequestForLessons, Student
+from lessons.forms import RequestForLessonsForm, StudentSignUpForm, LogInForm
 
 
 #  Create your views here.
@@ -14,7 +13,6 @@ def home(request):
 
 
 def sign_up(request):
-    # form = SignUpForm()
     return render(request, "sign_up.html")
 
 
@@ -22,13 +20,14 @@ def sign_up_student(request):
     if request.method == "POST":
         form = StudentSignUpForm(request.POST)
         if form.is_valid():
-            # create user and add to db
-            form.save()
+            # create user, add it to db, and log them in
+            user = form.save()
+            login(request, user)
             return redirect("home")
-            # login(request, user)
-            # return redirect("feed")
+
     else:
         form = StudentSignUpForm()
+
     return render(request, "sign_up_student.html", {"form": form})
 
 
@@ -38,18 +37,20 @@ def log_in(request):
         if form.is_valid():
             email = form.cleaned_data.get("email")
             password = form.cleaned_data.get("password")
-            print(f"email: {email}, pass: {password}")
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
-                print("user is not none")
                 return redirect("home")
 
-        print("no user with that name")
-        # this will need to be changed to the dashboard in time!
-    form = LogInForm()
-    print("user is none")
+    else:
+        form = LogInForm()
+
     return render(request, "log_in.html", {"form": form})
+
+
+def log_out(request):
+    logout(request)
+    return redirect("home")
 
 
 @login_required
@@ -62,11 +63,6 @@ def show_booking(request, booking_id):
         return render(request, "show_booking.html", {"booking": booking})
 
 
-def log_out(request):
-    logout(request)
-    return redirect("home")
-
-
 @login_required
 def bookings_list(request):
     student = Student.objects.get(user=request.user)
@@ -76,6 +72,7 @@ def bookings_list(request):
 
 @login_required
 def requests_list(request):
+    # TODO: change user to student in requests model
     requests = RequestForLessons.objects.filter(student=request.user)
     return render(request, "requests_list.html", {"requests": requests})
 
@@ -85,9 +82,10 @@ def create_request(request):
     if request.method == "POST":
         form = RequestForLessonsForm(request.POST, usr=request.user)
         if form.is_valid():
-            req = form.save()
-            print(req)
+            form.save()
             return redirect("home")
 
-    form = RequestForLessonsForm(usr=request.user)
+    else:
+        form = RequestForLessonsForm(usr=request.user)
+
     return render(request, "create_request.html", {"form": form})

@@ -1,8 +1,8 @@
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.validators import MinValueValidator
+
 from django.core.exceptions import ValidationError
-import datetime
 
 
 # # Create your models here.
@@ -29,8 +29,8 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, email, first_name, last_name, password=None):
         """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
+        Creates and saves a superuser with the given email, first name,
+        last name and password.
         """
         user = self.create_user(
             email,
@@ -53,7 +53,7 @@ class User(AbstractBaseUser):
     is_parent = models.BooleanField(default=False)
     # TODO: are we calling them admins? directors? superadmins? superusers? idk
     # is_director = models.BooleanField(default=False)
-    # for now, im calling them adming as per django docs
+    # for now, im calling them admin as django default
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -132,8 +132,10 @@ class Booking(models.Model):
 
     def __str__(self):
         return (
-            f"Booking from {self.startTime.strftime('%H:%M')} until {self.endTime.strftime('%H:%M')}."
-            f" This booking was created at {self.bookingCreatedAt.strftime('%H:%M')}"
+            f"Booking from {self.startTime.strftime('%H:%M')}"
+            f"until {self.endTime.strftime('%H:%M')}."
+            " This booking was created at"
+            f"{self.bookingCreatedAt.strftime('%H:%M')}"
         )
 
 
@@ -168,7 +170,7 @@ class RequestForLessons(models.Model):
         ],
     )
     lesson_duration = models.IntegerField(
-        default=60,
+        default=60,  # default is 1 hour
         blank=False,
         validators=[
             MinValueValidator(15, message="A lesson must be at least 15 minutes")

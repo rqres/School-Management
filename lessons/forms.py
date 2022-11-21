@@ -16,11 +16,6 @@ class StudentSignUpForm(UserCreationForm):
         label="Password confirmation", widget=forms.PasswordInput
     )
 
-    # password = forms.CharField(label="Password",widget=forms.PasswordInput())
-    # password_confirm = forms.CharField(
-    #     label="Re-enter password", widget=forms.PasswordInput()
-    # )
-
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
@@ -31,18 +26,6 @@ class StudentSignUpForm(UserCreationForm):
 
     @transaction.atomic
     def save(self, commit=True):
-        # super().save(commit=False)
-        # user = User.objects.create_user(
-        #     self.cleaned_data.get("email"),
-        #     first_name=self.cleaned_data.get("first_name"),
-        #     last_name=self.cleaned_data.get("last_name"),
-        #     password=self.cleaned_data.get("password"),
-        # )
-        # # password = forms.CharField(label='Password', widget=forms.PasswordInput())
-        # # password_confirm = forms.CharField(label='Re-enter password', widget=forms.PasswordInput())
-        # user.is_student = True
-
-        # user.save()
         # Save the provided password in hashed format
         user = super(StudentSignUpForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
@@ -52,6 +35,7 @@ class StudentSignUpForm(UserCreationForm):
         Student.objects.create(
             user=user, school_name=self.cleaned_data.get("school_name")
         )
+
         return user
 
 
