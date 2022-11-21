@@ -1,6 +1,8 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from .forms import StudentSignUpForm
 from .forms import LogInForm
+from .models import Booking
 
 # # Create your views here.
 
@@ -31,3 +33,15 @@ def sign_up_student(request):
 def log_in(request):
     form = LogInForm()
     return render(request, "log_in.html", {"form": form})
+
+def booking_list(request):
+    bookings = Booking.objects.all() # Gets all existing booking not specific to user logged in
+    return render(request, 'booking_list.html', {'bookings': bookings})
+
+def show_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+    except ObjectDoesNotExist:
+        return redirect('bookings')
+    else:
+        return render(request, 'show_booking.html', {'booking' : booking})
