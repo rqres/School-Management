@@ -1,7 +1,9 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.exceptions import ValidationError
 import datetime
+
 
 # # Create your models here.
 
@@ -89,6 +91,11 @@ class Student(models.Model):
     school_name = models.CharField(max_length=100, blank=False)
 
 
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    # add extra fields for teachers here:
+    school_name = models.CharField(max_length=100, blank=False)
+
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
@@ -100,17 +107,25 @@ class Invoice(models.Model):
 
 
 class Booking(models.Model):
-    # Have access to Request model
-    # Each booking has an invoice attached to it
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
-    startTime = models.TimeField()
-    endTime = models.TimeField()
+    name =  models.CharField(max_length=50, blank=False,unique=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
+    description = models.CharField(max_length=50, blank=False)
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,blank=False)    
+    startTime = models.DateTimeField(blank=False)
+    endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-
+    
+    def clean(self):
+        if (self.startTime is not None and self.endTime is not None):
+            duration = self.endTime - self.startTime
+            minutes = duration.total_seconds()/60
+            if not(minutes == 30 or minutes == 45 or minutes == 60):
+                raise ValidationError('Length of lesson sholud be 30 or 45 or 60 minutes')
     class Meta:
-        # Model options
-        ordering = ["-bookingCreatedAt"]
+        #Model options
+        ordering  = ['-bookingCreatedAt']
+  
 
     def __str__(self):
         return (
