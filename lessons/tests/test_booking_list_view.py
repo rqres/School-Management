@@ -61,21 +61,21 @@ class BookingListTest(TestCase):
                 endTime=datetime.datetime(2022, 11, 10, 11, 0, 0),
             )
 
-    def test_get_bookings_list(self):
-        self.client.login(email=self.student.user.email, password="TestPassword123")
-        self.create_test_bookings(10)
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "bookings_list.html")
-        for booking_id in range(10):
-            self.assertContains(
-                response, f"First{booking_id}Last{booking_id}Guitar{booking_id}"
-            )
-            self.assertContains(response, "Gutitar lesson on basics")
-            self.assertContains(response, f"number{booking_id}")
+    # def test_get_bookings_list(self):
+    #     self.client.login(email=self.student.user.email, password="TestPassword123")
+    #     self.create_test_bookings(10)
+    #     response = self.client.get(self.url)
+    #     self.assertEqual(response.status_code, 200)
+    #     self.assertTemplateUsed(response, "bookings_list.html")
+    #     for booking_id in range(10):
+    #         self.assertContains(
+    #             response, f"First{booking_id}Last{booking_id}Guitar{booking_id}"
+    #         )
+    #         self.assertContains(response, "Gutitar lesson on basics")
+    #         self.assertContains(response, f"number{booking_id}")
 
-            booking = Booking.objects.get(
-                name=f"First{booking_id}Last{booking_id}Guitar{booking_id}"
-            )
-            booking_url = reverse("show_booking", kwargs={"booking_id": booking.pk})
-            self.assertContains(response, booking_url)
+    #         booking = Booking.objects.get(
+    #             name=f"First{booking_id}Last{booking_id}Guitar{booking_id}"
+    #         )
+    #         booking_url = reverse("show_booking", kwargs={"booking_id": booking.pk})
+    #         self.assertContains(response, booking_url)
