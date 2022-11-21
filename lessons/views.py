@@ -8,13 +8,16 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import LogInForm
 from .models import Booking
 
-# # Create your views here.
+
+#  Create your views here.
 def home(request):
     return render(request, "home.html")
+
 
 def sign_up(request):
     # form = SignUpForm()
     return render(request, "sign_up.html")
+
 
 def sign_up_student(request):
     if request.method == "POST":
@@ -31,13 +34,24 @@ def sign_up_student(request):
 
 
 def log_in(request):
+    if request.method == "POST":
+        form = LogInForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get("email")
+            password = form.cleaned_data.get("password")
+            print(f"email: {email}, pass: {password}")
+            user = authenticate(email=email, password=password)
+            if user is not None:
+                login(request, user)
+                print("user is not none")
+                return redirect("home")
+
+        print("no user with that name")
+        # this will need to be changed to the dashboard in time!
     form = LogInForm()
+    print("user is none")
     return render(request, "log_in.html", {"form": form})
 
-@login_required
-def booking_list(request):
-    bookings = Booking.objects.all() # Gets all existing booking not specific to user logged in
-    return render(request, 'booking_list.html', {'bookings': bookings})
     
 @login_required
 def show_booking(request, booking_id):
@@ -48,17 +62,18 @@ def show_booking(request, booking_id):
     else:
         return render(request, 'show_booking.html', {'booking' : booking})
 
+
 def log_out(request):
     logout(request)
-    return redirect(home)
+    return redirect("home")
 
 
 @login_required
 def bookings_list(request):
     bookings = Booking.objects.filter(student=request.user)
     return render(request, "bookings_list.html", {"bookings": bookings})
-    
-    
+
+
 @login_required
 def requests_list(request):
     requests = RequestForLessons.objects.filter(student=request.user)
