@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from .forms import StudentSignUpForm
@@ -34,10 +35,12 @@ def log_in(request):
     form = LogInForm()
     return render(request, "log_in.html", {"form": form})
 
+@login_required
 def booking_list(request):
     bookings = Booking.objects.all() # Gets all existing booking not specific to user logged in
     return render(request, 'booking_list.html', {'bookings': bookings})
-
+    
+@login_required
 def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)

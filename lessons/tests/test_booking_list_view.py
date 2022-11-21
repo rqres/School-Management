@@ -6,6 +6,19 @@ class BookingListTest(TestCase):
     def setUp(self):
         super(TestCase, self).setUp()
         self.url = reverse('booking_list')
+        self.user_student = User.objects.create_user(
+            "john.doe@example.org",
+            first_name="John",
+            last_name="Doe",
+            password="TestPassword123",
+        )
+
+        self.user_student.is_student = True
+
+        self.student = Student.objects.create(
+            user = self.user_student,
+            school_name = "Test School"
+        )
 
     def test_booking_list_url(self):
         self.assertEqual(self.url, '/bookings/')
@@ -52,6 +65,7 @@ class BookingListTest(TestCase):
             )
       
     def test_get_booking_list(self):
+        self.client.login(email= self.student.user.email, password='TestPassword123')
         self.create_test_bookings(10)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
