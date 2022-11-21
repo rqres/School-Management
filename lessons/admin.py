@@ -68,7 +68,6 @@ admin.site.unregister(Group)
 #     ]
 
 # Admins can edit bookings and create them
-@admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     list_display = ('get_student','get_teacher',"startTime","endTime","invoice")
     
