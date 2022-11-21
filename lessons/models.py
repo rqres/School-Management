@@ -86,6 +86,11 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    # add extra fields for teachers here:
+    school_name = models.CharField(max_length=100, blank=False)
+
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
@@ -95,15 +100,16 @@ class Invoice(models.Model):
     urn = models.CharField(max_length=50, blank=False)
 
 class Booking(models.Model):
-    # Have access to Request model 
-    # Each booking has an invoice attached to it 
+    
+    name =  models.CharField(max_length=50, blank=False,unique=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
+    description = models.CharField(max_length=50, blank=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,blank=False)    
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-    # Add description of booking field
-
+    
     def clean(self):
         if (self.startTime is not None and self.endTime is not None):
             duration = self.endTime - self.startTime
