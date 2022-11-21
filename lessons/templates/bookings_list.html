@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>My Bookings</title>
+  <style>
+    div {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <h1>Fox</h1>
+  </div>
+  <div>
+    <p>Welcome to Fox's musical tutoring website</p>
+  </div>
+  <div>
+    <h2><i>Your bookings</i></h2>
+  </div>
+
+  <div>
+    <ul>
+      {% for booking in bookings %}
+      <li>{{booking}}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</body>
+
+</html>
