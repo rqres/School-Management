@@ -1,0 +1,17 @@
+[
+  {
+    "model": "lessons.user",
+    "pk": 2,
+    "fields": {
+      "first_name": "Jake",
+      "last_name": "Walker",
+      "email": "jake.walker@example.org",
+      "password": "pbkdf2_sha256$390000$UuRoW4swCRUXszUmhyY7pa$B6MpbPGv5dYUa4Nyx1uMq1INGKcjyAPE5+Z0+XPoanM=",
+      "is_student": false,
+      "is_teacher": false,
+      "is_parent": false,
+      "is_admin": false,
+      "is_active": true
+    }
+  }
+]
