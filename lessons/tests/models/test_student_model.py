@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lessons.models import User, Student
+from lessons.models import Student
 from django.core.exceptions import ValidationError
 
 # Create your tests here.
@@ -23,7 +23,7 @@ class StudentModelTestCase(TestCase):
         self._assert_student_is_invalid()
 
     def test_student_is_deleted_when_corresponding_user_is_deleted(self):
-        self.student.save()
+        # self.student.save()
         before = list(Student.objects.all())
         self.student.user.delete()
         after = list(Student.objects.all())

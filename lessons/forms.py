@@ -43,6 +43,7 @@ class StudentSignUpForm(UserCreationForm):
         user = super(StudentSignUpForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
+            user.is_student = True
             user.save()
 
         Student.objects.create(
@@ -59,7 +60,7 @@ class LogInForm(forms.Form):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._usr = kwargs.pop("usr", None)
+        self._student = kwargs.pop("student", None)
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -75,7 +76,7 @@ class RequestForLessonsForm(forms.ModelForm):
     def save(self):
         super().save(commit=False)
         req = RequestForLessons.objects.create(
-            student=self._usr,
+            student=self._student,
             no_of_lessons=self.cleaned_data.get("no_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
