@@ -36,9 +36,10 @@
 /*
  * Cover page
  */
-h1.cover-heading {
+h1.cover-title {
   font-size: 4.5rem;
   font-family: 'Comic Sans MS';
+  color: #FFA500;
 }
 
 h3.cover-text {
