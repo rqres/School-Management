@@ -1,3 +1,4 @@
+from django.db import IntegrityError
 from django.test import TestCase
 from lessons.models import User
 from django.core.exceptions import ValidationError
@@ -13,14 +14,14 @@ class UserModelTestCase(TestCase):
     ]
 
     def setUp(self):
-        self.user = User.objects.get(email="john.doe@example.org")
+        self.user = User.objects.get(email="default.user@example.org")
 
     def test_first_name_must_not_be_blank(self):
         self.user.first_name = ""
         self._assert_user_is_invalid()
 
     def test_first_name_may_already_exist(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
+        other_user = User.objects.get(email="other.user@example.org")
         self.user.first_name = other_user.first_name
 
         self._assert_user_is_valid()
@@ -34,7 +35,7 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_last_name_may_already_exist(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
+        other_user = User.objects.get(email="other.user@example.org")
         self.user.last_name = other_user.last_name
 
         self._assert_user_is_valid()
@@ -48,10 +49,15 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_email_must_be_unique(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
-
-        self.user.email = other_user.email
-        self._assert_user_is_invalid()
+        # - since we're using email as PK, simply saving a new user with
+        # a duplicate email
+        # will just update the existing user without raising a ValidationError
+        # - instead we need to force insert a duplicate user
+        #  to get an IntegrityError
+        with self.assertRaises(IntegrityError):
+            bad_user = User(email=self.user.email, first_name="Bad", last_name="User")
+            bad_user.save(force_insert=True)
+            bad_user.delete()
 
     def test_default_user_has_no_flags_set(self):
         self.assertFalse(self.user.is_admin)

@@ -1,7 +1,21 @@
 [
   {
+    "model": "lessons.user",
+    "pk": "john.doe@example.org",
+    "fields": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "password": "pbkdf2_sha256$390000$UuRoW4swCRUXszUmhyY7pa$B6MpbPGv5dYUa4Nyx1uMq1INGKcjyAPE5+Z0+XPoanM=",
+      "is_student": true,
+      "is_teacher": false,
+      "is_parent": false,
+      "is_admin": false,
+      "is_active": true
+    }
+  },
+  {
     "model": "lessons.student",
-    "pk": 1,
+    "pk": "john.doe@example.org",
     "fields": {
       "school_name": "King's College London"
     }

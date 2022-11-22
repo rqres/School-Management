@@ -46,7 +46,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
-    email = models.EmailField(unique=True, blank=False)
+    email = models.EmailField(unique=True, blank=False, primary_key=True)
     is_student = models.BooleanField(default=False)
     # TODO: implement later
     is_teacher = models.BooleanField(default=False)
@@ -140,7 +140,7 @@ class Booking(models.Model):
 
 
 class RequestForLessons(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     # todo: availability field
     # WEEKDAYS = [
     #     ("MON", "Monday"),

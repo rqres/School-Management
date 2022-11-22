@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lessons.models import User, Student
+from lessons.models import Student
 from django.core.exceptions import ValidationError
 
 # Create your tests here.
@@ -7,25 +7,19 @@ from django.core.exceptions import ValidationError
 
 class StudentModelTestCase(TestCase):
     fixtures = [
-        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_student.json",
-        "lessons/tests/fixtures/other_users.json",
         "lessons/tests/fixtures/other_students.json",
     ]
 
     def setUp(self):
-        user = User.objects.get(email="john.doe@example.org")
-        user.is_student = True
-        user.save()
-
-        self.student = Student.objects.get(user=user)
+        self.student = Student.objects.get(user_id="john.doe@example.org")
 
     def test_corresponding_user_must_not_be_none(self):
         self.student.user = None
         self._assert_student_is_invalid()
 
     def test_student_is_deleted_when_corresponding_user_is_deleted(self):
-        self.student.save()
+        # self.student.save()
         before = list(Student.objects.all())
         self.student.user.delete()
         after = list(Student.objects.all())
@@ -40,11 +34,7 @@ class StudentModelTestCase(TestCase):
         self._assert_student_is_invalid()
 
     def test_school_name_may_already_exist(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
-        other_user.is_student = True
-        other_user.save()
-        other_student = Student.objects.get(user=other_user)
-
+        other_student = Student.objects.get(user_id="jake.walker@example.org")
         self.student.school_name = other_student.school_name
 
         self._assert_student_is_valid()
