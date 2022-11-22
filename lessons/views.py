@@ -47,16 +47,18 @@ def log_in(request):
         form = LogInForm()
     return render(request, "log_in.html", {"form": form})
 
+
 @login_required
 def log_out(request):
     logout(request)
     return redirect("home")
 
+
 @login_required
 def account(request):
     # Right now this only accomodates for student accounts!
-    student = Student.objects.get(user = request.user)
-    return render(request, "account.html", {"student": student})
+    return render(request, "account.html", {"student": request.user.student})
+
 
 @login_required
 def show_booking(request, booking_id):
