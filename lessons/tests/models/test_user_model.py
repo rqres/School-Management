@@ -6,26 +6,22 @@ from django.core.exceptions import ValidationError
 
 
 class UserModelTestCase(TestCase):
+
+    fixtures = [
+        "lessons/tests/fixtures/default_user.json",
+        "lessons/tests/fixtures/other_users.json",
+    ]
+
     def setUp(self):
-        self.user = User.objects.create_user(
-            "john.doe@example.org",
-            first_name="John",
-            last_name="Doe",
-            password="TestPassword123",
-        )
+        self.user = User.objects.get(email="john.doe@example.org")
 
     def test_first_name_must_not_be_blank(self):
         self.user.first_name = ""
         self._assert_user_is_invalid()
 
     def test_first_name_may_already_exist(self):
-        User.objects.create_user(
-            "jake.smith@example.org",
-            first_name="Jake",
-            last_name="Smith",
-            password="TestPassword123",
-        )
-        self.user.first_name = "Jake"
+        other_user = User.objects.get(email="jake.walker@example.org")
+        self.user.first_name = other_user.first_name
 
         self._assert_user_is_valid()
 
@@ -38,14 +34,9 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_last_name_may_already_exist(self):
-        User.objects.create_user(
-            "jane.lang@example.org",
-            first_name="Jane",
-            last_name="Lang",
-            password="TestPassword123",
-        )
+        other_user = User.objects.get(email="jake.walker@example.org")
+        self.user.last_name = other_user.last_name
 
-        self.user.last_name = "Lang"
         self._assert_user_is_valid()
 
     def test_last_name_must_not_have_more_than_50_chars(self):
@@ -57,14 +48,9 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_email_must_be_unique(self):
-        User.objects.create_user(
-            "jane.doe@example.org",
-            first_name="Jane",
-            last_name="Doe",
-            password="TestPassword123",
-        )
+        other_user = User.objects.get(email="jake.walker@example.org")
 
-        self.user.email = "jane.doe@example.org"
+        self.user.email = other_user.email
         self._assert_user_is_invalid()
 
     def test_default_user_has_no_flags_set(self):
