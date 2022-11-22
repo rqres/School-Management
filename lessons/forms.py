@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
+from django.core.validators import RegexValidator
+
 from .models import RequestForLessons, Student, User
 
 
@@ -11,7 +13,18 @@ class StudentSignUpForm(UserCreationForm):
         model = User
         fields = ["first_name", "last_name", "email", "school_name"]
 
-    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+
     password2 = forms.CharField(
         label="Password confirmation", widget=forms.PasswordInput
     )
