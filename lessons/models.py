@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db.models import Count
 from django.core.exceptions import ValidationError
 import datetime
 
@@ -100,14 +101,18 @@ class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
 
-
 class Invoice(models.Model):
     # TODO:implement invoice with unique reference number
-    urn = models.CharField(max_length=50, blank=False)
+    student_num = models.IntegerField(blank=False)
+    invoice_num = models.IntegerField(blank=False)
 
+    def save(self, *args, **kwargs):
+        self.urn = str(self.student_num) + '-' + str(self.invoice_num)
+        super(Invoice, self).save(*args, **kwargs)
+        
 
 class Booking(models.Model):
-    name =  models.CharField(max_length=50, blank=False,unique=True)
+    name = models.CharField(max_length=50, blank=False,unique=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
     description = models.CharField(max_length=50, blank=False)
@@ -116,12 +121,21 @@ class Booking(models.Model):
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
     
+    def save(self, *args, **kwargs): 
+        self.invoice = Invoice.objects.create(
+            student_num = self.student.user.pk + 1000,
+            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
+        )   
+        self.invoice.save()
+        super(Booking, self).save(*args, **kwargs)
+
     def clean(self):
         if (self.startTime is not None and self.endTime is not None):
             duration = self.endTime - self.startTime
             minutes = duration.total_seconds()/60
             if not(minutes == 30 or minutes == 45 or minutes == 60):
                 raise ValidationError('Length of lesson sholud be 30 or 45 or 60 minutes')
+       
     class Meta:
         #Model options
         ordering  = ['-bookingCreatedAt']
