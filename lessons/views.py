@@ -42,18 +42,22 @@ def log_in(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("home")
-
+                return redirect("account")
+            # TODO: ACCOMODATE DIFFERENT TYPES OF ACCOUNTS (ADMIN, STUDENT, TEACHER, PARENT etc.)
     else:
         form = LogInForm()
-
     return render(request, "log_in.html", {"form": form})
 
-
+@login_required
 def log_out(request):
     logout(request)
     return redirect("home")
 
+@login_required
+def account(request):
+    # Right now this only accomodates for student accounts!
+    student = Student.objects.get(user = request.user)
+    return render(request, "account.html", {"student": student})
 
 @login_required
 def show_booking(request, booking_id):
