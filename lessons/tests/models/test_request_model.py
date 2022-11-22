@@ -6,7 +6,6 @@ from lessons.models import RequestForLessons, Student
 
 class RequestModelTestCase(TestCase):
     fixtures = [
-        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_student.json",
         "lessons/tests/fixtures/default_request.json",
     ]

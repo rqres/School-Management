@@ -7,16 +7,12 @@ from django.core.exceptions import ValidationError
 
 class StudentModelTestCase(TestCase):
     fixtures = [
-        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_student.json",
         "lessons/tests/fixtures/other_students.json",
-        "lessons/tests/fixtures/other_users.json",
     ]
 
     def setUp(self):
         self.student = Student.objects.get(user_id="john.doe@example.org")
-        self.student.user.is_student = True
-        self.student.save()
 
     def test_corresponding_user_must_not_be_none(self):
         self.student.user = None
@@ -39,9 +35,6 @@ class StudentModelTestCase(TestCase):
 
     def test_school_name_may_already_exist(self):
         other_student = Student.objects.get(user_id="jake.walker@example.org")
-        other_student.user.is_student = True
-        other_student.user.save()
-
         self.student.school_name = other_student.school_name
 
         self._assert_student_is_valid()

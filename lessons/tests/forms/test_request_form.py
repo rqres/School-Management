@@ -13,7 +13,6 @@ class RequestForLessonsFormTestCase(TestCase):
     """Unit tests for the request for lessons form"""
 
     fixtures = [
-        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_student.json",
     ]
 

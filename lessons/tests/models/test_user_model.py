@@ -14,14 +14,14 @@ class UserModelTestCase(TestCase):
     ]
 
     def setUp(self):
-        self.user = User.objects.get(email="john.doe@example.org")
+        self.user = User.objects.get(email="default.user@example.org")
 
     def test_first_name_must_not_be_blank(self):
         self.user.first_name = ""
         self._assert_user_is_invalid()
 
     def test_first_name_may_already_exist(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
+        other_user = User.objects.get(email="other.user@example.org")
         self.user.first_name = other_user.first_name
 
         self._assert_user_is_valid()
@@ -35,7 +35,7 @@ class UserModelTestCase(TestCase):
         self._assert_user_is_invalid()
 
     def test_last_name_may_already_exist(self):
-        other_user = User.objects.get(email="jake.walker@example.org")
+        other_user = User.objects.get(email="other.user@example.org")
         self.user.last_name = other_user.last_name
 
         self._assert_user_is_valid()
