@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Student Dashboard</title>
+    </head>
+    <body>
+        <h1><strong>Welcome back, 
+            {% for stu in student %}
+            <li>{{stu}}</li>
+            {% endfor %}
+        </strong></h1>
+        <div><p><a href='{% url 'bookings_list' %}'> View your Bookings</p></div>
+        <div><p><a href='{% url 'requests_list' %}'> View your Requests</p></div>
+        <div><p><a href='{% url 'create_request' %}'> Submit a new Request</p></div>
+        <div><p><a href='{% url 'log_out' %}'> Log Out</p></div>
+    </body>
+</html>
