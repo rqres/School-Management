@@ -1,7 +1,7 @@
 [
   {
     "model": "lessons.student",
-    "pk": 1,
+    "pk": "john.doe@example.org",
     "fields": {
       "school_name": "King's College London"
     }
