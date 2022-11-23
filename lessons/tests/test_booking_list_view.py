@@ -66,7 +66,7 @@ class BookingListTest(TestCase):
             )
       
     def test_get_booking_list(self):
-        self.client.login(email= self.student.user.email, password='TestPassword123')
+        print(self.client.login(email='john.doe@example.org', password='TestPassword123'))
         self.create_test_bookings(10)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

@@ -1,0 +1,13 @@
+<html>
+    <head>
+        <title>Payment Page</title>
+    </head>
+    <body>
+        <h1><strong>Payment</strong></h1>
+        <form action= "{% url 'payment' %}" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="Pay" value="pay">
+        </form>
+    </body>
+</html>

@@ -2,11 +2,11 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 from lessons.models import Booking, RequestForLessons
-from .forms import RequestForLessonsForm, StudentSignUpForm
-
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm
 from django.contrib.auth import authenticate, login, logout
 from .forms import LogInForm
-from .models import Booking
+from .models import Booking , Invoice
+from django.http import HttpResponseForbidden
 
 # # Create your views here.
 def home(request):
@@ -38,6 +38,15 @@ def log_in(request):
 def booking_list(request):
     bookings = Booking.objects.all() # Gets all existing booking not specific to user logged in
     return render(request, 'booking_list.html', {'bookings': bookings})
+
+# @login_required
+# def booking_list(request):
+#     if request.user.is_student is False:
+#         return redirect("home")
+    
+#     bookings = request.user.student.booking_set.all()
+    
+#     return render(request, 'booking_list.html', {'bookings': bookings})
     
 @login_required
 def show_booking(request, booking_id):
@@ -51,14 +60,7 @@ def show_booking(request, booking_id):
 def log_out(request):
     logout(request)
     return redirect(home)
-
-
-@login_required
-def bookings_list(request):
-    bookings = Booking.objects.filter(student=request.user)
-    return render(request, "bookings_list.html", {"bookings": bookings})
-    
-    
+  
 @login_required
 def requests_list(request):
     requests = RequestForLessons.objects.filter(student=request.user)
@@ -77,3 +79,19 @@ def create_request(request):
     form = RequestForLessonsForm(usr=request.user)
     return render(request, "create_request.html", {"form": form})
 
+@login_required
+def payment(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            current_user = request.user
+            form = PaymentForm(request.POST)
+            if form.is_valid():
+                invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
+                invoice.is_paid = True
+                return redirect('home')
+            else:
+                return render(request, 'home.html', {'form': form}) # replace with actual feed page
+        else:
+            return redirect('log_in')
+    else:
+        return HttpResponseForbidden()

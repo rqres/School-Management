@@ -38,5 +38,5 @@ urlpatterns = [
     path(
         "account/requests/create", views.create_request, name="create_request"
     ),  # path to create new request
-
+    path("payment", views.payment, name="payment"),# path to payment page
 ]
