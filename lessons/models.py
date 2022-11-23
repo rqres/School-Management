@@ -102,9 +102,9 @@ class Director(models.Model):
     # extra fields for director:
 
 class Invoice(models.Model):
-    # TODO:implement invoice with unique reference number
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
+    is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.urn = str(self.student_num) + '-' + str(self.invoice_num)

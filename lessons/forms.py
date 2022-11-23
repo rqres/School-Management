@@ -1,7 +1,8 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import RequestForLessons, Student, User
+from .models import Invoice, RequestForLessons, Student, User
 
 
 class StudentSignUpForm(UserCreationForm):
@@ -67,3 +68,16 @@ class RequestForLessonsForm(forms.ModelForm):
         )
 
         return req
+
+class PaymentForm(forms.Form):
+    invoice_urn = forms.CharField(label="Invoice reference number")
+    account_name =forms.CharField(max_length=50)
+    account_number = forms.IntegerField(max_value=9999999) #change to char
+    sort_code = forms.IntegerField(max_value=999999)
+    postcode = forms.CharField(
+        label="Postcode", 
+        validators = [RegexValidator(
+            regex=r'^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$',
+            # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
+            message='Postcode must be valid'
+        )])
