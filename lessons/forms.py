@@ -35,11 +35,13 @@ class StudentSignUpForm(UserCreationForm):
         )
         return user
 
-
 class LogInForm(forms.Form):
     email = forms.CharField(label="Email")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
+class AdminLoginForm(forms.Form):
+    adminemail = forms.CharField(label="Email")
+    adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):

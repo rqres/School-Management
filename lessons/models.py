@@ -46,12 +46,9 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
     is_student = models.BooleanField(default=False)
-    # TODO: implement later
     is_teacher = models.BooleanField(default=False)
     is_parent = models.BooleanField(default=False)
-    # TODO: are we calling them admins? directors? superadmins? superusers? idk
-    # is_director = models.BooleanField(default=False)
-    # for now, im calling them adming as per django docs
+    is_director = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -88,10 +85,15 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
-
+#subclass for User class
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
+    school_name = models.CharField(max_length=100, blank=False)
+
+#subclass for Director class
+#class Admin():
+
 
 
 class Invoice(models.Model):

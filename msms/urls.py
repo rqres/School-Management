@@ -36,5 +36,6 @@ urlpatterns = [
     ),  # path to view my requests for lessons
     path(
         "account/requests/create", views.create_request, name="create_request"
-    ),  # path to create new request
+    ),  # path to create new request'
+    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
 ]

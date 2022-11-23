@@ -28,9 +28,8 @@ def sign_up_student(request):
     return render(request, "sign_up_student.html", {"form": form})
 
 #changed
-def sign_up_admin(request):
-    #amdinform=
-    return render(request, 'sign_up_admin.html', {'form': form})
+#def sign_up_admin(request):
+    #return render(request, 'sign_up_admin.html', {'form': form})
 
 def log_in(request):
     if request.method == "POST":
@@ -45,6 +44,20 @@ def log_in(request):
     else:
         form = LogInForm()
         return render(request, "log_in.html", {"form": form})
+
+def adminlogin(request):
+    if request.method == "POST":
+        adminloginform = AdminLoginForm(request.POST)
+        if form.is_valid():
+            username = adminloginform.cleaned_data.get(username)
+            password = adminloginform.cleaned_data.get(password)
+            user = authenticate(username = username, password = password)
+            if user is not None:
+                login(request, user)
+                return redirect(home)
+    else:
+        adminloginform = AdminLoginForm()
+        return render(request, "adminlogin.html", {"form": adminloginform})
 
 def log_out(request):
     logout(request)
