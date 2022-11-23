@@ -104,6 +104,7 @@ class Director(models.Model):
 class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
+    urn = models.CharField(max_length=50)
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -124,7 +125,7 @@ class Booking(models.Model):
     def save(self, *args, **kwargs): 
         self.invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
-            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
+            invoice_num = self.student.booking_set.count() + 1
         )   
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)
