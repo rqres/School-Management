@@ -1,8 +1,11 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import RequestForLessons, Student, User
-
+from .models import Invoice, RequestForLessons, Student, User
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
@@ -11,28 +14,43 @@ class StudentSignUpForm(UserCreationForm):
         model = User
         fields = ["first_name", "last_name", "email", "school_name"]
 
-    # password = forms.CharField(label="Password",widget=forms.PasswordInput())
-    # password_confirm = forms.CharField(
-    #     label="Re-enter password", widget=forms.PasswordInput()
-    # )
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
 
     @transaction.atomic
-    def save(self):
-        super().save(commit=False)
-        user = User.objects.create_user(
-            self.cleaned_data.get("email"),
-            first_name=self.cleaned_data.get("first_name"),
-            last_name=self.cleaned_data.get("last_name"),
-            # password=self.cleaned_data.get("new_password"),
-        )
-        # password = forms.CharField(label='Password', widget=forms.PasswordInput())
-        # password_confirm = forms.CharField(label='Re-enter password', widget=forms.PasswordInput())
-        user.is_student = True
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(StudentSignUpForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.is_student = True
+            user.save()
 
-        user.save()
         Student.objects.create(
             user=user, school_name=self.cleaned_data.get("school_name")
         )
+
         return user
 
 class LogInForm(forms.Form):
@@ -45,7 +63,7 @@ class AdminLoginForm(forms.Form):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._usr = kwargs.pop("usr", None)
+        self._student = kwargs.pop("student", None)
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -61,7 +79,7 @@ class RequestForLessonsForm(forms.ModelForm):
     def save(self):
         super().save(commit=False)
         req = RequestForLessons.objects.create(
-            student=self._usr,
+            student=self._student,
             no_of_lessons=self.cleaned_data.get("no_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
@@ -69,3 +87,36 @@ class RequestForLessonsForm(forms.ModelForm):
         )
 
         return req
+
+class PaymentForm(forms.Form):
+    invoice_urn = forms.CharField(label="Invoice reference number")
+    account_name =forms.CharField(max_length=50)
+    account_number = forms.CharField(
+        min_length=8,
+        max_length=8,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Account number must contain numbers only'
+        )]
+    ) 
+    sort_code = forms.CharField(
+        min_length=6,
+        max_length=6,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Sort code must contain numbers only'
+        )])
+    postcode = forms.CharField(
+        label="Postcode", 
+        validators = [RegexValidator(
+            regex=r'^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$',
+            # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
+            message='Postcode must be valid'
+        )])
+    def clean_invoice(self):
+        try:
+            invoice_urn = self.cleaned_data.get("invoice_urn")
+            invoice = Invoice.objects.get(urn=invoice_urn)
+        except ObjectDoesNotExist:
+            raise ValidationError('Enter valid invoice urn')
+            
