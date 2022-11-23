@@ -48,6 +48,12 @@ h2.signup-title {
   color: #FFA500;
 }
 
+h2.login-title {
+  font-size: 3.5rem;
+  font-family: 'Arial Rounded MT BOLD';
+  color: #5e5b5b;
+}
+
 h3.home-text {
   font-size: 2rem;
   font-family: 'Arial Rounded MT';
@@ -73,6 +79,16 @@ h4.signup-text {
 
 .signup-card {
   background-color: rgba(245, 245, 245, 0.8);
+  max-width: 100rem;
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 30px;
+  border-radius: 25px;
+}
+
+.login-card {
+  background-color: rgba(241, 160, 46, 0.8);
   max-width: 100rem;
   padding-top: 30px;
   padding-left: 20px;
