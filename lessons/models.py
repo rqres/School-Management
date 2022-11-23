@@ -3,8 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 import datetime
 
-# # Create your models here.
-
+# Create your models here.
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -48,7 +47,6 @@ class User(AbstractBaseUser):
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
     is_parent = models.BooleanField(default=False)
-    is_director = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -86,14 +84,10 @@ class Student(models.Model):
     school_name = models.CharField(max_length=100, blank=False)
 
 #subclass for User class
-class Director(models.Model):
+class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
-
-#subclass for Director class
-#class Admin():
-
 
 
 class Invoice(models.Model):
