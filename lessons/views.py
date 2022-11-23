@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
 
@@ -65,6 +65,9 @@ def log_out(request):
     logout(request)
     return redirect("home")
 
+def forgot_password(request):
+    form = ForgotPasswordForm()
+    return render(request, "forgot_password.html", {"form": form})
 
 @login_required
 def account(request):

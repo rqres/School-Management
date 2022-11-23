@@ -31,6 +31,10 @@ urlpatterns = [
     path("log_in/", views.log_in, name="log_in"),  # path to log-in page
     
     path(
+        "forgot_password/", views.forgot_password, name="forgot_password"
+    ),  # path to reset password
+    
+    path(
         "account/bookings/", views.bookings_list, name="bookings_list"
     ),  # path to list of bookings
     
@@ -42,7 +46,7 @@ urlpatterns = [
     
     path("account/", views.account, name="account"), # path to account overview (currently a simple redirect)
     
-    path("adminaccount/", views.account, name="account_admin"), 
+    path("adminaccount/", views.account_admin, name="account_admin"), 
     # this should probably be renamed or we should decide on a convention for different account dashboards.
     
     path(

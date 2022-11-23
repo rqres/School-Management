@@ -119,4 +119,13 @@ class PaymentForm(forms.Form):
             invoice = Invoice.objects.get(urn=invoice_urn)
         except ObjectDoesNotExist:
             raise ValidationError('Enter valid invoice urn')
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.CharField(label="Email", required=True)
+    
+    def authenticate_email(self):
+        checked_email = self.cleaned_data['email']
+        if not User.objects.filter(checked_email).exists():
+            raise forms.ValidationError("This e-mail is not registered to any account!")
+    
             
