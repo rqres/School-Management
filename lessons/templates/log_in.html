@@ -1,10 +1,16 @@
 {% extends 'base.html' %}
 {% block body %}
-<h1><strong>Log In</strong></h1>
-<form action= '{% url 'log_in' %}' method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Log In">
-</form>
-<div><p><a href='#'>Forgot your password?</p></div>
+<div class="container vh-100">
+  <div class="row h-100">
+    <div class="col-12">
+      <h1><strong>Log In</strong></h1>
+      <form action= '{% url 'log_in' %}' method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Log In">
+      </form>
+      <div><p><a href='#'>Forgot your password?</p></div>
+    </div>
+  </div>
+</div>
 {% endblock %}
