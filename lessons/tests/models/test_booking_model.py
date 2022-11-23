@@ -34,37 +34,24 @@ class BookingTest(TestCase):
             school_name = "Test School"
         )
 
-        self.invoice = Invoice.objects.create(
-            urn = "number"
-        )
-
-        self.second_invoice = Invoice.objects.create(
-            urn = "another_number"
-        )
         self.booking = Booking(
             name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar1',
             student = self.student,
             teacher = self.teacher,
             description = 'Gutitar lesson on basics',
-            invoice = self.invoice,
             startTime = datetime.datetime(2022,11,10,10,0,0),     
             endTime = datetime.datetime(2022,11,10,11,0,0)
         )
+        self.booking.save()
         self.booking_other = Booking(
             name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar15',
             student = self.student,
             teacher = self.teacher,
             description = 'Gutitar lesson on basics continued',
-            invoice = self.second_invoice,
             startTime = datetime.datetime(2022,11,11,10,0,0),     
             endTime = datetime.datetime(2022,11,11,11,0,0)
         )
-
-    def test_valid_invoice(self):
-        try:
-            self.invoice.full_clean()
-        except ValidationError:
-            self.fail("Test invoice should be valids")
+        self.booking_other.save()
 
     def test_valid_booking(self):
         try:
@@ -106,6 +93,7 @@ class BookingTest(TestCase):
             self.booking.full_clean()
         except ValidationError:
             self.fail("Test booking should be valids")
+
     def test_username_cannot_be_over_50_characters_long(self):
         self.booking.name = 'x' * 51
         self._assert_booking_is_invalid()
@@ -119,6 +107,11 @@ class BookingTest(TestCase):
     def test_teacher_user_is_valid(self):
         try:
             self.teacher.full_clean()
+        except(ValidationError):
+            self.fail("Student should be valid")
+    def test_invoice_is_valid(self):
+        try:
+            self.booking.invoice.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
 

@@ -3,10 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-
-from lessons.models import Booking, RequestForLessons
-from lessons.forms import RequestForLessonsForm, StudentSignUpForm, LogInForm
-
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm
+from .models import Booking , Invoice ,RequestForLessons
+from django.http import HttpResponseForbidden
 
 #  Create your views here.
 def home(request):
@@ -74,9 +73,7 @@ def show_booking(request, booking_id):
 def bookings_list(request):
     if request.user.is_student is False:
         return redirect("home")
-
     bookings = request.user.student.booking_set.all()
-
     return render(request, "bookings_list.html", {"bookings": bookings})
 
 
@@ -114,5 +111,21 @@ def create_request(request):
 
     else:
         form = RequestForLessonsForm(student=request.user.student)
-
     return render(request, "create_request.html", {"form": form})
+    
+@login_required
+def payment(request):
+    if request.method == "POST":
+        form = PaymentForm(request.POST)
+        if form.is_valid(): 
+            try:
+                invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
+            except ObjectDoesNotExist:
+                form = PaymentForm() 
+                return render(request, "payment_form.html", {"form": form})
+            
+            invoice.is_paid = True
+            return redirect("home")
+    else:
+        form = PaymentForm()    
+    return render(request, "payment_form.html", {"form": form})

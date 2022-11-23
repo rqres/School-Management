@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.db.models import Count
 from django.core.validators import MinValueValidator
-
 from django.core.exceptions import ValidationError
 
 
@@ -46,7 +46,7 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
-    email = models.EmailField(unique=True, blank=False, primary_key=True)
+    email = models.EmailField(unique=True, blank=False)
     is_student = models.BooleanField(default=False)
     # TODO: implement later
     is_teacher = models.BooleanField(default=False)
@@ -101,21 +101,34 @@ class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
 
-
 class Invoice(models.Model):
-    # TODO:implement invoice with unique reference number
-    urn = models.CharField(max_length=50, blank=False)
+    student_num = models.IntegerField(blank=False)
+    invoice_num = models.IntegerField(blank=False)
+    urn = models.CharField(max_length=50)
+    is_paid = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        self.urn = str(self.student_num) + '-' + str(self.invoice_num)
+        super(Invoice, self).save(*args, **kwargs)
+        
 
 class Booking(models.Model):
-    name = models.CharField(max_length=50, blank=False, unique=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
+    name = models.CharField(max_length=50, blank=False,unique=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
     description = models.CharField(max_length=50, blank=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs): 
+        self.invoice = Invoice.objects.create(
+            student_num = self.student.user.pk + 1000,
+            invoice_num = self.student.booking_set.count() + 1
+        )   
+        self.invoice.save()
+        super(Booking, self).save(*args, **kwargs)
 
     def clean(self):
         if self.startTime is not None and self.endTime is not None:

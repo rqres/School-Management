@@ -3,7 +3,7 @@ from django.test import TestCase
 from django import forms
 
 from lessons.forms import RequestForLessonsForm
-from lessons.models import RequestForLessons, Student
+from lessons.models import RequestForLessons, Student , User
 
 
 # Create your tests here.
@@ -54,7 +54,8 @@ class RequestForLessonsFormTestCase(TestCase):
             form.delete()
 
     def test_form_must_save_correctly(self):
-        student = Student.objects.get(user_id="john.doe@example.org")
+        user = User.objects.get(email="john.doe@example.org")
+        student = Student.objects.get(user=user)
         form = RequestForLessonsForm(student=student, data=self.form_input)
         before_count = RequestForLessons.objects.count()
         request = form.save()
