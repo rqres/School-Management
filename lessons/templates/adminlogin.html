@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
     <head>
-        <title>Log In Page</title>
+        <title>Log In Page for Admins</title>
     </head>
     <body>
         <h1><strong>Log In</strong></h1>
-        <form action= '{% url 'log_in' %}' method="post">
+        <form action= '{% url 'adminlogin' %}' method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Log In">

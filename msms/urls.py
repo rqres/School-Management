@@ -59,4 +59,5 @@ urlpatterns = [
         views.show_request,
         name="show_request",
     ),
+    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
 ]
