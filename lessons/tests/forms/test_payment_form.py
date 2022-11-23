@@ -24,13 +24,14 @@ class PaymentFormTestCase(TestCase):
             student_num = self.student.user.pk + 1000,
             invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
         )  
-        self.invoice.save()
+        self.invoice.save() 
+
         self.form_input = {
             'invoice_urn': '1001-1',
             'account_name' : 'John Doe',
             'account_number' : '12345678',
             'sort_code' : '123456',
-            'postcode': 'AB1 1AB'}
+            'postcode': 'SW17 9TR'}
 
     def test_form_contains_required_fields(self):
         form = PaymentForm()
@@ -39,6 +40,11 @@ class PaymentFormTestCase(TestCase):
         self.assertIn('account_number', form.fields)
         self.assertIn('sort_code', form.fields)
         self.assertIn('postcode', form.fields)
+
+    def test_valid_request_form(self):
+        print(self.invoice.urn)
+        form = PaymentForm(data=self.form_input)
+        self.assertTrue(form.is_valid())
 
     def test_form_rejects_blank_invoice_urn(self):
         self.form_input['invoice_urn'] = ''
@@ -61,11 +67,7 @@ class PaymentFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_form_rejects_blank_post_code(self):
-        self.form_input['post_code'] = ''
+        self.form_input['postcode'] = ''
         form = PaymentForm(data=self.form_input)
         self.assertFalse(form.is_valid())
-
-    def test_form_rejects_blank_post_code(self):
-        self.form_input['post_code'] = ''
-        form = PaymentForm(data=self.form_input)
-        self.assertFalse(form.is_valid())
+    

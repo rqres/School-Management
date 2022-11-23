@@ -51,7 +51,7 @@ urlpatterns = [
     ),  # path to create new request
     
     path(
-        "payment", views.payment, name="payment"
+        "account/payment", views.payment, name="payment_form"
     ),# path to payment page
     
     path(

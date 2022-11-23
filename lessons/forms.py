@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, Student, User
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
@@ -87,8 +89,21 @@ class RequestForLessonsForm(forms.ModelForm):
 class PaymentForm(forms.Form):
     invoice_urn = forms.CharField(label="Invoice reference number")
     account_name =forms.CharField(max_length=50)
-    account_number = forms.IntegerField(max_value=9999999) #change to char
-    sort_code = forms.IntegerField(max_value=999999)
+    account_number = forms.CharField(
+        min_length=8,
+        max_length=8,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Account number must contain numbers only'
+        )]
+    ) 
+    sort_code = forms.CharField(
+        min_length=6,
+        max_length=6,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Sort code must contain numbers only'
+        )])
     postcode = forms.CharField(
         label="Postcode", 
         validators = [RegexValidator(
@@ -96,3 +111,10 @@ class PaymentForm(forms.Form):
             # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
             message='Postcode must be valid'
         )])
+    def clean_invoice(self):
+        try:
+            invoice_urn = self.cleaned_data.get("invoice_urn")
+            invoice = Invoice.objects.get(urn=invoice_urn)
+        except ObjectDoesNotExist:
+            raise ValidationError('Enter valid invoice urn')
+            

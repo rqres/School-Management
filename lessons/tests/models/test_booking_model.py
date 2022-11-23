@@ -109,6 +109,11 @@ class BookingTest(TestCase):
             self.teacher.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
+    def test_invoice_is_valid(self):
+        try:
+            self.booking.invoice.full_clean()
+        except(ValidationError):
+            self.fail("Student should be valid")
 
     def test_valid_length_of_booking(self):
         duration = self.booking.endTime - self.booking.startTime
