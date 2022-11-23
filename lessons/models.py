@@ -1,9 +1,8 @@
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db.models import Count
+from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
-import datetime
 
 
 # # Create your models here.
@@ -30,8 +29,8 @@ class CustomUserManager(BaseUserManager):
 
     def create_superuser(self, email, first_name, last_name, password=None):
         """
-        Creates and saves a superuser with the given email, date of
-        birth and password.
+        Creates and saves a superuser with the given email, first name,
+        last name and password.
         """
         user = self.create_user(
             email,
@@ -54,7 +53,7 @@ class User(AbstractBaseUser):
     is_parent = models.BooleanField(default=False)
     # TODO: are we calling them admins? directors? superadmins? superusers? idk
     # is_director = models.BooleanField(default=False)
-    # for now, im calling them adming as per django docs
+    # for now, im calling them admin as django default
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -97,6 +96,7 @@ class Teacher(models.Model):
     # add extra fields for teachers here:
     school_name = models.CharField(max_length=100, blank=False)
 
+
 class Director(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
@@ -116,7 +116,7 @@ class Booking(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
     description = models.CharField(max_length=50, blank=False)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE,blank=False)    
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
@@ -130,26 +130,29 @@ class Booking(models.Model):
         super(Booking, self).save(*args, **kwargs)
 
     def clean(self):
-        if (self.startTime is not None and self.endTime is not None):
+        if self.startTime is not None and self.endTime is not None:
             duration = self.endTime - self.startTime
-            minutes = duration.total_seconds()/60
-            if not(minutes == 30 or minutes == 45 or minutes == 60):
-                raise ValidationError('Length of lesson sholud be 30 or 45 or 60 minutes')
-       
+            minutes = duration.total_seconds() / 60
+            if not (minutes == 30 or minutes == 45 or minutes == 60):
+                raise ValidationError(
+                    "Length of lesson sholud be 30 or 45 or 60 minutes"
+                )
+
     class Meta:
-        #Model options
-        ordering  = ['-bookingCreatedAt']
-  
+        # Model options
+        ordering = ["-bookingCreatedAt"]
 
     def __str__(self):
         return (
-            f"Booking from {self.startTime.strftime('%H:%M')} until {self.endTime.strftime('%H:%M')}."
-            f" This booking was created at {self.bookingCreatedAt.strftime('%H:%M')}"
+            f"Booking from {self.startTime.strftime('%H:%M')}"
+            f"until {self.endTime.strftime('%H:%M')}."
+            " This booking was created at"
+            f"{self.bookingCreatedAt.strftime('%H:%M')}"
         )
 
 
 class RequestForLessons(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     # todo: availability field
     # WEEKDAYS = [
     #     ("MON", "Monday"),
@@ -179,7 +182,7 @@ class RequestForLessons(models.Model):
         ],
     )
     lesson_duration = models.IntegerField(
-        default=60,
+        default=60,  # default is 1 hour
         blank=False,
         validators=[
             MinValueValidator(15, message="A lesson must be at least 15 minutes")

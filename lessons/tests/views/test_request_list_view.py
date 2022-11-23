@@ -15,7 +15,8 @@ class RequestForLessonsListViewTestCase(TestCase):
 
     def setUp(self):
         self.url = reverse("requests_list")
-        self.student = Student.objects.get(user_id="john.doe@example.org")
+        self.user = User.objects.get(email="john.doe@example.org")
+        self.student = Student.objects.get(user=self.user)
 
     def test_request_list_url(self):
         self.assertEqual(self.url, "/account/requests/")
