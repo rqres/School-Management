@@ -1,84 +1,121 @@
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from lessons.models import Booking, RequestForLessons
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm
-from django.contrib.auth import authenticate, login, logout
-from .forms import LogInForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm
 from .models import Booking , Invoice
 from django.http import HttpResponseForbidden
 
-# # Create your views here.
+#  Create your views here.
 def home(request):
     return render(request, "home.html")
 
+
 def sign_up(request):
-    # form = SignUpForm()
     return render(request, "sign_up.html")
+
 
 def sign_up_student(request):
     if request.method == "POST":
         form = StudentSignUpForm(request.POST)
         if form.is_valid():
-            # create user and add to db
-            form.save()
+            # create user, add it to db, and log them in
+            user = form.save()
+            login(request, user)
             return redirect("home")
-            # login(request, user)
-            # return redirect("feed")
+
     else:
         form = StudentSignUpForm()
+
     return render(request, "sign_up_student.html", {"form": form})
 
 
 def log_in(request):
-    form = LogInForm()
+    if request.method == "POST":
+        form = LogInForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data.get("email")
+            password = form.cleaned_data.get("password")
+            user = authenticate(email=email, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("account")
+            # TODO: ACCOMODATE DIFFERENT TYPES OF ACCOUNTS (ADMIN, STUDENT, TEACHER, PARENT etc.)
+    else:
+        form = LogInForm()
     return render(request, "log_in.html", {"form": form})
 
-@login_required
-def booking_list(request):
-    bookings = Booking.objects.all() # Gets all existing booking not specific to user logged in
-    return render(request, 'booking_list.html', {'bookings': bookings})
 
-# @login_required
-# def booking_list(request):
-#     if request.user.is_student is False:
-#         return redirect("home")
-    
-#     bookings = request.user.student.booking_set.all()
-    
-#     return render(request, 'booking_list.html', {'bookings': bookings})
-    
+@login_required
+def log_out(request):
+    logout(request)
+    return redirect("home")
+
+
+@login_required
+def account(request):
+    # Right now this only accomodates for student accounts!
+    return render(request, "account.html", {"student": request.user.student})
+
+
 @login_required
 def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
     except ObjectDoesNotExist:
-        return redirect('bookings')
+        return redirect("bookings_list")
     else:
-        return render(request, 'show_booking.html', {'booking' : booking})
+        return render(request, "show_booking.html", {"booking": booking})
 
-def log_out(request):
-    logout(request)
-    return redirect(home)
-  
+
+@login_required
+def bookings_list(request):
+    if request.user.is_student is False:
+        return redirect("home")
+
+    bookings = request.user.student.booking_set.all()
+
+    return render(request, "bookings_list.html", {"bookings": bookings})
+
+
 @login_required
 def requests_list(request):
-    requests = RequestForLessons.objects.filter(student=request.user)
+    if request.user.is_student is False:
+        return redirect("home")
+    requests = request.user.student.requestforlessons_set.all()
     return render(request, "requests_list.html", {"requests": requests})
+
+
+@login_required
+def show_request(request, lessons_request_id):
+    # https://github.com/testdrivenio/django-ajax-xhr
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    if is_ajax:
+        booking = get_object_or_404(RequestForLessons, id=lessons_request_id)
+        if request.method == "DELETE":
+            booking.delete()
+            return JsonResponse({"status": "Booking deleted!"})
+        return JsonResponse({"status": "Invalid request"}, status=400)
+    else:
+        # todo: display the request
+        pass
 
 
 @login_required
 def create_request(request):
     if request.method == "POST":
-        form = RequestForLessonsForm(request.POST, usr=request.user)
+        form = RequestForLessonsForm(request.POST, student=request.user.student)
         if form.is_valid():
-            req = form.save()
-            print(req)
-            return redirect("home")
+            form.save()
+            return redirect("requests_list")
 
-    form = RequestForLessonsForm(usr=request.user)
+    else:
+        form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
-
+    
 @login_required
 def payment(request):
     if request.method == 'POST':
