@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
+from django.core.validators import RegexValidator
+
 from .models import RequestForLessons, Student, User
 
 
@@ -11,7 +13,18 @@ class StudentSignUpForm(UserCreationForm):
         model = User
         fields = ["first_name", "last_name", "email", "school_name"]
 
-    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+
     password2 = forms.CharField(
         label="Password confirmation", widget=forms.PasswordInput
     )
@@ -30,6 +43,7 @@ class StudentSignUpForm(UserCreationForm):
         user = super(StudentSignUpForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
+            user.is_student = True
             user.save()
 
         Student.objects.create(
@@ -46,7 +60,7 @@ class LogInForm(forms.Form):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._usr = kwargs.pop("usr", None)
+        self._student = kwargs.pop("student", None)
         super().__init__(*args, **kwargs)
 
     class Meta:
@@ -62,7 +76,7 @@ class RequestForLessonsForm(forms.ModelForm):
     def save(self):
         super().save(commit=False)
         req = RequestForLessons.objects.create(
-            student=self._usr,
+            student=self._student,
             no_of_lessons=self.cleaned_data.get("no_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),

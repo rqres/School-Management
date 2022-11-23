@@ -1,0 +1,14 @@
+[
+  {
+    "model": "lessons.requestforlessons",
+    "pk": 1,
+    "fields": {
+      "student": "john.doe@example.org",
+      "fulfilled": false,
+      "no_of_lessons": 10,
+      "days_between_lessons": 7,
+      "lesson_duration": 60,
+      "other_info": "This is some info"
+    }
+  }
+]

@@ -1,11 +1,10 @@
-from django.contrib.admin.options import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
-from lessons.models import Booking, RequestForLessons, Student
+from lessons.models import Booking, RequestForLessons
 from lessons.forms import RequestForLessonsForm, StudentSignUpForm, LogInForm
 
 
@@ -42,17 +41,23 @@ def log_in(request):
             user = authenticate(email=email, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("home")
-
+                return redirect("account")
+            # TODO: ACCOMODATE DIFFERENT TYPES OF ACCOUNTS (ADMIN, STUDENT, TEACHER, PARENT etc.)
     else:
         form = LogInForm()
-
     return render(request, "log_in.html", {"form": form})
 
 
+@login_required
 def log_out(request):
     logout(request)
     return redirect("home")
+
+
+@login_required
+def account(request):
+    # Right now this only accomodates for student accounts!
+    return render(request, "account.html", {"student": request.user.student})
 
 
 @login_required
@@ -67,16 +72,19 @@ def show_booking(request, booking_id):
 
 @login_required
 def bookings_list(request):
+    if request.user.is_student is False:
+        return redirect("home")
 
-    student = Student.objects.get(user=request.user)
-    bookings = Booking.objects.filter(student=student)
+    bookings = request.user.student.booking_set.all()
+
     return render(request, "bookings_list.html", {"bookings": bookings})
 
 
 @login_required
 def requests_list(request):
-    # TODO: change user to student in requests model
-    requests = RequestForLessons.objects.filter(student=request.user)
+    if request.user.is_student is False:
+        return redirect("home")
+    requests = request.user.student.requestforlessons_set.all()
     return render(request, "requests_list.html", {"requests": requests})
 
 
@@ -99,12 +107,12 @@ def show_request(request, lessons_request_id):
 @login_required
 def create_request(request):
     if request.method == "POST":
-        form = RequestForLessonsForm(request.POST, usr=request.user)
+        form = RequestForLessonsForm(request.POST, student=request.user.student)
         if form.is_valid():
             form.save()
             return redirect("requests_list")
 
     else:
-        form = RequestForLessonsForm(usr=request.user)
+        form = RequestForLessonsForm(student=request.user.student)
 
     return render(request, "create_request.html", {"form": form})
