@@ -4,12 +4,9 @@ from django.contrib.auth.models import Group
 # from .models import Student
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-
-from lessons.models import Booking, Director, Invoice, RequestForLessons, Student, User
-
+from lessons.models import Booking, Admin, Invoice, RequestForLessons, Student, User
 
 # Register your models here.
-
 
 class UserAdmin(BaseUserAdmin):
     # The forms to add and change user instances
@@ -68,7 +65,7 @@ admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 
 admin.site.register(Student)
-admin.site.register(Director)
+admin.site.register(Admin)
 admin.site.register(Booking)
 admin.site.register(Invoice)
 admin.site.register(RequestForLessons)

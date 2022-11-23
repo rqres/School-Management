@@ -1,10 +1,11 @@
 from django import forms
+from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
+from .models import Invoice, RequestForLessons, Student, User
 from django.core.validators import RegexValidator
-
-from .models import RequestForLessons, Student, User
-
+from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
@@ -52,11 +53,13 @@ class StudentSignUpForm(UserCreationForm):
 
         return user
 
-
 class LogInForm(forms.Form):
     email = forms.CharField(label="Email")
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
+class AdminLoginForm(forms.Form):
+    adminemail = forms.CharField(label="Email")
+    adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -84,3 +87,36 @@ class RequestForLessonsForm(forms.ModelForm):
         )
 
         return req
+
+class PaymentForm(forms.Form):
+    invoice_urn = forms.CharField(label="Invoice reference number")
+    account_name =forms.CharField(max_length=50)
+    account_number = forms.CharField(
+        min_length=8,
+        max_length=8,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Account number must contain numbers only'
+        )]
+    ) 
+    sort_code = forms.CharField(
+        min_length=6,
+        max_length=6,
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Sort code must contain numbers only'
+        )])
+    postcode = forms.CharField(
+        label="Postcode", 
+        validators = [RegexValidator(
+            regex=r'^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$',
+            # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
+            message='Postcode must be valid'
+        )])
+    def clean_invoice(self):
+        try:
+            invoice_urn = self.cleaned_data.get("invoice_urn")
+            invoice = Invoice.objects.get(urn=invoice_urn)
+        except ObjectDoesNotExist:
+            raise ValidationError('Enter valid invoice urn')
+            

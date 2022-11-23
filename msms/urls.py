@@ -51,8 +51,13 @@ urlpatterns = [
     ),  # path to create new request
     
     path(
+        "account/payment", views.payment, name="payment_form"
+    ),# path to payment page
+    
+    path(
         "account/requests/<int:lessons_request_id>/",
         views.show_request,
         name="show_request",
     ),
+    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
 ]

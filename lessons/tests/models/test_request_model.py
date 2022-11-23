@@ -1,7 +1,7 @@
 from django.core.validators import ValidationError
 from django.test import TestCase
 
-from lessons.models import RequestForLessons, Student
+from lessons.models import RequestForLessons, Student ,User
 
 
 class RequestModelTestCase(TestCase):
@@ -11,7 +11,8 @@ class RequestModelTestCase(TestCase):
     ]
 
     def setUp(self):
-        student = Student.objects.get(user_id="john.doe@example.org")
+        self.user = User.objects.get(email="john.doe@example.org")
+        student = Student.objects.get(user=self.user)                                 
         self.request = student.requestforlessons_set.first()
 
     def test_corresponding_student_must_not_be_none(self):

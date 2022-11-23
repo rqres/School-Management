@@ -1,34 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <title>My Bookings</title>
-  <style>
-    div {
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-  <div>
-    <h1>Fox</h1>
-  </div>
-  <div>
-    <p>Welcome to Fox's musical tutoring website</p>
-  </div>
-  <div>
-    <h2><i>Your bookings</i></h2>
-  </div>
-
-  <div>
-    <ul>
-      {% for booking in bookings %}
-      <li>{{booking}}</li>
-      {% endfor %}
-    </ul>
-  </div>
-
-</body>
-
+<html>
+    <head>
+        <title>Fox</title>
+        <style>
+            div {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div><h1>Fox</h1></div>
+        <div><p>Welcome to Fox's musical tutoring website</p></div>
+        <div>
+            <h2>List of Bookings:</h2>
+            <table class="table">
+                {% for booking in bookings %}
+                <tr>
+                    <td> {{ booking.name }}</td>
+                    <td> {{ booking.description }}</td>
+                    <td>{{ booking.invoice.urn }}</td>
+                    <td>{{ booking.startTime}}</td>
+                    <td>{{ booking.endTime}}</td>
+                    <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </body>
 </html>
