@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
 
@@ -11,10 +11,8 @@ from django.http import HttpResponseForbidden
 def home(request):
     return render(request, "home.html")
 
-
 def sign_up(request):
     return render(request, "sign_up.html")
-
 
 def sign_up_student(request):
     if request.method == "POST":
@@ -52,13 +50,13 @@ def log_in(request):
 def adminlogin(request):
     if request.method == "POST":
         adminloginform = AdminLoginForm(request.POST)
-        if form.is_valid():
+        if adminloginform.is_valid():
             username = adminloginform.cleaned_data.get(username)
             password = adminloginform.cleaned_data.get(password)
             user = authenticate(username = username, password = password)
             if user is not None:
                 login(request, user)
-                return redirect(home)
+                return redirect("account_admin")
     else:
         adminloginform = AdminLoginForm()
         return render(request, "adminlogin.html", {"form": adminloginform})
@@ -72,6 +70,10 @@ def log_out(request):
 def account(request):
     # Right now this only accomodates for student accounts!
     return render(request, "account.html", {"student": request.user.student})
+
+@login_required
+def account_admin(request):
+    return render(request, "account_admin.html", {"admin": request.user.admin})
 
 
 @login_required

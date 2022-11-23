@@ -42,6 +42,9 @@ urlpatterns = [
     
     path("account/", views.account, name="account"), # path to account overview (currently a simple redirect)
     
+    path("adminaccount/", views.account, name="account_admin"), 
+    # this should probably be renamed or we should decide on a convention for different account dashboards.
+    
     path(
         "account/requests/", views.requests_list, name="requests_list"
     ),  # path to view my requests for lessons
