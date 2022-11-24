@@ -66,7 +66,12 @@ def log_out(request):
     return redirect("home")
 
 def forgot_password(request):
-    form = ForgotPasswordForm()
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            form.authenticate_email()
+    else:
+        form = ForgotPasswordForm()
     return render(request, "forgot_password.html", {"form": form})
 
 @login_required
