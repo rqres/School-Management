@@ -52,11 +52,11 @@ class StudentSignUpForm(UserCreationForm):
         return user
 
 class LogInForm(forms.Form):
-    email = forms.CharField(label="Email")
+    email = forms.CharField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 class AdminLoginForm(forms.Form):
-    adminemail = forms.CharField(label="Email")
+    adminemail = forms.CharField(label="Email", required=True)
     adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 class RequestForLessonsForm(forms.ModelForm):
@@ -118,11 +118,14 @@ class PaymentForm(forms.Form):
             raise forms.ValidationError('Enter valid invoice urn')
 
 class ForgotPasswordForm(forms.Form):
-    email = forms.CharField(label="Email", required=True)
+    email = forms.EmailField(label="Email", required=True)
+    message = ""
     
     def authenticate_email(self):
-        checked_email = self.cleaned_data['email']
-        if not User.objects.filter(checked_email).exists():
-            raise forms.ValidationError("This e-mail is not registered to any account!")
+        checked_email = self.cleaned_data.get('email')
+        if User.objects.filter(email = checked_email).exists():
+            self.message = "Instructions for password reset sent to your e-mail address."
+        else:
+            self.message = "This e-mail address is not registered to any account."
     
             
