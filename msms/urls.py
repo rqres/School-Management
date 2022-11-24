@@ -40,7 +40,7 @@ urlpatterns = [
     
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
-    ),  # path to log-in page
+    ),  # path to show a booking
     
     path("log_out/", views.log_out, name="log_out"),  # path to log-out page
     
@@ -58,7 +58,7 @@ urlpatterns = [
     ),  # path to create new request
     
     path(
-        "account/payment", views.payment, name="payment_form"
+        "account/payment/", views.payment, name="payment_form"
     ),# path to payment page
     
     path(

@@ -31,7 +31,7 @@ class PaymentFormTestCase(TestCase):
             'account_name' : 'John Doe',
             'account_number' : '12345678',
             'sort_code' : '123456',
-            'postcode': 'SW17 9TR'}
+            'postcode': 'AB12 3SU'}
 
     def test_form_contains_required_fields(self):
         form = PaymentForm()
@@ -42,7 +42,6 @@ class PaymentFormTestCase(TestCase):
         self.assertIn('postcode', form.fields)
 
     def test_valid_request_form(self):
-        print(self.invoice.urn)
         form = PaymentForm(data=self.form_input)
         self.assertTrue(form.is_valid())
 
@@ -70,4 +69,5 @@ class PaymentFormTestCase(TestCase):
         self.form_input['postcode'] = ''
         form = PaymentForm(data=self.form_input)
         self.assertFalse(form.is_valid())
-    
+        
+     #TODO: Test for all the validations

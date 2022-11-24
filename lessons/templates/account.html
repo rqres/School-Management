@@ -7,6 +7,7 @@
         <h1><strong> Welcome back, {{ student.user.first_name }} {{ student.user.last_name }} </strong></h1>
         <p style = "color: orange"><strong>You are a student at {{ student.school_name }} </strong></p>
         <div><p><a href='{% url 'bookings_list' %}'> View your Bookings</p></div>
+        <div><p><a href='{% url 'payment_form' %}'> Make a Payment</p></div>
         <div><p><a href='{% url 'requests_list' %}'> View your Requests</p></div>
         <div><p><a href='{% url 'create_request' %}'> Submit a new Request</p></div>
         <div><p><a href='{% url 'log_out' %}'> Log Out</p></div>

@@ -4,8 +4,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, Student, User
 from django.core.validators import RegexValidator
-from django.core.exceptions import ValidationError
-from django.core.exceptions import ObjectDoesNotExist
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
@@ -113,12 +111,11 @@ class PaymentForm(forms.Form):
             # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
             message='Postcode must be valid'
         )])
+
     def clean_invoice(self):
-        try:
-            invoice_urn = self.cleaned_data.get("invoice_urn")
-            invoice = Invoice.objects.get(urn=invoice_urn)
-        except ObjectDoesNotExist:
-            raise ValidationError('Enter valid invoice urn')
+        invoice_urn = self.cleaned_data.get("invoice_urn")
+        if not Invoice.objects.filter(urn=invoice_urn).exists():
+            raise forms.ValidationError('Enter valid invoice urn')
 
 class ForgotPasswordForm(forms.Form):
     email = forms.CharField(label="Email", required=True)
