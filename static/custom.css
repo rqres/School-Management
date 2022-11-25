@@ -59,6 +59,11 @@ h3.home-text {
   font-family: 'Arial Rounded MT';
 }
 
+h3.account-text {
+  font-size: 2rem;
+  font-family: 'Optima';
+}
+
 h4.signup-text {
   font-size: 1.4rem;
   font-family: 'Optima';
