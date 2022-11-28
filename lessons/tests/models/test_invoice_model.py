@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from lessons.models import Invoice, Student, User
+from djmoney.money import Money
 
 class InvoiceTest(TestCase):
 
@@ -21,13 +22,15 @@ class InvoiceTest(TestCase):
         )
         self.invoice = Invoice(
             student_num = self.student.user.pk + 1000,
-            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
+            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
+            price = Money(10,'GBP')
         )  
         self.invoice.save()
 
         self.second_invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
-            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
+            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
+            price = Money(10,'GBP')
         )
         self.second_invoice.save()
 
@@ -46,6 +49,17 @@ class InvoiceTest(TestCase):
         self.invoice.invoice_num = None
         self._assert_booking_is_invalid()
     
+    def test_urn_field_must_not_be_blank(self):
+        self.invoice.urn = None
+        self._assert_booking_is_invalid()
+
+    def test_price_field_must_not_be_blank(self):
+        self.invoice.price = None
+        self._assert_booking_is_invalid()
+
+    def test_is_paid_field_is_default_false(self):
+        self.assertFalse(self.invoice.is_paid)
+        
     def test_student_num_field_is_valid(self):
         test_user = User.objects.get(pk=int(self.invoice.student_num - 1000))
         student = Student.objects.get(user = test_user)

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db.models import Count
+from djmoney.models.fields import MoneyField
+from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 
@@ -99,6 +100,7 @@ class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
+    price = MoneyField(decimal_places=2, max_digits=8,default_currency='GBP')
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -117,9 +119,11 @@ class Booking(models.Model):
     bookingCreatedAt = models.TimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs): 
+        costOfBooking = (self.endTime - self.startTime).total_seconds()/10
         self.invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.booking_set.count() + 1
+            invoice_num = self.student.booking_set.count() + 1,
+            price = Money(costOfBooking,'GBP')
         )   
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)

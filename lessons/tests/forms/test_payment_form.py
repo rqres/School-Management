@@ -3,6 +3,7 @@ from django import forms
 from django.test import TestCase
 from lessons.forms import PaymentForm
 from lessons.models import Invoice, Student, User
+from djmoney.money import Money
 
 class PaymentFormTestCase(TestCase):
     """Unit tests of the log in form."""
@@ -22,7 +23,8 @@ class PaymentFormTestCase(TestCase):
         )
         self.invoice = Invoice(
             student_num = self.student.user.pk + 1000,
-            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1
+            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
+            price = Money(10,'GBP')
         )  
         self.invoice.save() 
 
