@@ -100,12 +100,16 @@ class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
-    price = MoneyField(decimal_places=2, max_digits=8,default_currency='GBP')
+    price = MoneyField(decimal_places=2, max_digits=5,default_currency='GBP')
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.urn = str(self.student_num) + '-' + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
+
+    
+    class Meta:
+        unique_together = ('student_num', 'invoice_num',)
         
 
 class Booking(models.Model):
@@ -119,6 +123,7 @@ class Booking(models.Model):
     bookingCreatedAt = models.TimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs): 
+        # Create Invoice object for the booking object created
         costOfBooking = (self.endTime - self.startTime).total_seconds()/10
         self.invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
@@ -136,7 +141,9 @@ class Booking(models.Model):
                 raise ValidationError(
                     "Length of lesson sholud be 30 or 45 or 60 minutes"
                 )
-
+    def update_invoice(self):
+            """ Invoice should be updated depending on the changes made to Booking """
+            pass
     class Meta:
         # Model options
         ordering = ["-bookingCreatedAt"]

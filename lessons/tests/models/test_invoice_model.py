@@ -18,13 +18,14 @@ class InvoiceTest(TestCase):
             price = Money(10,'GBP')
         )  
         self.invoice.save()
-
+       
         self.second_invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
-            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
+            invoice_num = Invoice.objects.filter(student_num=self.invoice.student_num).count() + 1,
             price = Money(10,'GBP')
         )
         self.second_invoice.save()
+        
 
     def test_valid_invoice(self):
         try:
@@ -35,19 +36,21 @@ class InvoiceTest(TestCase):
 
     def test_student_num_field_must_not_be_blank(self):
         self.invoice.student_num = None
-        self._assert_booking_is_invalid()
+        self._assert_invoice_is_invalid()
 
     def test_invoice_num_field_must_not_be_blank(self):
         self.invoice.invoice_num = None
-        self._assert_booking_is_invalid()
+        self._assert_invoice_is_invalid()
     
     def test_urn_field_must_not_be_blank(self):
         self.invoice.urn = None
-        self._assert_booking_is_invalid()
+        self._assert_invoice_is_invalid()
+
 
     def test_price_field_must_not_be_blank(self):
         self.invoice.price = None
-        self._assert_booking_is_invalid()
+        self._assert_invoice_is_invalid()
+
 
 
     def test_is_paid_field_is_default_false(self):
@@ -57,12 +60,26 @@ class InvoiceTest(TestCase):
         test_user = User.objects.get(pk=int(self.invoice.student_num - 1000))
         student = Student.objects.get(user = test_user)
         try:
-            self.student.full_clean()
+            student.full_clean()
         except ValidationError:
             self.fail('Invalid student number assigned')
 
+    def test_student_must_have_unique_invoice_nums(self):
+        self.invoice.invoice_num = self.second_invoice.invoice_num
+        self._assert_invoice_is_invalid()
 
-    def _assert_booking_is_invalid(self):
+    def test_urn_contains_valid_student_num(self):
+        self.assertIn(str(self.invoice.student_num),self.invoice.urn)
+
+    def test_urn_contains_valid_invoice_num(self):
+        self.assertIn(str(self.invoice.invoice_num),self.invoice.urn)
+
+    def test_price_cannot_be_more_than_5_digits(self):
+        self.invoice.price = Money(999999,'GBP')
+        self._assert_invoice_is_invalid()
+
+
+    def _assert_invoice_is_invalid(self):
         with self.assertRaises(ValidationError):
             self.invoice.full_clean()
     
