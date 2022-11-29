@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
         """
@@ -85,15 +86,21 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
+    def __str__(self):
+        return self.user.email
+
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for teachers here:
     school_name = models.CharField(max_length=100, blank=False)
 
+
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
+
 
 class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
@@ -102,25 +109,25 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.urn = str(self.student_num) + '-' + str(self.invoice_num)
+        self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
-        
+
 
 class Booking(models.Model):
-    name = models.CharField(max_length=50, blank=False,unique=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
+    name = models.CharField(max_length=50, blank=False, unique=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-    
-    def save(self, *args, **kwargs): 
+
+    def save(self, *args, **kwargs):
         self.invoice = Invoice.objects.create(
-            student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.booking_set.count() + 1
-        )   
+            student_num=self.student.user.pk + 1000,
+            invoice_num=self.student.booking_set.count() + 1,
+        )
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)
 
@@ -158,6 +165,7 @@ class RequestForLessons(models.Model):
     #     ("SAT", "Saturday"),
     #     ("SUN", "Sunday"), ]
     # availability = models.MultipleChoiceField()
+
     fulfilled = models.BooleanField(default=False)
 
     no_of_lessons = models.IntegerField(
@@ -184,3 +192,6 @@ class RequestForLessons(models.Model):
         ],
     )
     other_info = models.CharField(max_length=500, blank=True)
+
+    def __str__(self):
+        return f"{self.student}: {self.no_of_lessons} lessons"
