@@ -4,35 +4,17 @@ from lessons.models import Booking, Invoice, User , Student , Teacher
 import datetime
 
 class BookingTest(TestCase):
-
+    fixtures = [
+        "lessons/tests/fixtures/default_student.json",
+        "lessons/tests/fixtures/default_teacher.json",
+    ]
     def setUp(self):
         super(TestCase, self).setUp()
-        self.user_student = User.objects.create_user(
-            "john.doe@example.org",
-            first_name="John",
-            last_name="Doe",
-            password="TestPassword123",
-        )
+        self.user_student = User.objects.get(email="john.doe@example.org")
+        self.student = Student.objects.get(user=self.user_student)
 
-        self.user_student.is_student = True
-
-        self.student = Student.objects.create(
-            user = self.user_student,
-            school_name = "Test School"
-        )
-        self.user_teacher = User.objects.create_user(
-            "jane.dave@example.org",
-            first_name="Jane",
-            last_name="Dave",
-            password="TestPassword123",
-        )
-
-        self.user_teacher.is_teacher = True
-
-        self.teacher = Teacher.objects.create(
-            user = self.user_teacher,
-            school_name = "Test School"
-        )
+        self.user_teacher = User.objects.get(email="jane.doe@example.org")
+        self.teacher = Teacher.objects.get(user=self.user_teacher)
 
         self.booking = Booking(
             name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar1',
@@ -114,6 +96,11 @@ class BookingTest(TestCase):
             self.booking.invoice.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
+
+    def test_invoice_price_corsponds_to_duration(self):
+        pass
+
+
 
     def test_valid_length_of_booking(self):
         duration = self.booking.endTime - self.booking.startTime

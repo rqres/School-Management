@@ -4,22 +4,14 @@ from lessons.models import Invoice, Student, User
 from djmoney.money import Money
 
 class InvoiceTest(TestCase):
-
+    fixtures = [
+        "lessons/tests/fixtures/default_student.json",
+    ]
     def setUp(self):
         super(TestCase, self).setUp()
-        self.user_student = User.objects.create_user(
-            "john.doe@example.org",
-            first_name="John",
-            last_name="Doe",
-            password="TestPassword123",
-        )
+        self.user_student = User.objects.get(email="john.doe@example.org")
+        self.student = Student.objects.get(user=self.user_student)
 
-        self.user_student.is_student = True
-
-        self.student = Student.objects.create(
-            user = self.user_student,
-            school_name = "Test School"
-        )
         self.invoice = Invoice(
             student_num = self.student.user.pk + 1000,
             invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
@@ -56,6 +48,7 @@ class InvoiceTest(TestCase):
     def test_price_field_must_not_be_blank(self):
         self.invoice.price = None
         self._assert_booking_is_invalid()
+
 
     def test_is_paid_field_is_default_false(self):
         self.assertFalse(self.invoice.is_paid)
