@@ -19,7 +19,7 @@ class AdminLogInFormTestCase(TestCase):
         self.assertTrue(isinstance(password_field.widget, forms.PasswordInput))
 
     def test_form_accepts_valid_input(self):
-        forM = AdminLoginForm(data=self.form_input)
+        form = AdminLoginForm(data=self.form_input)
         self.assertTrue(form.is_valid())
 
     def test_form_rejects_blank_username(self):
