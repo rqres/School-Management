@@ -37,6 +37,14 @@ class Migration(migrations.Migration):
             name='Invoice',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('urn', models.CharField(max_length=50)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Admin',
+            fields=[
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
+                ('school_name', models.CharField(max_length=100)),
                 ('student_num', models.IntegerField()),
                 ('invoice_num', models.IntegerField()),
                 ('urn', models.CharField(max_length=50)),

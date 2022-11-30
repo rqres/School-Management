@@ -19,17 +19,17 @@ from lessons import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
+
     path("", views.home, name="home"),  # path for the home page
-    
+
     path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
-    
+
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
-    
+
     path("log_in/", views.log_in, name="log_in"),  # path to log-in page
-    
+
     path(
         "forgot_password/", views.forgot_password, name="forgot_password"
     ),  # path to reset password
@@ -37,13 +37,13 @@ urlpatterns = [
     path(
         "account/bookings/", views.bookings_list, name="bookings_list"
     ),  # path to list of bookings
-    
+
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show a booking
     
     path("log_out/", views.log_out, name="log_out"),  # path to log-out page
-    
+
     path("account/", views.account, name="account"), # path to account overview (currently a simple redirect)
     
     path("adminaccount/", views.account_admin, name="account_admin"), 
@@ -52,19 +52,25 @@ urlpatterns = [
     path(
         "account/requests/", views.requests_list, name="requests_list"
     ),  # path to view my requests for lessons
-    
+
     path(
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
-    
+
     path(
         "account/payment/", views.payment, name="payment_form"
     ),# path to payment page
-    
+    path(
+        "account/requests/create", views.create_request, name="create_request"
+    ),  # path to create new request'
+    path("admininteractions", views.admininteractions, name="admininteractions"), #admins go on here to login
+    path("admininteractions/log_in_admin", views.log_in_admin, name="log_in_admin"), #path to admin login page
     path(
         "account/requests/<int:lessons_request_id>/",
         views.show_request,
         name="show_request",
     ),
-    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
+    path("adminaccount/sign_up_admin", views.sign_up_admin, name="sign_up_admin"),
+    path("adminaccount/", views.adminaccount, name="adminaccount"), # path to adminaccount overview (currently a simple redirect)
+
 ]
