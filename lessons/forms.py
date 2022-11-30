@@ -54,12 +54,12 @@ class StudentSignUpForm(UserCreationForm):
 
 
 class LogInForm(forms.Form):
-    email = forms.CharField(label="Email", required=True)
+    email = forms.EmailField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 
 class AdminLoginForm(forms.Form):
-    adminemail = forms.CharField(label="Email", required=True)
+    adminemail = forms.EmailField(label="Email", required=True)
     adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 
