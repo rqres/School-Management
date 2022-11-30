@@ -23,4 +23,9 @@ class LogInTest(TestCase, LogInTester):
         )
         self.assertTrue(self.is_logged_in())
         self.assertTrue(self.user.is_parent)
+    
+    def test_parent_register_child(self):
+        register_child_page = reverse('register_child')
+        self.assertEqual(register_child_page, '/account/register_child/')
+        # response = self.client.get(register_child_page, follow=True, data=self.user.is_parent)
         

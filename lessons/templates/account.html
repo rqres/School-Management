@@ -28,7 +28,8 @@
           </div>
           <div>
             {% if student.user.is_parent %}
-              Parent Dashboard: As a parent you may...
+              <p> Parent Dashboard: As a parent you may... </p>
+              <a href = '{% url 'register_child' %}' class="btn btn-lg btn-warning mb-4"> Register children</a>
             {% endif %}
           </div>
         </div>

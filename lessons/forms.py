@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, Student, User
 from django.core.validators import RegexValidator
+from django.contrib.auth import authenticate
 
 
 class StudentSignUpForm(UserCreationForm):
@@ -156,13 +157,17 @@ class ForgotPasswordForm(forms.Form):
 
 class RegisterChildForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
+    password = password = forms.CharField(label="Password", widget=forms.PasswordInput())
     message = ""
 
-    def authenticate_email(self):
+    def authenticate(self, parent):
         checked_email = self.cleaned_data.get("email")
-        if User.objects.filter(email=checked_email).exists():
-            self.message = (
-                "Instructions for password reset sent to your e-mail address."
-            )
+        checked_pass = self.cleaned_data.get("password")
+        child = authenticate(username = checked_email, password = checked_pass)
+        if child is not None:
+            self.message = ("This user, " + child.first_name + " " + child.last_name + 
+                            " has been registered as your child.")
+            parent.children.add(child)
+            child.parents.add(parent)
         else:
-            self.message = "This e-mail address is not registered to any account."
+            self.message = "Incorrect e-mail or password specified."

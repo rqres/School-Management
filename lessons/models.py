@@ -54,6 +54,10 @@ class User(AbstractBaseUser):
 
     is_active = models.BooleanField(default=True)
 
+    # child-parent relations (many to many)
+    parents = models.ManyToManyField("self")
+    children = models.ManyToManyField("self")
+    
     objects = CustomUserManager()
 
     # THIS TELLS DJANGO TO USE THE EMAIL FIELD AS USERNAME
@@ -85,7 +89,7 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
-
+    
     def __str__(self):
         return self.user.email
 
