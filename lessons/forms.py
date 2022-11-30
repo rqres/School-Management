@@ -7,7 +7,8 @@ from django.core.validators import RegexValidator
 
 
 class StudentSignUpForm(UserCreationForm):
-    school_name = forms.CharField(max_length=100)
+    school_name = forms.CharField(max_length=100, required=True)
+    is_parent = forms.BooleanField(label="Are you a Parent?", required=False)
 
     class Meta:
         model = User
@@ -36,6 +37,8 @@ class StudentSignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+    
+    
 
     @transaction.atomic
     def save(self, commit=True):
@@ -44,6 +47,7 @@ class StudentSignUpForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_student = True
+            user.is_parent = self.cleaned_data["is_parent"]
             user.save()
 
         Student.objects.create(
