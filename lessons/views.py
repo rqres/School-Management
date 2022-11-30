@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, SignUpAdminForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
@@ -64,6 +64,18 @@ def log_in_admin(request):
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid.")
     adminloginform = AdminLoginForm()
     return render(request, "log_in_admin.html", {"form": adminloginform})
+
+def sign_up_admin(request):
+    if request.method == 'POST':
+        form = SignUpAdminForm(request.POST)#creates a bound version of the form with post data
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('log_in_admin')
+    else:
+        form = SignUpAdminForm()#create a form with SignUpAdminForm constructor, pass that form to template to render it
+    return render(request, 'sign_up_admin.html', {'form' : form})
+    #successful form means you save user record in database and redirect them to the database
 
 def log_out(request):
     logout(request)
