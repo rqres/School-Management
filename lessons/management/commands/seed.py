@@ -1,7 +1,7 @@
 import random
 from django.core.management.base import BaseCommand
 from faker import Faker
-from lessons.models import Student, User
+from lessons.models import RequestForLessons, Student, User
 
 
 class Command(BaseCommand):
@@ -10,6 +10,16 @@ class Command(BaseCommand):
         self.faker = Faker("en_GB")
 
     def handle(self, *args, **options):
+        self._seed_students()
+        self._seed_requests()
+
+    def _seed_requests(self):
+        # create 3 requests for every student in the DB
+        for st in Student.objects.all():
+            for _i in range(3):
+                RequestForLessons.objects.create(student=st)
+
+    def _seed_students(self):
         for i in range(51):
             fname = self.faker.first_name()
             lname = self.faker.last_name()

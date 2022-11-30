@@ -1,11 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db.models import Count
+from djmoney.models.fields import MoneyField
+from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 
 
 # Create your models here.
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, first_name, last_name, password=None):
@@ -84,10 +86,15 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
+    def __str__(self):
+        return self.user.email
+
+
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for teachers here:
     school_name = models.CharField(max_length=100, blank=False)
+
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -95,32 +102,40 @@ class Admin(models.Model):
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
 
+
 class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
+    price = MoneyField(decimal_places=2, max_digits=5,default_currency='GBP')
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.urn = str(self.student_num) + '-' + str(self.invoice_num)
+        self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
 
+    class Meta:
+        unique_together = ('student_num', 'invoice_num',)
+        
 
 class Booking(models.Model):
-    name = models.CharField(max_length=50, blank=False,unique=True)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE,blank=False)
-    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE,blank=False)
+    name = models.CharField(max_length=50, blank=False, unique=True)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
+    
+    def save(self, *args, **kwargs): 
+        # Create Invoice object for the booking object created
+        costOfBooking = (self.endTime - self.startTime).total_seconds()/10
         self.invoice = Invoice.objects.create(
             student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.booking_set.count() + 1
-        )
+            invoice_num = self.student.booking_set.count() + 1,
+            price = Money(costOfBooking,'GBP')
+        )   
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)
 
@@ -132,7 +147,9 @@ class Booking(models.Model):
                 raise ValidationError(
                     "Length of lesson sholud be 30 or 45 or 60 minutes"
                 )
-
+    def update_invoice(self):
+            """ Invoice should be updated depending on the changes made to Booking """
+            pass
     class Meta:
         # Model options
         ordering = ["-bookingCreatedAt"]
@@ -158,6 +175,8 @@ class RequestForLessons(models.Model):
     #     ("SAT", "Saturday"),
     #     ("SUN", "Sunday"), ]
     # availability = models.MultipleChoiceField()
+    # availability = models.CharField(max_length=500, blank=True)
+
     fulfilled = models.BooleanField(default=False)
 
     no_of_lessons = models.IntegerField(
@@ -184,3 +203,6 @@ class RequestForLessons(models.Model):
         ],
     )
     other_info = models.CharField(max_length=500, blank=True)
+
+    def __str__(self):
+        return f"{self.student}: {self.no_of_lessons} lessons"

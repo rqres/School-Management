@@ -4,8 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, Student, User, Admin
 from django.core.validators import RegexValidator
-from django.core.exceptions import ValidationError
-from django.core.exceptions import ObjectDoesNotExist
+
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
@@ -95,15 +94,15 @@ class SignUpAdminForm(UserCreationForm):
 
         return user
 
-
-
 class LogInForm(forms.Form):
-    email = forms.CharField(label="Email")
+    email = forms.CharField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
+
 
 class AdminLoginForm(forms.Form):
-    email = forms.CharField(label="Email")
-    password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    adminemail = forms.CharField(label="Email", required=True)
+    adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
+
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -118,7 +117,15 @@ class RequestForLessonsForm(forms.ModelForm):
             "lesson_duration",
             "other_info",
         ]
-        widgets = {"other_info": forms.Textarea()}
+        widgets = {
+            "other_info": forms.Textarea(),
+        }
+
+    # availability_field = forms.MultipleChoiceField(
+    #     choices=[("mon", "Monday"), ("tue", "Tuesday"), ("wed", "Wednesday")],
+    #     label="Which days are you available?",
+    #     widget=forms.CheckboxSelectMultiple(),
+    # )
 
     def save(self):
         super().save(commit=False)
@@ -132,9 +139,10 @@ class RequestForLessonsForm(forms.ModelForm):
 
         return req
 
+
 class PaymentForm(forms.Form):
     invoice_urn = forms.CharField(label="Invoice reference number")
-    account_name =forms.CharField(max_length=50)
+    account_name = forms.CharField(max_length=50)
     account_number = forms.CharField(
         min_length=8,
         max_length=8,
@@ -146,20 +154,38 @@ class PaymentForm(forms.Form):
     sort_code = forms.CharField(
         min_length=6,
         max_length=6,
-        validators= [RegexValidator(
-            regex=r'^[0-9]*$',
-            message='Sort code must contain numbers only'
-        )])
+        validators=[
+            RegexValidator(
+                regex=r"^[0-9]*$", message="Sort code must contain numbers only"
+            )
+        ],
+    )
     postcode = forms.CharField(
         label="Postcode",
-        validators = [RegexValidator(
-            regex=r'^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$',
-            # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
-            message='Postcode must be valid'
-        )])
+        validators=[
+            RegexValidator(
+                regex=r"^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$",
+                # Provide by wikipedia page https://en.wikipedia.org/wiki/Postcodes_in_the_United_Kingdom#Validation
+                message="Postcode must be valid",
+            )
+        ],
+    )
+
     def clean_invoice(self):
-        try:
-            invoice_urn = self.cleaned_data.get("invoice_urn")
-            invoice = Invoice.objects.get(urn=invoice_urn)
-        except ObjectDoesNotExist:
-            raise ValidationError('Enter valid invoice urn')
+        invoice_urn = self.cleaned_data.get("invoice_urn")
+        if not Invoice.objects.filter(urn=invoice_urn).exists():
+            raise forms.ValidationError("Enter valid invoice urn")
+
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(label="Email", required=True)
+    message = ""
+
+    def authenticate_email(self):
+        checked_email = self.cleaned_data.get("email")
+        if User.objects.filter(email=checked_email).exists():
+            self.message = (
+                "Instructions for password reset sent to your e-mail address."
+            )
+        else:
+            self.message = "This e-mail address is not registered to any account."

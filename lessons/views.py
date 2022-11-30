@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, SignUpAdminForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, SignUpAdminForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
@@ -14,10 +14,8 @@ from django.contrib import messages
 def home(request):
     return render(request, "home.html")
 
-
 def sign_up(request):
     return render(request, "sign_up.html")
-
 
 def sign_up_student(request):
     if request.method == "POST":
@@ -85,11 +83,23 @@ def log_out(request):
     logout(request)
     return redirect("home")
 
+def forgot_password(request):
+    if request.method == 'POST':
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            form.authenticate_email()
+    else:
+        form = ForgotPasswordForm()
+    return render(request, "forgot_password.html", {"form": form})
 
 @login_required
 def account(request):
     # Right now this only accomodates for student accounts!
     return render(request, "account.html", {"student": request.user.student})
+
+@login_required
+def account_admin(request):
+    return render(request, "account_admin.html", {"admin": request.user.admin})
 
 
 @login_required
@@ -105,7 +115,7 @@ def show_booking(request, booking_id):
 @login_required
 def bookings_list(request):
     if request.user.is_student is False:
-        return redirect("home")
+        return redirect("account")
     bookings = request.user.student.booking_set.all()
     return render(request, "bookings_list.html", {"bookings": bookings})
 
@@ -146,19 +156,22 @@ def create_request(request):
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
 
-@login_required
 def payment(request):
     if request.method == "POST":
-        form = PaymentForm(request.POST)
-        if form.is_valid():
-            try:
-                invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
-            except ObjectDoesNotExist:
-                form = PaymentForm()
-                return render(request, "payment_form.html", {"form": form})
-
-            invoice.is_paid = True
-            return redirect("home")
+        if request.user.is_authenticated:
+            form = PaymentForm(request.POST)
+            if form.is_valid(): 
+                try:
+                    invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn")) 
+                    invoice.is_paid = True
+                    invoice.save()
+                except ObjectDoesNotExist:
+                    form = PaymentForm() 
+                    return render(request, "payment_form.html", {"form": form})
+                return redirect("account")
+        else:
+            return redirect('log_in')
     else:
-        form = PaymentForm()
+        form = PaymentForm(request.POST)
     return render(request, "payment_form.html", {"form": form})
+        

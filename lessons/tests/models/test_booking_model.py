@@ -1,38 +1,21 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from lessons.models import Booking, Invoice, User , Student , Teacher
+from djmoney.money import Money
 import datetime
 
 class BookingTest(TestCase):
-
+    fixtures = [
+        "lessons/tests/fixtures/default_student.json",
+        "lessons/tests/fixtures/default_teacher.json",
+    ]
     def setUp(self):
         super(TestCase, self).setUp()
-        self.user_student = User.objects.create_user(
-            "john.doe@example.org",
-            first_name="John",
-            last_name="Doe",
-            password="TestPassword123",
-        )
+        self.user_student = User.objects.get(email="john.doe@example.org")
+        self.student = Student.objects.get(user=self.user_student)
 
-        self.user_student.is_student = True
-
-        self.student = Student.objects.create(
-            user = self.user_student,
-            school_name = "Test School"
-        )
-        self.user_teacher = User.objects.create_user(
-            "jane.dave@example.org",
-            first_name="Jane",
-            last_name="Dave",
-            password="TestPassword123",
-        )
-
-        self.user_teacher.is_teacher = True
-
-        self.teacher = Teacher.objects.create(
-            user = self.user_teacher,
-            school_name = "Test School"
-        )
+        self.user_teacher = User.objects.get(email="jane.doe@example.org")
+        self.teacher = Teacher.objects.get(user=self.user_teacher)
 
         self.booking = Booking(
             name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar1',
@@ -87,6 +70,7 @@ class BookingTest(TestCase):
         self.booking.endTime = None
         self._assert_booking_is_invalid()
 
+
     def test_name_can_be_50_characters_long(self):
         self.booking.name = 'x' * 50
         try:
@@ -94,8 +78,12 @@ class BookingTest(TestCase):
         except ValidationError:
             self.fail("Test booking should be valids")
 
-    def test_username_cannot_be_over_50_characters_long(self):
+    def test_name_cannot_be_over_50_characters_long(self):
         self.booking.name = 'x' * 51
+        self._assert_booking_is_invalid()
+
+    def test_name_field_is_unique(self):
+        self.booking.name = self.booking_other.name
         self._assert_booking_is_invalid()
 
     def test_student_user_is_valid(self):
@@ -109,11 +97,19 @@ class BookingTest(TestCase):
             self.teacher.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
+
     def test_invoice_is_valid(self):
         try:
             self.booking.invoice.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
+
+    def test_invoice_price_corsponds_to_duration(self):
+        cost = Money((self.booking.endTime - self.booking.startTime).total_seconds()/10, 'GBP')
+        self.assertEqual(cost, self.booking.invoice.price)
+
+    def test_invoice_student_num_corresponds_to_student_pk(self):
+        self.assertEqual(self.booking.invoice.student_num,self.booking.student.pk+1000)
 
     def test_valid_length_of_booking(self):
         duration = self.booking.endTime - self.booking.startTime

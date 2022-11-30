@@ -1,0 +1,243 @@
+/*By Jeroen Keppens
+ *copied from clucker
+ */
+/*
+ * Alerts
+ */
+
+.alert {
+  border-radius: 0px;
+}
+
+
+/*
+ * Cover page
+ */
+
+.content {
+  padding-top: 10px;
+}
+
+#background-image {
+  background: url('images/fox-cover.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+}
+
+.h-100 {
+  min-height: 100vh;
+  height: 100vh;
+}
+
+.vcenter-item{
+    display: flex;
+    align-items: center;
+}
+
+/*
+ * Cover page
+ */
+h1.home-title {
+  font-size: 4.5rem;
+  font-family: 'Comic Sans MS';
+  color: #FFA500;
+}
+
+h2.signup-title {
+  font-size: 3.5rem;
+  font-family: 'Arial Rounded MT BOLD';
+  color: #FFA500;
+}
+
+h2.login-title {
+  font-size: 3.5rem;
+  font-family: 'Arial Rounded MT BOLD';
+  color: #5e5b5b;
+}
+
+h2.create-request-title {
+  font-size: 2.2rem;
+  font-family: 'Arial Rounded MT BOLD';
+  color: #FFA500;
+}
+
+h3.home-text {
+  font-size: 2rem;
+  font-family: 'Arial Rounded MT';
+}
+
+h3.account-text {
+  font-size: 2rem;
+  font-family: 'Optima';
+}
+
+h4.signup-text {
+  font-size: 1.4rem;
+  font-family: 'Optima';
+}
+
+h4.view-request-text {
+  font-size: 1.5rem;
+  font-family: 'Gill Sans';
+  text-align: left;
+}
+
+.home-card {
+  background-color: rgba(245, 245, 245, 0.8);
+  max-width: 50rem;
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 45px;
+}
+h1.home-card-header{
+  background-color: rgba(96, 95, 95, 0.8);
+  width:fit-content;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 25px;
+}
+.home-card-block {
+  opacity: 1
+}
+
+.signup-card {
+  background-color: rgba(245, 245, 245, 0.8);
+  max-width: 100rem;
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 30px;
+  border-radius: 25px;
+}
+h2.signup-card-header{
+  background-color: rgba(96, 95, 95, 0.8);
+  width:fit-content;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 25px;
+}
+
+.login-card {
+  background-color: rgba(241, 160, 46, 0.8);
+  max-width: 60rem;
+  padding-top: 30px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 30px;
+  border-radius: 25px;
+}
+h2.login-card-header{
+  background-color: rgba(196, 196, 196, 0.8);
+  width:fit-content;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 25px;
+}
+
+/*
+ * forms
+ */
+.nolabel label {
+  display: none;
+}
+
+ul.errorlist {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/*
+ * Typefaces
+ */
+
+.low-key {
+  color: #777777;
+  font-weight: 300;
+}
+
+.list-title {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+/*
+ * Profile
+ */
+.profile-image {
+  width: 120px;
+  clear:both;
+  float:left;
+}
+
+.profile-text {
+  overflow:hidden;
+  padding-left:20px
+}
+
+h3.profile-title {
+  margin-bottom: 0px;
+}
+
+.profile-username {
+  color: #777777;
+  font-weight: 300;
+  font-style: italic;
+}
+
+.profile-bio {
+  font-size: 1.1rem;
+}
+
+.profile-statistics {
+  color: #777777;
+  font-weight: 300;
+  display: block;
+}
+
+.profile-statistics-item {
+  display: block;
+  padding-right: 50px;
+}
+
+/*
+ * Post
+ */
+.post-author {
+  margin-bottom: 0px;
+
+}
+
+.post-author-fullname {
+  font-weight: bold;
+}
+
+.post-author-user-details {
+  margin-left: 10px;
+  color: #777777;
+}
+
+/*
+ * Hyperlinks
+ */
+.content a {
+  text-decoration: none;
+  color: #0d6efd;
+}
+.content a:hover {
+  text-decoration: underline;
+  color: #0d6efd;
+}
+
+.post-author a {
+  text-decoration: none;
+  color: black;
+}
+.post-author a:hover {
+  text-decoration: underline;
+  color: black;
+}
