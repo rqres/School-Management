@@ -60,7 +60,7 @@ def log_in_admin(request):
             user = authenticate(username = username, password = password)
             if user is not None:
                 login(request, user)
-                return redirect(home)
+                return redirect("adminaccount")
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid.")
     adminloginform = AdminLoginForm()
     return render(request, "log_in_admin.html", {"form": adminloginform})
@@ -76,6 +76,9 @@ def sign_up_admin(request):
         form = SignUpAdminForm()#create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, 'sign_up_admin.html', {'form' : form})
     #successful form means you save user record in database and redirect them to the database
+
+def adminaccount(request):
+    return render(request, "adminaccount.html")
 
 def log_out(request):
     logout(request)

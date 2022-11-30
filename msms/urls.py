@@ -63,5 +63,7 @@ urlpatterns = [
         views.show_request,
         name="show_request",
     ),
-    path("sign_up_admin", views.sign_up_admin, name="sign_up_admin"),
+    path("adminaccount/sign_up_admin", views.sign_up_admin, name="sign_up_admin"),
+    path("adminaccount/", views.adminaccount, name="adminaccount"), # path to adminaccount overview (currently a simple redirect)
+
 ]
