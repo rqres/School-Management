@@ -54,7 +54,7 @@ class StudentSignUpForm(UserCreationForm):
 
 class SignUpAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
-    directorStatus = forms.CharField(label="Director?", max_length=5)
+    directorStatus = forms.BooleanField(label="Director?")
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email", "school_name","directorStatus"]
@@ -89,7 +89,7 @@ class SignUpAdminForm(UserCreationForm):
             user.is_admin = True
             user.save()
         Admin.objects.create(
-            user=user, school_name=self.cleaned_data.get("school_name"), directorStatus=self.get("directorStatus")
+            user=user, school_name=self.cleaned_data.get("school_name"), directorStatus=self.cleaned_data.get("directorStatus")
         )
 
         return user
