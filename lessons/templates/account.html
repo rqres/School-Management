@@ -26,6 +26,11 @@
           <div>
             <a href='{% url 'log_out' %}' class="btn btn-sm btn-secondary"> Log Out</a>
           </div>
+          <div>
+            {% if student.user.is_parent %}
+              Parent Dashboard: As a parent you may...
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>

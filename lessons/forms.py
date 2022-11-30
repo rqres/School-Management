@@ -153,3 +153,16 @@ class ForgotPasswordForm(forms.Form):
             )
         else:
             self.message = "This e-mail address is not registered to any account."
+
+class RegisterChildForm(forms.Form):
+    email = forms.EmailField(label="Email", required=True)
+    message = ""
+
+    def authenticate_email(self):
+        checked_email = self.cleaned_data.get("email")
+        if User.objects.filter(email=checked_email).exists():
+            self.message = (
+                "Instructions for password reset sent to your e-mail address."
+            )
+        else:
+            self.message = "This e-mail address is not registered to any account."

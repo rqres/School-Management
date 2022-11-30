@@ -66,5 +66,7 @@ urlpatterns = [
         views.show_request,
         name="show_request",
     ),
-    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
+    path("adminlogin/", views.adminlogin, name="adminlogin"), #path to admin login page
+    
+    path("account/register_child/", views.register_child, name="register_child") # path to register children
 ]

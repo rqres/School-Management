@@ -157,4 +157,6 @@ def payment(request):
     else:
         form = PaymentForm(request.POST)
     return render(request, "payment_form.html", {"form": form})
-        
+
+def register_child(request):
+    pass
