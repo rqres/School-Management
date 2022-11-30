@@ -54,7 +54,7 @@ class StudentSignUpForm(UserCreationForm):
 
 class SignUpAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
-    directorStatus = forms.BooleanField(label="Director?")
+    directorStatus = forms.BooleanField(label="Director?", required=False)
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email", "school_name","directorStatus"]

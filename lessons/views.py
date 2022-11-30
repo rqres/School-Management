@@ -69,8 +69,7 @@ def sign_up_admin(request):
         form = SignUpAdminForm(request.POST)#creates a bound version of the form with post data
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('log_in_admin')
+            return redirect('adminaccount')
     else:
         form = SignUpAdminForm()#create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, 'sign_up_admin.html', {'form' : form})
