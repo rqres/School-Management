@@ -27,7 +27,6 @@ def sign_up_student(request):
             user = form.save()
             login(request, user)
             return redirect("home")
-
     else:
         form = StudentSignUpForm()
 
