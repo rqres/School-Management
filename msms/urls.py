@@ -37,5 +37,8 @@ urlpatterns = [
     path(
         "account/requests/create", views.create_request, name="create_request"
     ),  # path to create new request'
-    path("adminlogin", views.adminlogin, name="adminlogin") #path to admin login page
+    path(
+        "admininteractions", views.admininteractions, name="admininteractions"
+    ), #admins go on here to login
+    path("admininteractions/log_in_admin", views.log_in_admin, name="log_in_admin") #path to admin login page
 ]

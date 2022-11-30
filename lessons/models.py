@@ -83,7 +83,6 @@ class Student(models.Model):
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
-#subclass for User class
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:

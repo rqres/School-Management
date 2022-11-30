@@ -1,10 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from lessons.models import Booking, RequestForLessons
-from .forms import RequestForLessonsForm, StudentSignUpForm
-
+from .forms import RequestForLessonsForm, StudentSignUpForm, AdminLoginForm, LogInForm
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from .forms import LogInForm
 
 # # Create your views here.
 def home(request):
@@ -27,9 +26,9 @@ def sign_up_student(request):
         form = StudentSignUpForm()
     return render(request, "sign_up_student.html", {"form": form})
 
-#changed
-#def sign_up_admin(request):
-    #return render(request, 'sign_up_admin.html', {'form': form})
+#admins redirected to admin login page
+def admininteractions(request):
+    return render(request, "log_in_admin.html")
 
 def log_in(request):
     if request.method == "POST":
@@ -45,19 +44,19 @@ def log_in(request):
         form = LogInForm()
         return render(request, "log_in.html", {"form": form})
 
-def adminlogin(request):
+def log_in_admin(request):
     if request.method == "POST":
         adminloginform = AdminLoginForm(request.POST)
-        if form.is_valid():
-            username = adminloginform.cleaned_data.get(username)
-            password = adminloginform.cleaned_data.get(password)
+        if adminloginform.is_valid():
+            username = adminloginform.cleaned_data.get('username')
+            password = adminloginform.cleaned_data.get('password')
             user = authenticate(username = username, password = password)
             if user is not None:
                 login(request, user)
                 return redirect(home)
-    else:
-        adminloginform = AdminLoginForm()
-        return render(request, "adminlogin.html", {"form": adminloginform})
+        messages.add_message(request, messages.ERROR, "The credentials provided were invalid.")
+    adminloginform = AdminLoginForm()
+    return render(request, "log_in_admin.html", {"form": adminloginform})
 
 def log_out(request):
     logout(request)
