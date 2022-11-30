@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from lessons.models import User
+from lessons.models import RequestForLessons, User
 
 
 class Command(BaseCommand):
@@ -7,3 +7,6 @@ class Command(BaseCommand):
         regular_users = User.objects.filter(is_admin=False)
         for u in regular_users:
             u.delete()
+        requests = RequestForLessons.objects.all()
+        for req in requests:
+            req.delete()
