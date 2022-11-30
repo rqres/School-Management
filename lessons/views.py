@@ -3,9 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, SignUpAdminForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
 #  Create your views here.
 def home(request):
@@ -22,15 +25,14 @@ def sign_up_student(request):
             user = form.save()
             login(request, user)
             return redirect("home")
-
     else:
         form = StudentSignUpForm()
 
     return render(request, "sign_up_student.html", {"form": form})
 
-#changed
-#def sign_up_admin(request):
-    #return render(request, 'sign_up_admin.html', {'form': form})
+#admins redirected to admin login page
+def admininteractions(request):
+    return render(request, "log_in_admin.html")
 
 def log_in(request):
     if request.method == "POST":
@@ -47,19 +49,35 @@ def log_in(request):
         form = LogInForm()
     return render(request, "log_in.html", {"form": form})
 
-def adminlogin(request):
+def log_in_admin(request):
     if request.method == "POST":
         adminloginform = AdminLoginForm(request.POST)
         if adminloginform.is_valid():
-            username = adminloginform.cleaned_data.get(username)
-            password = adminloginform.cleaned_data.get(password)
+            username = adminloginform.cleaned_data.get('username')
+            password = adminloginform.cleaned_data.get('password')
             user = authenticate(username = username, password = password)
             if user is not None:
                 login(request, user)
-                return redirect("account_admin")
+                return redirect("adminaccount")
+        messages.add_message(request, messages.ERROR, "The credentials provided were invalid.")
+    adminloginform = AdminLoginForm()
+    return render(request, "log_in_admin.html", {"form": adminloginform})
+
+#check if the user is a director then display sign up page
+def sign_up_admin(request):
+    if request.method == 'POST':
+        form = SignUpAdminForm(request.POST)#creates a bound version of the form with post data
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('log_in_admin')
     else:
-        adminloginform = AdminLoginForm()
-        return render(request, "adminlogin.html", {"form": adminloginform})
+        form = SignUpAdminForm()#create a form with SignUpAdminForm constructor, pass that form to template to render it
+    return render(request, 'sign_up_admin.html', {'form' : form})
+    #successful form means you save user record in database and redirect them to the database
+
+def adminaccount(request):
+    return render(request, "adminaccount.html")
 
 def log_out(request):
     logout(request)
@@ -137,7 +155,6 @@ def create_request(request):
     else:
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
-    
 
 def payment(request):
     if request.method == "POST":

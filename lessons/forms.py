@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, Student, User
+from .models import Invoice, RequestForLessons, Student, User, Admin
 from django.core.validators import RegexValidator
 
 
@@ -52,6 +52,47 @@ class StudentSignUpForm(UserCreationForm):
 
         return user
 
+class SignUpAdminForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100)
+    directorStatus = forms.CharField(label="Director?", max_length=5)
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "school_name","directorStatus"]
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+    @transaction.atomic
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(SignUpAdminForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.is_admin = True
+            user.save()
+        Admin.objects.create(
+            user=user, school_name=self.cleaned_data.get("school_name"), directorStatus=self.get("directorStatus")
+        )
+
+        return user
 
 class LogInForm(forms.Form):
     email = forms.CharField(label="Email", required=True)
@@ -105,11 +146,10 @@ class PaymentForm(forms.Form):
     account_number = forms.CharField(
         min_length=8,
         max_length=8,
-        validators=[
-            RegexValidator(
-                regex=r"^[0-9]*$", message="Account number must contain numbers only"
-            )
-        ],
+        validators= [RegexValidator(
+            regex=r'^[0-9]*$',
+            message='Account number must contain numbers only'
+        )]
     )
     sort_code = forms.CharField(
         min_length=6,
