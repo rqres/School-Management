@@ -1,30 +1,28 @@
 from django.test import TestCase
-from lessons.models import User, Student
+from lessons.models import Student,User
 from django.core.exceptions import ValidationError
 
 # Create your tests here.
 
 
 class StudentModelTestCase(TestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(
-            "john.doe@example.org",
-            first_name="John",
-            last_name="Doe",
-            password="TestPassword123",
-        )
-        self.user.is_student = True
+    fixtures = [
+        "lessons/tests/fixtures/default_student.json",
+        "lessons/tests/fixtures/other_students.json",
+    ]
 
-        self.student = Student.objects.create(user=self.user, school_name="Test School")
+    def setUp(self):
+        self.user = User.objects.get(email="john.doe@example.org")
+        self.student = Student.objects.get(user=self.user)
 
     def test_corresponding_user_must_not_be_none(self):
         self.student.user = None
         self._assert_student_is_invalid()
 
     def test_student_is_deleted_when_corresponding_user_is_deleted(self):
-        self.student.save()
+        # self.student.save()
         before = list(Student.objects.all())
-        self.user.delete()
+        self.student.user.delete()
         after = list(Student.objects.all())
         self.assertEqual(len(before) - 1, len(after))
 
@@ -37,15 +35,9 @@ class StudentModelTestCase(TestCase):
         self._assert_student_is_invalid()
 
     def test_school_name_may_already_exist(self):
-        same_school_user = User.objects.create_user(
-            "jane.doe@example.org",
-            first_name="Jane",
-            last_name="Doe",
-            password="TestPassword123",
-        )
-
-        Student.objects.create(user=same_school_user, school_name="School2")
-        self.student.school_name = "School2"
+        other_user = User.objects.get(email="jake.walker@example.org")
+        other_student = Student.objects.get(user=other_user)
+        self.student.school_name = other_student.school_name
 
         self._assert_student_is_valid()
 
