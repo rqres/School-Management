@@ -22,6 +22,7 @@ class PaymentFormTestCase(TestCase):
             school_name = "Test School"
         )
         self.invoice = Invoice(
+            student = self.student,
             student_num = self.student.user.pk + 1000,
             invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
             price = Money(10,'GBP')
