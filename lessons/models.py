@@ -165,6 +165,7 @@ class RequestForLessons(models.Model):
     #     ("SAT", "Saturday"),
     #     ("SUN", "Sunday"), ]
     # availability = models.MultipleChoiceField()
+    # availability = models.CharField(max_length=500, blank=True)
 
     fulfilled = models.BooleanField(default=False)
 
