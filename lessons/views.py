@@ -65,6 +65,7 @@ def log_in_admin(request):
     adminloginform = AdminLoginForm()
     return render(request, "log_in_admin.html", {"form": adminloginform})
 
+#check if the user is a director then display sign up page
 def sign_up_admin(request):
     if request.method == 'POST':
         form = SignUpAdminForm(request.POST)#creates a bound version of the form with post data
