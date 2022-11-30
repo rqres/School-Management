@@ -53,9 +53,9 @@ def log_in_admin(request):
     if request.method == "POST":
         adminloginform = AdminLoginForm(request.POST)
         if adminloginform.is_valid():
-            username = adminloginform.cleaned_data.get('username')
-            password = adminloginform.cleaned_data.get('password')
-            user = authenticate(username = username, password = password)
+            email = adminloginform.cleaned_data.get('adminemail')
+            password = adminloginform.cleaned_data.get('adminpassword')
+            user = authenticate(email= email, password = password)
             if user is not None:
                 login(request, user)
                 return redirect("adminaccount")
@@ -160,13 +160,13 @@ def payment(request):
     if request.method == "POST":
         if request.user.is_authenticated:
             form = PaymentForm(request.POST)
-            if form.is_valid(): 
+            if form.is_valid():
                 try:
-                    invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn")) 
+                    invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
                     invoice.is_paid = True
                     invoice.save()
                 except ObjectDoesNotExist:
-                    form = PaymentForm() 
+                    form = PaymentForm()
                     return render(request, "payment_form.html", {"form": form})
                 return redirect("account")
         else:
@@ -174,4 +174,3 @@ def payment(request):
     else:
         form = PaymentForm(request.POST)
     return render(request, "payment_form.html", {"form": form})
-        
