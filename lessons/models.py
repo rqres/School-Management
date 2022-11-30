@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from django.db.models import Count
+from djmoney.models.fields import MoneyField
+from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 
@@ -106,12 +107,16 @@ class Invoice(models.Model):
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
+    price = MoneyField(decimal_places=2, max_digits=5,default_currency='GBP')
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
 
+    class Meta:
+        unique_together = ('student_num', 'invoice_num',)
+        
 
 class Booking(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
@@ -122,12 +127,15 @@ class Booking(models.Model):
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-
-    def save(self, *args, **kwargs):
+    
+    def save(self, *args, **kwargs): 
+        # Create Invoice object for the booking object created
+        costOfBooking = (self.endTime - self.startTime).total_seconds()/10
         self.invoice = Invoice.objects.create(
-            student_num=self.student.user.pk + 1000,
-            invoice_num=self.student.booking_set.count() + 1,
-        )
+            student_num = self.student.user.pk + 1000,
+            invoice_num = self.student.booking_set.count() + 1,
+            price = Money(costOfBooking,'GBP')
+        )   
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)
 
@@ -139,7 +147,9 @@ class Booking(models.Model):
                 raise ValidationError(
                     "Length of lesson sholud be 30 or 45 or 60 minutes"
                 )
-
+    def update_invoice(self):
+            """ Invoice should be updated depending on the changes made to Booking """
+            pass
     class Meta:
         # Model options
         ordering = ["-bookingCreatedAt"]

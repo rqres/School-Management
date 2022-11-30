@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'lessons',
     'widget_tweaks',
+    'djmoney',
 ]
 
 MIDDLEWARE = [
