@@ -103,12 +103,12 @@ class Admin(models.Model):
     directorStatus = models.BooleanField(default=False)
 
 
-class Invoice(models.Model):  
+class Invoice(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
-    price = MoneyField(decimal_places=2, max_digits=5,default_currency='GBP')
+    price = MoneyField(decimal_places=2, max_digits=5, default_currency="GBP")
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -117,8 +117,11 @@ class Invoice(models.Model):
         super(Invoice, self).save(*args, **kwargs)
 
     class Meta:
-        unique_together = ('student_num', 'invoice_num',)
-        
+        unique_together = (
+            "student_num",
+            "invoice_num",
+        )
+
 
 class Booking(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
@@ -129,30 +132,32 @@ class Booking(models.Model):
     startTime = models.DateTimeField(blank=False)
     endTime = models.DateTimeField(blank=False)
     bookingCreatedAt = models.TimeField(auto_now_add=True)
-    
-    def save(self, *args, **kwargs): 
+
+    def save(self, *args, **kwargs):
         # Create Invoice object for the booking object created
-        costOfBooking = (self.endTime - self.startTime).total_seconds()/10
+        costOfBooking = round((self.endTime - self.startTime).total_seconds() / 10, 2)
         self.invoice = Invoice.objects.create(
-            student = self.student,
-            student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.invoice_set.count() + 1,
-            price = Money(costOfBooking,'GBP')
-        )   
+            student=self.student,
+            student_num=self.student.user.pk + 1000,
+            invoice_num=self.student.invoice_set.count() + 1,
+            price=Money(costOfBooking, "GBP"),
+        )
         self.invoice.save()
         super(Booking, self).save(*args, **kwargs)
 
     def clean(self):
         if self.startTime is not None and self.endTime is not None:
             duration = self.endTime - self.startTime
-            minutes = duration.total_seconds() / 60
+            minutes = round(duration.total_seconds() / 60)
             if not (minutes == 30 or minutes == 45 or minutes == 60):
                 raise ValidationError(
-                    "Length of lesson sholud be 30 or 45 or 60 minutes"
+                    "Length of lesson should be 30 or 45 or 60 minutes"
                 )
+
     def update_invoice(self):
-            """ Invoice should be updated depending on the changes made to Booking """
-            pass
+        """Invoice should be updated depending on the changes made to Booking"""
+        pass
+
     class Meta:
         # Model options
         ordering = ["-bookingCreatedAt"]
@@ -168,17 +173,9 @@ class Booking(models.Model):
 
 class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    # todo: availability field
-    # WEEKDAYS = [
-    #     ("MON", "Monday"),
-    #     ("TUE", "Tuesday"),
-    #     ("WED", "Wednesday"),
-    #     ("THU", "Thursday"),
-    #     ("FRI", "Friday"),
-    #     ("SAT", "Saturday"),
-    #     ("SUN", "Sunday"), ]
-    # availability = models.MultipleChoiceField()
-    # availability = models.CharField(max_length=500, blank=True)
+    # i am storing the availabilty as a comma separated string of days
+    # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
+    availability = models.CharField(max_length=500, blank=True)
 
     fulfilled = models.BooleanField(default=False)
 

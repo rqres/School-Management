@@ -3,7 +3,7 @@ from django.test import TestCase
 from django import forms
 
 from lessons.forms import RequestForLessonsForm
-from lessons.models import RequestForLessons, Student , User
+from lessons.models import RequestForLessons, Student, User
 
 
 # Create your tests here.
@@ -19,6 +19,7 @@ class RequestForLessonsFormTestCase(TestCase):
     def setUp(self):
         self.form_input = {
             "no_of_lessons": 10,
+            "availability_field": ["MON", "TUE", "SAT"],
             "days_between_lessons": 7,
             "lesson_duration": 60,
             "other_info": "This is some info",

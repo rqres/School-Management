@@ -52,12 +52,14 @@ class StudentSignUpForm(UserCreationForm):
 
         return user
 
+
 class SignUpAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
     directorStatus = forms.BooleanField(label="Director?", required=False)
+
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "school_name","directorStatus"]
+        fields = ["first_name", "last_name", "email", "school_name", "directorStatus"]
 
     password1 = forms.CharField(
         label="Password",
@@ -73,6 +75,7 @@ class SignUpAdminForm(UserCreationForm):
     password2 = forms.CharField(
         label="Password confirmation", widget=forms.PasswordInput
     )
+
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
@@ -80,6 +83,7 @@ class SignUpAdminForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
@@ -89,10 +93,13 @@ class SignUpAdminForm(UserCreationForm):
             user.is_admin = True
             user.save()
         Admin.objects.create(
-            user=user, school_name=self.cleaned_data.get("school_name"), directorStatus=self.cleaned_data.get("directorStatus")
+            user=user,
+            school_name=self.cleaned_data.get("school_name"),
+            directorStatus=self.cleaned_data.get("directorStatus"),
         )
 
         return user
+
 
 class LogInForm(forms.Form):
     email = forms.CharField(label="Email", required=True)
@@ -121,16 +128,27 @@ class RequestForLessonsForm(forms.ModelForm):
             "other_info": forms.Textarea(),
         }
 
-    # availability_field = forms.MultipleChoiceField(
-    #     choices=[("mon", "Monday"), ("tue", "Tuesday"), ("wed", "Wednesday")],
-    #     label="Which days are you available?",
-    #     widget=forms.CheckboxSelectMultiple(),
-    # )
+    WEEKDAYS = [
+        ("MON", "Monday"),
+        ("TUE", "Tuesday"),
+        ("WED", "Wednesday"),
+        ("THU", "Thursday"),
+        ("FRI", "Friday"),
+        ("SAT", "Saturday"),
+        ("SUN", "Sunday"),
+    ]
+
+    availability_field = forms.MultipleChoiceField(
+        choices=WEEKDAYS,
+        label="Which days are you available?",
+        widget=forms.CheckboxSelectMultiple,
+    )
 
     def save(self):
         super().save(commit=False)
         req = RequestForLessons.objects.create(
             student=self._student,
+            availability=",".join(self.cleaned_data.get("availability_field")),
             no_of_lessons=self.cleaned_data.get("no_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
@@ -146,10 +164,11 @@ class PaymentForm(forms.Form):
     account_number = forms.CharField(
         min_length=8,
         max_length=8,
-        validators= [RegexValidator(
-            regex=r'^[0-9]*$',
-            message='Account number must contain numbers only'
-        )]
+        validators=[
+            RegexValidator(
+                regex=r"^[0-9]*$", message="Account number must contain numbers only"
+            )
+        ],
     )
     sort_code = forms.CharField(
         min_length=6,
