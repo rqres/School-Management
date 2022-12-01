@@ -3,7 +3,6 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, Admin
-from django.core.validators import RegexValidator
 
 
 class StudentSignUpForm(UserCreationForm):

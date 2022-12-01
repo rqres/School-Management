@@ -33,11 +33,8 @@ class RequestModelTestCase(TestCase):
         self._assert_request_is_invalid()
 
     def test_availability_must_not_contain_invalid_days(self):
-        valid_days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-        av_input = self.request.availability.split(",")
-        for day in av_input:
-            if day not in valid_days:
-                self._assert_request_is_invalid()
+        self.request.availability += ",BAD"
+        self._assert_request_is_invalid()
 
     def test_availability_may_have_27_chars(self):
         self.request.availability = "MON,TUE,WED,THU,FRI,SAT,SUN"

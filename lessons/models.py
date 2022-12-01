@@ -214,6 +214,15 @@ class RequestForLessons(models.Model):
     def __str__(self):
         return f"{self.student}: {self.no_of_lessons} lessons"
 
+    def clean(self):
+        valid_days = ["", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        availability_list = self.availability.split(",")
+        for day in availability_list:
+            if day not in valid_days:
+                raise ValidationError(
+                    "Availability list must only contain days of the week (the first 3 letters in capitals)"
+                )
+
 
 class SchoolTerm(models.Model):
     start_date = models.DateField(blank=False)
