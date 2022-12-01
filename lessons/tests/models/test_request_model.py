@@ -28,9 +28,9 @@ class RequestModelTestCase(TestCase):
     def test_request_is_unfulfilled_by_default(self):
         self.assertFalse(self.request.fulfilled)
 
-    def test_availability_may_be_blank(self):
+    def test_availability_cannot_be_blank(self):
         self.request.availability = ""
-        self._assert_request_is_valid()
+        self._assert_request_is_invalid()
 
     def test_availability_must_not_contain_invalid_days(self):
         valid_days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]

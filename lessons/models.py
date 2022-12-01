@@ -177,9 +177,10 @@ class RequestForLessons(models.Model):
     # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
     # max length is 28 because at most someone could be avlb every day
     # len("mon,tue,wed,thu,fri,sat,sun") = 27
-    availability = models.CharField(max_length=27, blank=True)
+    availability = models.CharField(max_length=27, blank=False)
 
     fulfilled = models.BooleanField(default=False)
+    request_created_at = models.DateTimeField(auto_now_add=True)
 
     no_of_lessons = models.IntegerField(
         default=10,  # default is 10 lessons (per year?)
@@ -206,5 +207,26 @@ class RequestForLessons(models.Model):
     )
     other_info = models.CharField(max_length=500, blank=True)
 
+    class Meta:
+        # Model options
+        ordering = ["-request_created_at"]
+
     def __str__(self):
         return f"{self.student}: {self.no_of_lessons} lessons"
+
+
+class SchoolTerm(models.Model):
+    start_date = models.DateField(blank=False)
+    end_date = models.DateField(blank=False)
+
+    def clean(self):
+        if self.start_date is not None and self.end_date is not None:
+            all_terms = SchoolTerm.objects.all()
+            for term in all_terms:
+                if (
+                    self.start_date >= term.start_date
+                    and self.start_date <= term.end_date
+                ) or (
+                    self.end_date <= term.end_date and self.end_date >= term.start_date
+                ):
+                    raise ValidationError("School terms cannot overlap!")

@@ -32,7 +32,7 @@ def sign_up_student(request):
             # create user, add it to db, and log them in
             user = form.save()
             login(request, user)
-            return redirect("home")
+            return redirect("account")
     else:
         form = StudentSignUpForm()
 
@@ -152,18 +152,30 @@ def requests_list(request):
 
 @login_required
 def show_request(request, lessons_request_id):
-    # https://github.com/testdrivenio/django-ajax-xhr
-    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+    # # https://github.com/testdrivenio/django-ajax-xhr
+    # is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
-    if is_ajax:
-        booking = get_object_or_404(RequestForLessons, id=lessons_request_id)
-        if request.method == "DELETE":
-            booking.delete()
-            return JsonResponse({"status": "Booking deleted!"})
-        return JsonResponse({"status": "Invalid request"}, status=400)
-    else:
-        # todo: display the request
-        pass
+    # if is_ajax:
+    #     booking = get_object_or_404(RequestForLessons, id=lessons_request_id)
+    #     if request.method == "DELETE":
+    #         booking.delete()
+    #         return JsonResponse({"status": "Booking deleted!"})
+    #     return JsonResponse({"status": "Invalid request"}, status=400)
+    # else:
+    #     # todo: display the request
+    #     pass
+    print("NOT YET IMPLEMENTED")
+    pass
+
+
+@login_required
+def delete_request(request, lessons_request_id):
+    req = RequestForLessons.objects.get(id=lessons_request_id)
+    if req:
+        req.delete()
+        print(f"Request {lessons_request_id} deleted")
+        return redirect("requests_list")
+    print("cant find request")
 
 
 @login_required

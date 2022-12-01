@@ -49,7 +49,7 @@ class StudentSignUpViewTestCase(TestCase, LogInTester):
         self.assertTrue(form.is_bound)
         self.assertFalse(self.is_logged_in())
 
-    def test_succsesful_sign_up(self):
+    def test_successful_sign_up(self):
         user_before_count = User.objects.count()
         student_before_count = Student.objects.count()
         response = self.client.post(self.url, self.form_input, follow=True)
@@ -58,11 +58,11 @@ class StudentSignUpViewTestCase(TestCase, LogInTester):
         self.assertEqual(user_after_count, user_before_count + 1)
         self.assertEqual(student_after_count, student_before_count + 1)
 
-        response_url = reverse("home")
+        response_url = reverse("account")
         self.assertRedirects(
             response, response_url, status_code=302, target_status_code=200
         )
-        self.assertTemplateUsed(response, "home.html")
+        self.assertTemplateUsed(response, "account.html")
         user = User.objects.get(email="john.doe@example.org")
         student = Student.objects.get(user=user)
         self.assertEqual(student.user.first_name, "John")
