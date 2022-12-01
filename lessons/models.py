@@ -4,6 +4,7 @@ from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
+import datetime
 
 
 # Create your models here.
@@ -118,21 +119,51 @@ class Invoice(models.Model):
 
     class Meta:
         unique_together = ('student_num', 'invoice_num',)
-        
 
 class Booking(models.Model):
-    name = models.CharField(max_length=50, blank=False, unique=True)
+    num_of_lessons = models.IntegerField(blank=False)
+    days_between_lessons = models.IntegerField(
+        default=7,  # default is one week between each lesson
+        blank=False,
+        validators=[
+            MinValueValidator(
+                1, message="Number of days between lessons must be greater than 1!"
+            )
+        ],
+    )
+    lesson_duration = models.IntegerField(
+        default=60,  # default is 1 hour
+        blank=False,
+        validators=[
+            MinValueValidator(15, message="A lesson must be at least 15 minutes")
+        ],
+    )
+    invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, blank=True, null=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
-    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
-    startTime = models.DateTimeField(blank=False)
-    endTime = models.DateTimeField(blank=False)
-    bookingCreatedAt = models.TimeField(auto_now_add=True)
-    
-    def save(self, *args, **kwargs): 
-        # Create Invoice object for the booking object created
-        costOfBooking = (self.endTime - self.startTime).total_seconds()/10
+
+    def create_lessons(self):
+        """ Creates a set of lessons for the comfirmed booking"""
+        for lesson_id in range(self.num_of_lessons):
+            lesson = Lesson.objects.create(
+                name = f'{self.student.user.first_name}{self.teacher.user.last_name}{lesson_id}',
+                # These times could potentially cause conflict with student's schedule
+                # TODO: Validate these times
+                startTime = datetime.datetime(2022,11,10,10,0,0),
+                endTime = datetime.datetime(2022,11,10,11,0,0),
+                booking = self,
+            )
+            lesson.save()
+
+    def update_lessons(self):
+        """ Lessons should be updated depending on the changes made to Booking """
+        lessons = self.lesson_set()
+        # for each on lessons and update each of them
+
+    def create_invoice(self):
+        """ Invoice should be created for Lesson that has been created """
+        costOfBooking = self.lesson_duration/10
         self.invoice = Invoice.objects.create(
             student = self.student,
             student_num = self.student.user.pk + 1000,
@@ -140,7 +171,26 @@ class Booking(models.Model):
             price = Money(costOfBooking,'GBP')
         )   
         self.invoice.save()
+
+    def update_invoice(self):
+            """ Invoice should be updated depending on the changes made to Lesson """
+            costOfBooking = self.lesson_duration/10
+            self.invoice.price = Money(costOfBooking,'GBP')
+
+    def save(self, *args, **kwargs): 
         super(Booking, self).save(*args, **kwargs)
+
+class Lesson(models.Model):
+    name = models.CharField(max_length=50, blank=False, unique=True)
+    startTime = models.DateTimeField(blank=False)
+    endTime = models.DateTimeField(blank=False)
+    duration = models.IntegerField(blank=False)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, blank=False)
+    lessonCreatedAt = models.TimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs): 
+        self.duration = (self.endTime - self.startTime).total_seconds()
+        super(Lesson, self).save(*args, **kwargs)
 
     def clean(self):
         if self.startTime is not None and self.endTime is not None:
@@ -150,12 +200,10 @@ class Booking(models.Model):
                 raise ValidationError(
                     "Length of lesson sholud be 30 or 45 or 60 minutes"
                 )
-    def update_invoice(self):
-            """ Invoice should be updated depending on the changes made to Booking """
-            pass
+
     class Meta:
         # Model options
-        ordering = ["-bookingCreatedAt"]
+        ordering = ["-lessonCreatedAt"]
 
     def __str__(self):
         return (
@@ -164,7 +212,6 @@ class Booking(models.Model):
             " This booking was created at"
             f"{self.bookingCreatedAt.strftime('%H:%M')}"
         )
-
 
 class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
