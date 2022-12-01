@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, Student, User, Admin
+from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, Admin
 from django.core.validators import RegexValidator
 
 
@@ -109,6 +109,21 @@ class LogInForm(forms.Form):
 class AdminLoginForm(forms.Form):
     adminemail = forms.CharField(label="Email", required=True)
     adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
+
+
+class SchoolTermForm(forms.ModelForm):
+    class Meta:
+        model = SchoolTerm
+        fields = ["start_date", "end_date"]
+
+    def save(self):
+        super().save(commit=False)
+        school_term = SchoolTerm.objects.create(
+            start_date=self.cleaned_data.get("start_date"),
+            end_date=self.cleaned_data.get("end_date"),
+        )
+
+        return school_term
 
 
 class RequestForLessonsForm(forms.ModelForm):

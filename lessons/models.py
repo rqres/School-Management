@@ -180,7 +180,7 @@ class RequestForLessons(models.Model):
     availability = models.CharField(max_length=27, blank=False)
 
     fulfilled = models.BooleanField(default=False)
-    request_created_at = models.DateTimeField(auto_now_add=True)
+    request_created_at = models.DateTimeField(auto_now_add=True, blank=False)
 
     no_of_lessons = models.IntegerField(
         default=10,  # default is 10 lessons (per year?)
@@ -219,8 +219,14 @@ class SchoolTerm(models.Model):
     start_date = models.DateField(blank=False)
     end_date = models.DateField(blank=False)
 
+    class Meta:
+        ordering = ["-start_date"]
+
     def clean(self):
         if self.start_date is not None and self.end_date is not None:
+            if self.start_date > self.end_date:
+                raise ValidationError("Start date cannot be greater than end date")
+
             all_terms = SchoolTerm.objects.all()
             for term in all_terms:
                 if (

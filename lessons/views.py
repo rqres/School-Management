@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 from .forms import (
     RequestForLessonsForm,
+    SchoolTermForm,
     StudentSignUpForm,
     PaymentForm,
     LogInForm,
@@ -12,7 +12,7 @@ from .forms import (
     ForgotPasswordForm,
     SignUpAdminForm,
 )
-from .models import Booking, Invoice, RequestForLessons
+from .models import Booking, Invoice, RequestForLessons, SchoolTerm
 from django.contrib import messages
 
 
@@ -42,6 +42,25 @@ def sign_up_student(request):
 # admins redirected to admin login page
 def admininteractions(request):
     return render(request, "log_in_admin.html")
+
+
+def school_terms_list(request):
+    if not request.user.is_admin:
+        return redirect("home")
+    school_terms = SchoolTerm.objects.all()
+    return render(request, "school_terms_list.html", {"school_terms": school_terms})
+
+
+def create_school_term(request):
+    if request.method == "POST":
+        form = SchoolTermForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("school_terms_list")
+
+    else:
+        form = SchoolTermForm()
+    return render(request, "create_school_term.html", {"form": form})
 
 
 def log_in(request):
@@ -116,12 +135,18 @@ def forgot_password(request):
 @login_required
 def account(request):
     # Right now this only accomodates for student accounts!
-    return render(request, "account.html", {"student": request.user.student})
+    if request.user.is_student:
+        return render(request, "account.html", {"student": request.user.student})
+    elif request.user.is_admin:
+        return redirect("adminaccount")
 
 
 @login_required
 def account_admin(request):
-    return render(request, "account_admin.html", {"admin": request.user.admin})
+    if request.user.is_admin:
+        return render(request, "account_admin.html", {"admin": request.user.admin})
+    else:
+        return redirect("account")
 
 
 @login_required

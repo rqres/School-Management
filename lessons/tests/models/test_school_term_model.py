@@ -20,6 +20,10 @@ class SchoolTermTestCase(TestCase):
         self.term.end_date = None
         self._assert_term_is_invalid()
 
+    def test_start_date_cannot_be_greater_than_end_date(self):
+        self.term.start_date = self.term.end_date + timedelta(days=10)
+        self._assert_term_is_invalid()
+
     def test_overlapping_term_is_invalid(self):
         other_term = SchoolTerm.objects.create(
             start_date=timezone.now() + timedelta(days=120),

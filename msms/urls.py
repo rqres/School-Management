@@ -69,4 +69,14 @@ urlpatterns = [
     path(
         "adminaccount/", views.adminaccount, name="adminaccount"
     ),  # path to adminaccount overview (currently a simple redirect)
+    path(
+        "adminaccount/schoolterms/",
+        views.school_terms_list,
+        name="school_terms_list",
+    ),
+    path(
+        "adminaccount/schoolterms/create/",
+        views.create_school_term,
+        name="create_school_term",
+    ),
 ]
