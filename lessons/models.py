@@ -103,7 +103,8 @@ class Admin(models.Model):
     directorStatus = models.BooleanField(default=False)
 
 
-class Invoice(models.Model):
+class Invoice(models.Model):  
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
@@ -111,6 +112,7 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        self.student_num = self.student.pk + 1000
         self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
 
@@ -132,8 +134,9 @@ class Booking(models.Model):
         # Create Invoice object for the booking object created
         costOfBooking = (self.endTime - self.startTime).total_seconds()/10
         self.invoice = Invoice.objects.create(
+            student = self.student,
             student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.booking_set.count() + 1,
+            invoice_num = self.student.invoice_set.count() + 1,
             price = Money(costOfBooking,'GBP')
         )   
         self.invoice.save()
