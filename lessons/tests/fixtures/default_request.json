@@ -5,6 +5,7 @@
     "fields": {
       "student": 1,
       "fulfilled": false,
+      "availability": "MON,WED,SAT",
       "no_of_lessons": 10,
       "days_between_lessons": 7,
       "lesson_duration": 60,

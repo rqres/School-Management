@@ -28,6 +28,25 @@ class RequestModelTestCase(TestCase):
     def test_request_is_unfulfilled_by_default(self):
         self.assertFalse(self.request.fulfilled)
 
+    def test_availability_may_be_blank(self):
+        self.request.availability = ""
+        self._assert_request_is_valid()
+
+    def test_availability_must_not_contain_invalid_days(self):
+        valid_days = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        av_input = self.request.availability.split(",")
+        for day in av_input:
+            if day not in valid_days:
+                self._assert_request_is_invalid()
+
+    def test_availability_may_have_27_chars(self):
+        self.request.availability = "MON,TUE,WED,THU,FRI,SAT,SUN"
+        self._assert_request_is_valid()
+
+    def test_availability_cannot_be_over_27_chars(self):
+        self.request.availability = "MON,TUE,WED,THU,FRI,SAT,SUN,"
+        self._assert_request_is_invalid()
+
     def test_no_of_lessons_cannot_be_blank(self):
         self.request.no_of_lessons = ""
         self._assert_request_is_invalid()

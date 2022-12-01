@@ -33,12 +33,15 @@ class RequestForLessonsFormTestCase(TestCase):
     # Form has necessary fields
     def test_form_has_necessary_fields(self):
         form = RequestForLessonsForm()
+        self.assertIn("availability_field", form.fields)
         self.assertIn("no_of_lessons", form.fields)
         self.assertIn("days_between_lessons", form.fields)
         self.assertIn("lesson_duration", form.fields)
         self.assertIn("other_info", form.fields)
         other_info_field = form.fields["other_info"].widget
         self.assertTrue(isinstance(other_info_field, forms.Textarea))
+        availability_field = form.fields["availability_field"].widget
+        self.assertTrue(isinstance(availability_field, forms.CheckboxSelectMultiple))
 
     # No bad input
     def test_form_uses_model_validation(self):
@@ -62,7 +65,7 @@ class RequestForLessonsFormTestCase(TestCase):
         request = form.save()
         after_count = RequestForLessons.objects.count()
         self.assertEqual(after_count, before_count + 1)
-        # request = RequestForLessons.objects.get()
+        self.assertEqual(request.availability, "MON,TUE,SAT")
         self.assertEqual(request.no_of_lessons, 10)
         self.assertEqual(request.days_between_lessons, 7)
         self.assertEqual(request.lesson_duration, 60)

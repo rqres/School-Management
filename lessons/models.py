@@ -175,7 +175,9 @@ class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     # i am storing the availabilty as a comma separated string of days
     # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
-    availability = models.CharField(max_length=500, blank=True)
+    # max length is 28 because at most someone could be avlb every day
+    # len("mon,tue,wed,thu,fri,sat,sun") = 27
+    availability = models.CharField(max_length=27, blank=True)
 
     fulfilled = models.BooleanField(default=False)
 
