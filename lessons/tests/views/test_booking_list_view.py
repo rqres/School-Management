@@ -24,16 +24,32 @@ class BookingListTest(TestCase):
         self.assertEqual(self.url, "/account/bookings/")
 
     def create_test_bookings(self,booking_count):
-        booking = Booking.objects.create(
-            num_of_lessons = booking_count,
-            student = self.student,
-            teacher = self.teacher,
-            description = 'Gutitar lesson on basics',
-            days_between_lessons = 7,
-            lesson_duration = 60,
-        )
-        booking.create_lessons()
-        booking.save()
+        
+        for booking_id in range(booking_count):
+            user_teacher = User.objects.create_user(
+            f'teacher{booking_id}@example.org',
+            first_name=f'First{booking_id}',
+            last_name=f'Last{booking_id}',
+            password="TestPassword123",
+            )
+
+            user_teacher.is_teacher = True
+
+            new_teacher = Teacher.objects.create(
+                user = user_teacher,
+                school_name = "Test School"
+            )
+            booking = Booking.objects.create(
+                num_of_lessons = booking_count,
+                student = self.student,
+                teacher = new_teacher,
+                description = f'Gutitar lesson on basics{booking_id}',
+                days_between_lessons = 7,
+                lesson_duration = 60,
+            )
+            booking.create_lessons()
+            booking.create_invoice()
+            booking.save()
        
        
        
@@ -43,5 +59,12 @@ class BookingListTest(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "bookings_list.html")
-        
+        for booking_id in range(10):
+            booking = Booking.objects.get(pk=booking_id+1)   
+            self.assertContains(response, booking.num_of_lessons)
+            self.assertContains(response, booking.description)
+            self.assertContains(response, booking.invoice.urn)
+            self.assertContains(response, booking.student.user.first_name)
+            self.assertContains(response, booking.teacher.user.first_name)
+
             

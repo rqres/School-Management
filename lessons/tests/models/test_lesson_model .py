@@ -24,7 +24,7 @@ class LessonTest(TestCase):
             endTime = datetime.datetime(2022,11,10,11,0,0)
         )
         self.lesson.save()
-        self.lesson = Lesson(
+        self.lesson_other = Lesson(
             name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar15',
             description = 'Gutitar lesson on basics continued',
             startTime = datetime.datetime(2022,11,11,10,0,0),     
@@ -42,20 +42,8 @@ class LessonTest(TestCase):
         self.lesson.name = ''
         self._assert_lesson_is_invalid()
 
-    def test_teacher_field_must_not_be_blank(self):
-        self.lesson.teacher = None
-        self._assert_lesson_is_invalid()
-
-    def test_student_field_must_not_be_blank(self):
-        self.lesson.student = None
-        self._assert_lesson_is_invalid()
-
     def test_description_field_must_not_be_blank(self):
         self.lesson.description = ''
-        self._assert_lesson_is_invalid()
-
-    def test_invoice_field_must_not_be_blank(self):
-        self.lesson.invoice = None
         self._assert_lesson_is_invalid()
     
     def test_startTime_field_must_not_be_blank(self):
@@ -82,30 +70,6 @@ class LessonTest(TestCase):
         self.lesson.name = self.lesson_other.name
         self._assert_lesson_is_invalid()
 
-    def test_student_user_is_valid(self):
-        try:
-            self.student.full_clean()
-        except(ValidationError):
-            self.fail("Student should be valid")
-
-    def test_teacher_user_is_valid(self):
-        try:
-            self.teacher.full_clean()
-        except(ValidationError):
-            self.fail("Student should be valid")
-
-    def test_invoice_is_valid(self):
-        try:
-            self.lesson.invoice.full_clean()
-        except(ValidationError):
-            self.fail("Student should be valid")
-
-    def test_invoice_price_corsponds_to_duration(self):
-        cost = Money((self.lesson.endTime - self.lesson.startTime).total_seconds()/10, 'GBP')
-        self.assertEqual(cost, self.lesson.invoice.price)
-
-    def test_invoice_student_num_corresponds_to_student_pk(self):
-        self.assertEqual(self.lesson.invoice.student_num,self.lesson.student.pk+1000)
 
     def test_valid_length_of_lesson(self):
         duration = self.lesson.endTime - self.lesson.startTime

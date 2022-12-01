@@ -142,12 +142,12 @@ class Booking(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
-
+    
     def create_lessons(self):
-        """ Creates a set of lessons for the comfirmed booking"""
+        """ Creates a set of lessons for the confirmed booking"""
         for lesson_id in range(self.num_of_lessons):
             lesson = Lesson.objects.create(
-                name = f'{self.student.user.first_name}{self.teacher.user.last_name}{lesson_id}',
+                name = f'{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}',
                 # These times could potentially cause conflict with student's schedule
                 # TODO: Validate these times
                 startTime = datetime.datetime(2022,11,10,10,0,0),
@@ -158,8 +158,10 @@ class Booking(models.Model):
 
     def update_lessons(self):
         """ Lessons should be updated depending on the changes made to Booking """
-        lessons = self.lesson_set()
+        lessons = self.lesson_set.all()
         # for each on lessons and update each of them
+        for lesson in lessons:
+            pass
 
     def create_invoice(self):
         """ Invoice should be created for Lesson that has been created """
@@ -167,7 +169,7 @@ class Booking(models.Model):
         self.invoice = Invoice.objects.create(
             student = self.student,
             student_num = self.student.user.pk + 1000,
-            invoice_num = self.student.invoice_set.count() + 1,
+            invoice_num = self.student.invoice_set.all().count() + 1,
             price = Money(costOfBooking,'GBP')
         )   
         self.invoice.save()
@@ -176,9 +178,6 @@ class Booking(models.Model):
             """ Invoice should be updated depending on the changes made to Lesson """
             costOfBooking = self.lesson_duration/10
             self.invoice.price = Money(costOfBooking,'GBP')
-
-    def save(self, *args, **kwargs): 
-        super(Booking, self).save(*args, **kwargs)
 
 class Lesson(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
@@ -210,7 +209,7 @@ class Lesson(models.Model):
             f"Booking from {self.startTime.strftime('%H:%M')}"
             f"until {self.endTime.strftime('%H:%M')}."
             " This booking was created at"
-            f"{self.bookingCreatedAt.strftime('%H:%M')}"
+            f"{self.lessonCreatedAt.strftime('%H:%M')}"
         )
 
 class RequestForLessons(models.Model):
