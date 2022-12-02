@@ -9,7 +9,7 @@ class PaymentFormTest(TestCase):
 
     fixtures = [
         "lessons/tests/fixtures/default_student.json",
-        "lessons/tests/fixtures/default_user.json",
+        "lessons/tests/fixtures/default_teacher.json",
     ]
 
     def setUp(self):
@@ -17,30 +17,20 @@ class PaymentFormTest(TestCase):
         self.url = reverse("payment_form")
         self.user = User.objects.get(email="john.doe@example.org")
         self.student = Student.objects.get(user=self.user)
-
-        # TODO: Create teacher and booking fixtures
-        self.user_teacher = User.objects.create_user(
-            "jane.dave@example.org",
-            first_name="Jane",
-            last_name="Dave",
-            password="TestPassword123",
-        )
-
-        self.user_teacher.is_teacher = True
-
-        self.teacher = Teacher.objects.create(
-            user=self.user_teacher, school_name="Test School"
-        )
+        
+        self.user_teacher = User.objects.get(email="jane.doe@example.org")
+        self.teacher = Teacher.objects.get(user=self.user_teacher)
 
         self.booking = Booking(
-            name=f"{self.student.user.first_name}{self.teacher.user.last_name}Guitar1",
-            student=self.student,
-            teacher=self.teacher,
-            description="Gutitar lesson on basics",
-            startTime=timezone.now(),
-            endTime=timezone.now() + datetime.timedelta(hours=1),
+            num_of_lessons = 10,
+            student = self.student,
+            teacher = self.teacher,
+            description = 'Gutitar lesson on basics',
+            days_between_lessons = 7,
+            lesson_duration = 60,
         )
         self.booking.save()
+        self.booking.create_invoice()
 
         self.data = {
             "invoice_urn": self.booking.invoice.urn,

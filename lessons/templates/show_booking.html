@@ -11,7 +11,17 @@
         <div><h1>Fox</h1></div>
         <div><p>Welcome to Fox's musical tutoring website</p></div>
         <div>
-            <h2>Bookings:</h2>
+            <h2>Lessons in Booking:</h2>
+            <!-- Possibly be able to view this in a calender? -->
+            <table class="table">
+                {% for lesson in lessons %}
+                <tr>
+                    <td> {{ lesson.startTime }}</td>
+                    <td> {{ lesson.endTime }}</td>
+                    <td>{{ lesson.duration }}</td>
+                </tr>
+                {% endfor %}
+            </table>
         </div>
     </body>
 </html>
