@@ -16,6 +16,9 @@ from .models import Booking, Invoice, RequestForLessons, SchoolTerm
 
 #  Create your views here.
 def home(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+
     return render(request, "home.html")
 
 
@@ -160,20 +163,20 @@ def create_request(request):
 
 @login_required
 def edit_request(request, id):
-
     req = get_object_or_404(RequestForLessons, id=id)
 
     if request.method == "POST":
-        form = RequestForLessonsForm(request.POST, student=request.user.student)
+        form = RequestForLessonsForm(
+            request.POST, instance=req, student=request.user.student
+        )
         if form.is_valid():
-            form.save()
+            req = form.save(edit=True)
+            req.save()
             return redirect("requests_list")
 
     else:
         form = RequestForLessonsForm(instance=req)
-    return render(
-        request, "edit_request.html", {"request_id": id, "form": form}
-    )
+    return render(request, "edit_request.html", {"request_id": id, "form": form})
 
 
 def payment(request):
