@@ -1,7 +1,10 @@
 from django.test import TestCase
 from django.urls import reverse
-from lessons.models import Booking, Invoice, User, Student, Teacher
+from lessons.models import Booking, User, Student, Teacher
 import datetime
+from django.utils import timezone
+
+
 class BookingListTest(TestCase):
 
     fixtures = [
@@ -16,6 +19,7 @@ class BookingListTest(TestCase):
         self.user = User.objects.get(email="john.doe@example.org")
         self.student = Student.objects.get(user=self.user)
 
+
         self.user_teacher = User.objects.get(email="jane.doe@example.org")
         self.teacher = Teacher.objects.get(user=self.user_teacher)
 
@@ -27,17 +31,16 @@ class BookingListTest(TestCase):
         
         for booking_id in range(booking_count):
             user_teacher = User.objects.create_user(
-            f'teacher{booking_id}@example.org',
-            first_name=f'First{booking_id}',
-            last_name=f'Last{booking_id}',
-            password="TestPassword123",
+                f"teacher{booking_id}@example.org",
+                first_name=f"First{booking_id}",
+                last_name=f"Last{booking_id}",
+                password="TestPassword123",
             )
 
             user_teacher.is_teacher = True
 
             new_teacher = Teacher.objects.create(
-                user = user_teacher,
-                school_name = "Test School"
+                user=user_teacher, school_name="Test School"
             )
             booking = Booking.objects.create(
                 num_of_lessons = booking_count,
@@ -50,9 +53,7 @@ class BookingListTest(TestCase):
             booking.create_lessons()
             booking.create_invoice()
             booking.save()
-       
-       
-       
+
     def test_get_booking_list(self):
         self.client.login(email=self.student.user.email, password="Watermelon123")
         self.create_test_bookings(10)
@@ -67,4 +68,4 @@ class BookingListTest(TestCase):
             self.assertContains(response, booking.student.user.first_name)
             self.assertContains(response, booking.teacher.user.first_name)
 
-            
+

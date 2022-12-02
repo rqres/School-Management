@@ -104,12 +104,12 @@ class Admin(models.Model):
     directorStatus = models.BooleanField(default=False)
 
 
-class Invoice(models.Model):  
+class Invoice(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
-    price = MoneyField(decimal_places=2, max_digits=5,default_currency='GBP')
+    price = MoneyField(decimal_places=2, max_digits=5, default_currency="GBP")
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
@@ -118,7 +118,11 @@ class Invoice(models.Model):
         super(Invoice, self).save(*args, **kwargs)
 
     class Meta:
-        unique_together = ('student_num', 'invoice_num',)
+        unique_together = (
+            "student_num",
+            "invoice_num",
+        )
+
 
 class Booking(models.Model):
     num_of_lessons = models.IntegerField(blank=False)
@@ -194,10 +198,10 @@ class Lesson(models.Model):
     def clean(self):
         if self.startTime is not None and self.endTime is not None:
             duration = self.endTime - self.startTime
-            minutes = duration.total_seconds() / 60
+            minutes = round(duration.total_seconds() / 60)
             if not (minutes == 30 or minutes == 45 or minutes == 60):
                 raise ValidationError(
-                    "Length of lesson sholud be 30 or 45 or 60 minutes"
+                    "Length of lesson should be 30 or 45 or 60 minutes"
                 )
 
     class Meta:
@@ -214,19 +218,14 @@ class Lesson(models.Model):
 
 class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    # todo: availability field
-    # WEEKDAYS = [
-    #     ("MON", "Monday"),
-    #     ("TUE", "Tuesday"),
-    #     ("WED", "Wednesday"),
-    #     ("THU", "Thursday"),
-    #     ("FRI", "Friday"),
-    #     ("SAT", "Saturday"),
-    #     ("SUN", "Sunday"), ]
-    # availability = models.MultipleChoiceField()
-    # availability = models.CharField(max_length=500, blank=True)
+    # i am storing the availabilty as a comma separated string of days
+    # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
+    # max length is 28 because at most someone could be avlb every day
+    # len("mon,tue,wed,thu,fri,sat,sun") = 27
+    availability = models.CharField(max_length=27, blank=False)
 
     fulfilled = models.BooleanField(default=False)
+    request_created_at = models.DateTimeField(auto_now_add=True, blank=False)
 
     no_of_lessons = models.IntegerField(
         default=10,  # default is 10 lessons (per year?)
@@ -253,5 +252,41 @@ class RequestForLessons(models.Model):
     )
     other_info = models.CharField(max_length=500, blank=True)
 
+    class Meta:
+        # Model options
+        ordering = ["-request_created_at"]
+
     def __str__(self):
         return f"{self.student}: {self.no_of_lessons} lessons"
+
+    def clean(self):
+        valid_days = ["", "MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        availability_list = self.availability.split(",")
+        for day in availability_list:
+            if day not in valid_days:
+                raise ValidationError(
+                    "Availability list must only contain days of the week (the first 3 letters in capitals)"
+                )
+
+
+class SchoolTerm(models.Model):
+    start_date = models.DateField(blank=False)
+    end_date = models.DateField(blank=False)
+
+    class Meta:
+        ordering = ["-start_date"]
+
+    def clean(self):
+        if self.start_date is not None and self.end_date is not None:
+            if self.start_date > self.end_date:
+                raise ValidationError("Start date cannot be greater than end date")
+
+            all_terms = SchoolTerm.objects.all()
+            for term in all_terms:
+                if (
+                    self.start_date >= term.start_date
+                    and self.start_date <= term.end_date
+                ) or (
+                    self.end_date <= term.end_date and self.end_date >= term.start_date
+                ):
+                    raise ValidationError("School terms cannot overlap!")
