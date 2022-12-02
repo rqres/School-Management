@@ -33,7 +33,7 @@ urlpatterns = [
     path(
         "forgot_password/", views.forgot_password, name="forgot_password"
     ),  # path to reset password
-    
+
     path(
         "account/bookings/", views.bookings_list, name="bookings_list"
     ),  # path to list of bookings
@@ -41,14 +41,11 @@ urlpatterns = [
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show a booking
-    
+
     path("log_out/", views.log_out, name="log_out"),  # path to log-out page
 
     path("account/", views.account, name="account"), # path to account overview (currently a simple redirect)
-    
-    path("adminaccount/", views.account_admin, name="account_admin"), 
-    # this should probably be renamed or we should decide on a convention for different account dashboards.
-    
+
     path(
         "account/requests/", views.requests_list, name="requests_list"
     ),  # path to view my requests for lessons
@@ -62,15 +59,15 @@ urlpatterns = [
     ),# path to payment page
     path(
         "account/requests/create", views.create_request, name="create_request"
-    ),  # path to create new request'
-    path("admininteractions", views.admininteractions, name="admininteractions"), #admins go on here to login
-    path("admininteractions/log_in_admin", views.log_in_admin, name="log_in_admin"), #path to admin login page
+    ),  # path to create new request
     path(
         "account/requests/<int:lessons_request_id>/",
         views.show_request,
         name="show_request",
     ),
-    path("adminaccount/sign_up_admin", views.sign_up_admin, name="sign_up_admin"),
-    path("adminaccount/", views.adminaccount, name="adminaccount"), # path to adminaccount overview (currently a simple redirect)
+    path("admininteractions/", views.admininteractions, name="admininteractions"), #admins go on here to login
+    path("log_in_admin/", views.log_in_admin, name="log_in_admin"), #path to admin login page
+    path("sign_up_admin/", views.sign_up_admin, name="sign_up_admin"),
+    path("adminaccount/", views.adminaccount, name="adminaccount"),
 
 ]
