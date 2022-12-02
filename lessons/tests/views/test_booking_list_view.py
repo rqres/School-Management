@@ -6,22 +6,26 @@ class BookingListTest(TestCase):
 
     fixtures = [
         "lessons/tests/fixtures/default_student.json",
-        "lessons/tests/fixtures/default_user.json",
+        "lessons/tests/fixtures/default_teacher.json",
     ]
 
     def setUp(self):
         super(TestCase, self).setUp()
         self.url = reverse("bookings_list")
+
         self.user = User.objects.get(email="john.doe@example.org")
         self.student = Student.objects.get(user=self.user)
+
+        self.user_teacher = User.objects.get(email="jane.doe@example.org")
+        self.teacher = Teacher.objects.get(user=self.user_teacher)
 
 
     def test_booking_list_url(self):
         self.assertEqual(self.url, "/account/bookings/")
 
     def create_test_bookings(self,booking_count):
+        
         for booking_id in range(booking_count):
-            
             user_teacher = User.objects.create_user(
             f'teacher{booking_id}@example.org',
             first_name=f'First{booking_id}',
@@ -36,17 +40,19 @@ class BookingListTest(TestCase):
                 school_name = "Test School"
             )
             booking = Booking.objects.create(
-                name = f'{self.student.user.first_name}{new_teacher.user.last_name}Guitar{booking_id}',
+                num_of_lessons = booking_count,
                 student = self.student,
                 teacher = new_teacher,
-                description = 'Gutitar lesson on basics',
-                startTime = datetime.datetime(2022,11,10,10,0,0),
-                endTime = datetime.datetime(2022,11,10,11,0,0),
+                description = f'Gutitar lesson on basics{booking_id}',
+                days_between_lessons = 7,
+                lesson_duration = 60,
             )
+            booking.create_lessons()
+            booking.create_invoice()
             booking.save()
-            
-            
-      
+       
+       
+       
     def test_get_booking_list(self):
         self.client.login(email=self.student.user.email, password="Watermelon123")
         self.create_test_bookings(10)
@@ -54,10 +60,11 @@ class BookingListTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "bookings_list.html")
         for booking_id in range(10):
-            booking = Booking.objects.get(name = f'JohnLast{booking_id}Guitar{booking_id}')
-            self.assertContains(response, f'JohnLast{booking_id}Guitar{booking_id}')
-            self.assertContains(response, f'{booking.invoice.urn}')
-            self.assertContains(response, 'Gutitar lesson on basics')
-            booking_url = reverse('show_booking', kwargs={'booking_id': booking.pk})
-            self.assertContains(response, booking_url)
+            booking = Booking.objects.get(pk=booking_id+1)   
+            self.assertContains(response, booking.num_of_lessons)
+            self.assertContains(response, booking.description)
+            self.assertContains(response, booking.invoice.urn)
+            self.assertContains(response, booking.student.user.first_name)
+            self.assertContains(response, booking.teacher.user.first_name)
+
             
