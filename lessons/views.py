@@ -30,10 +30,6 @@ def sign_up_student(request):
 
     return render(request, "sign_up_student.html", {"form": form})
 
-#admins redirected to admin login page
-def admininteractions(request):
-    return render(request, "log_in_admin.html")
-
 def log_in(request):
     if request.method == "POST":
         form = LogInForm(request.POST)
@@ -49,7 +45,10 @@ def log_in(request):
         form = LogInForm()
     return render(request, "log_in.html", {"form": form})
 
-@login_required
+#admins redirected to admin login page
+def admininteractions(request):
+    return render(request, "log_in_admin.html")
+
 def log_in_admin(request):
     if request.method == "POST":
         adminloginform = AdminLoginForm(request.POST)
@@ -70,14 +69,14 @@ def sign_up_admin(request):
         form = SignUpAdminForm(request.POST)#creates a bound version of the form with post data
         if form.is_valid():
             user = form.save()
-            return redirect('adminaccount')
+            return redirect("adminaccount")
     else:
         form = SignUpAdminForm()#create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, 'sign_up_admin.html', {'form' : form})
     #successful form means you save user record in database and redirect them to the database
 
 def adminaccount(request):
-    return render(request, "adminaccount.html")
+    return render(request, 'adminaccount.html', {"admin": request.user.admin})
 
 def log_out(request):
     logout(request)
