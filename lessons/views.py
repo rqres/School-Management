@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
@@ -126,9 +126,9 @@ def requests_list(request):
 
 
 @login_required
-def show_request(request, lessons_request_id):
+def show_request(request, id):
     try:
-        req = RequestForLessons.objects.get(id=lessons_request_id)
+        req = RequestForLessons.objects.get(id=id)
     except ObjectDoesNotExist:
         return redirect("requests_list")
     else:
@@ -136,13 +136,13 @@ def show_request(request, lessons_request_id):
 
 
 @login_required
-def delete_request(request, lessons_request_id):
-    req = RequestForLessons.objects.get(id=lessons_request_id)
+def delete_request(request, id):
+    req = get_object_or_404(RequestForLessons, id=id)
     if req:
         req.delete()
-        print(f"Request {lessons_request_id} deleted")
-        return redirect("requests_list")
-    print("cant find request")
+        print("success!")
+
+    return redirect("requests_list")
 
 
 @login_required
@@ -156,6 +156,24 @@ def create_request(request):
     else:
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
+
+
+@login_required
+def edit_request(request, id):
+
+    req = get_object_or_404(RequestForLessons, id=id)
+
+    if request.method == "POST":
+        form = RequestForLessonsForm(request.POST, student=request.user.student)
+        if form.is_valid():
+            form.save()
+            return redirect("requests_list")
+
+    else:
+        form = RequestForLessonsForm(instance=req)
+    return render(
+        request, "edit_request.html", {"request_id": id, "form": form}
+    )
 
 
 def payment(request):

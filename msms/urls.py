@@ -56,12 +56,17 @@ urlpatterns = [
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
     path(
-        "account/requests/<int:lessons_request_id>/",
+        "account/requests/<int:id>/",
         views.show_request,
         name="show_request",
     ),
     path(
-        "account/requests/<int:lessons_request_id>/delete",
+        "account/requests/<int:id>/edit/",
+        views.edit_request,
+        name="edit_request"
+    ),
+    path(
+        "account/requests/<int:id>/delete/",
         views.delete_request,
         name="delete_request",
     ),
