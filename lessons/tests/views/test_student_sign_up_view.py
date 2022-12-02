@@ -62,7 +62,7 @@ class StudentSignUpViewTestCase(TestCase, LogInTester):
         self.assertRedirects(
             response, response_url, status_code=302, target_status_code=200
         )
-        self.assertTemplateUsed(response, "account.html")
+        self.assertTemplateUsed(response, "account_student.html")
         user = User.objects.get(email="john.doe@example.org")
         student = Student.objects.get(user=user)
         self.assertEqual(student.user.first_name, "John")

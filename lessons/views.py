@@ -88,7 +88,7 @@ def sign_up_admin(request):
 def account(request):
     if request.user.is_school_admin:
         return render(
-            request, "account_admin.html", {"school_admin": request.user.school_admin}
+            request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
     elif request.user.is_student:
         return render(

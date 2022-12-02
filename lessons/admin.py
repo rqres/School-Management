@@ -38,8 +38,10 @@ class UserAdmin(BaseUserAdmin):
             "Permissions",
             {
                 "fields": (
-                    "is_admin",
+                    "is_school_admin",
                     "is_student",
+                    "is_admin",
+                    "is_teacher",
                 )
             },
         ),
