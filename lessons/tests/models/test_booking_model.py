@@ -17,33 +17,38 @@ class BookingTest(TestCase):
         self.user_teacher = User.objects.get(email="jane.doe@example.org")
         self.teacher = Teacher.objects.get(user=self.user_teacher)
 
+        self.invoice = Invoice(
+            student = self.student,
+            student_num = self.student.user.pk + 1000,
+            invoice_num = Invoice.objects.filter(student_num=self.student.user.pk).count() + 1,
+            price = Money(10,'GBP')
+        )  
+        self.invoice.save()
+
         self.booking = Booking(
-            name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar1',
+            num_of_lessons = 10,
             student = self.student,
             teacher = self.teacher,
             description = 'Gutitar lesson on basics',
-            startTime = datetime.datetime(2022,11,10,10,0,0),     
-            endTime = datetime.datetime(2022,11,10,11,0,0)
+            days_between_lessons = 7,
+            lesson_duration = 60,
         )
         self.booking.save()
         self.booking_other = Booking(
-            name = f'{self.student.user.first_name}{self.teacher.user.last_name}Guitar15',
+            num_of_lessons = 10,
             student = self.student,
             teacher = self.teacher,
-            description = 'Gutitar lesson on basics continued',
-            startTime = datetime.datetime(2022,11,11,10,0,0),     
-            endTime = datetime.datetime(2022,11,11,11,0,0)
+            description = 'Gutitar lesson on basics',
+            days_between_lessons = 7,
+            lesson_duration = 60,
         )
         self.booking_other.save()
 
     def test_valid_booking(self):
-        try:
-            self.booking.full_clean()
-        except ValidationError:
-            self.fail("Test booking should be valid")
+        self._assert_booking_is_valid()
 
-    def test_name_field_must_not_be_blank(self):
-        self.booking.name = ''
+    def test_num_of_lessons_field_must_not_be_blank(self):
+        self.booking.num_of_lessons = None
         self._assert_booking_is_invalid()
 
     def test_teacher_field_must_not_be_blank(self):
@@ -57,35 +62,26 @@ class BookingTest(TestCase):
     def test_description_field_must_not_be_blank(self):
         self.booking.description = ''
         self._assert_booking_is_invalid()
-
-    def test_invoice_field_must_not_be_blank(self):
-        self.booking.invoice = None
-        self._assert_booking_is_invalid()
     
-    def test_startTime_field_must_not_be_blank(self):
-        self.booking.startTime = None
+    def test_days_between_lessons_field_must_not_be_blank(self):
+        self.booking.days_between_lessons = None
         self._assert_booking_is_invalid()
 
-    def test_endTime_field_must_not_be_blank(self):
-        self.booking.endTime = None
+    def test_lesson_duration_field_must_not_be_blank(self):
+        self.booking.lesson_duration = None
         self._assert_booking_is_invalid()
 
+    def test_invoice_field_may_be_blank(self):
+        self.booking.invoice = None
+        self._assert_booking_is_valid()
 
-    def test_name_can_be_50_characters_long(self):
-        self.booking.name = 'x' * 50
+    def test_invoice_field_accepts_valid_invoice(self):
+        self.booking.invoice = self.invoice
         try:
-            self.booking.full_clean()
-        except ValidationError:
-            self.fail("Test booking should be valids")
-
-    def test_name_cannot_be_over_50_characters_long(self):
-        self.booking.name = 'x' * 51
-        self._assert_booking_is_invalid()
-
-    def test_name_field_is_unique(self):
-        self.booking.name = self.booking_other.name
-        self._assert_booking_is_invalid()
-
+            self.invoice.full_clean()
+        except(ValidationError):
+            self.fail("Student should be valid")
+    
     def test_student_user_is_valid(self):
         try:
             self.student.full_clean()
@@ -98,41 +94,44 @@ class BookingTest(TestCase):
         except(ValidationError):
             self.fail("Student should be valid")
 
-    def test_invoice_is_valid(self):
+    def test_valid_lesson_duration(self):
+        self.assertTrue(self.booking.lesson_duration == 30 or 
+                        self.booking.lesson_duration == 45 or 
+                        self.booking.lesson_duration == 60 )
+    
+    def test_create_invoice_for_booking(self):
+        self.booking.create_invoice()
         try:
-            self.booking.invoice.full_clean()
+            self.invoice.full_clean()
         except(ValidationError):
             self.fail("Student should be valid")
-
-    def test_invoice_price_corsponds_to_duration(self):
-        cost = Money((self.booking.endTime - self.booking.startTime).total_seconds()/10, 'GBP')
-        self.assertEqual(cost, self.booking.invoice.price)
-
-    def test_invoice_student_num_corresponds_to_student_pk(self):
-        self.assertEqual(self.booking.invoice.student_num,self.booking.student.pk+1000)
-
-    def test_valid_length_of_booking(self):
-        duration = self.booking.endTime - self.booking.startTime
-        minutes = duration.total_seconds()/60
-        self.assertTrue(minutes == 30 or 
-                        minutes == 45 or 
-                        minutes == 60 )
-
-    def test_invalid_length_of_booking(self):
-        self.booking.startTime = datetime.datetime(2022,11,10,11,0,0)
-        self.booking.endTime = datetime.datetime(2022,11,10,10,0,0)
-        self._assert_booking_is_invalid()
+        self.assertEqual(self.booking.invoice.student_num, self.student.pk + 1000)
+        self.assertEqual(self.booking.invoice.student, self.student)
+        costOfBooking = Money(self.booking.lesson_duration/10,'GBP')
+        self.assertEqual(self.booking.invoice.price, costOfBooking)
     
-    def test_invalid_long_length_of_booking(self):
-        self.booking.startTime = datetime.datetime(2022,11,10,10,0,0)
-        self.booking.endTime = datetime.datetime(2022,11,10,12,0,0)
-        self._assert_booking_is_invalid()
+    
+    def test_update_invoice_when_change_in_lesson_duration(self):
+        self.booking.invoice = self.invoice
+        self.booking.lesson_duration = 30
+        self.booking.update_invoice()
+        costOfBooking = Money(self.booking.lesson_duration/10,'GBP')
+        self.assertEqual(self.booking.invoice.price, costOfBooking)
 
-    def test_invalid_short_length_of_booking(self):
-        self.booking.startTime = datetime.datetime(2022,11,10,10,0,0)
-        self.booking.endTime = datetime.datetime(2022,11,10,10,20,0)
-        self._assert_booking_is_invalid()
+    def test_invoice_unique_to_booking(self):
+        pass
+
+    def test_create_lessons_for_booking(self):
+        self.booking.create_lessons()
+        lessons = self.booking.lesson_set.all()
+        self.assertEqual(lessons.count(),self.booking.num_of_lessons)
 
     def _assert_booking_is_invalid(self):
         with self.assertRaises(ValidationError):
             self.booking.full_clean()
+
+    def _assert_booking_is_valid(self):
+        try:
+            self.booking.full_clean()
+        except ValidationError:
+            self.fail("Test booking should be valid")

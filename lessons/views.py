@@ -105,10 +105,11 @@ def account_admin(request):
 def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
+        lessons = booking.lesson_set.all()
     except ObjectDoesNotExist:
         return redirect("bookings_list")
     else:
-        return render(request, "show_booking.html", {"booking": booking})
+        return render(request, "show_booking.html", {"lessons": lessons})
 
 
 @login_required
