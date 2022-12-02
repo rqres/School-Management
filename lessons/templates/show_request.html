@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>Fox</title>
+        <style>
+            div {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div><h1>Fox</h1></div>
+        <div><p>Welcome to Fox's musical tutoring website</p></div>
+        <div>
+            <h2>Your request for lessons:</h2>
+
+            <div style="border:1px solid black;">
+              <p>Created at: {{lessons_request.request_created_at}}</p>
+              <p>Fulfilled: {{lessons_request.fulfilled}}</p>
+              <p>Availability: {{lessons_request.availability}}</p>
+              <p>Number of lessons: {{lessons_request.no_of_lessons}}</p>
+              <p>Days between lessons: {{lessons_request.days_between_lessons}}</p>
+              <p>Lesson duration: {{lessons_request.lesson_duration}} minutes</p>
+              {% if lessons_request.other_info %}
+                <p>Other info: {{lessons_request.other_info}}</p>
+              {% endif %}
+            </div>
+        </div>
+    </body>
+</html>

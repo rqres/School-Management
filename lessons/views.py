@@ -127,8 +127,12 @@ def requests_list(request):
 
 @login_required
 def show_request(request, lessons_request_id):
-    print("NOT YET IMPLEMENTED")
-    pass
+    try:
+        req = RequestForLessons.objects.get(id=lessons_request_id)
+    except ObjectDoesNotExist:
+        return redirect("requests_list")
+    else:
+        return render(request, "show_request.html", {"lessons_request": req})
 
 
 @login_required
