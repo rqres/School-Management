@@ -164,7 +164,11 @@ class RegisterChildForm(forms.Form):
         checked_email = self.cleaned_data.get("email")
         checked_pass = self.cleaned_data.get("password")
         child = authenticate(username = checked_email, password = checked_pass)
-        if child is not None:
+        if child == parent:
+            self.message = "You cannot add yourself as your own child."
+        elif parent.children.filter(email = checked_email).exists():
+            self.message = "This user is already registered as your own child."
+        elif child is not None:
             self.message = ("This user, " + child.first_name + " " + child.last_name + 
                             " has been registered as your child.")
             parent.children.add(child)

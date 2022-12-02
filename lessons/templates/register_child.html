@@ -6,6 +6,13 @@
       <div class="col-12">
         <div class="card login-card mx-auto">
           <h2 class="login-title login-card-header">Register Children</h2>
+          <div>
+            <a href='{% url 'create_request' %}' class="btn btn-lg btn-warning mb-4"> You are a parent of:
+            {% for child in children %}
+              <p> {{ child.first_name }} {{child.last_name}} </p>
+            {% endfor %}
+            </a>
+          </div>
           <p> <form action= '{% url 'register_child' %}' method="post">
             {% csrf_token %}
             {% include 'partials/bootstrap_form.html' with form=form %}

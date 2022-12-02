@@ -164,10 +164,13 @@ def register_child(request):
             form = RegisterChildForm(request.POST)
             if form.is_valid():
                 form.authenticate(request.user)
-                return render(request, "register_child.html", {"form": form})
+                print(request.user.children)
+                return render(request, "register_child.html", 
+                              {"form": form, "parent": request.user, "children": request.user.children.all()})
         else:
             form = RegisterChildForm()
-            return render(request, "register_child.html", {"form": form})
+            return render(request, "register_child.html", 
+                          {"form": form, "parent": request.user, "children": request.user.children.all()})
     else:
         return redirect('account')
     
