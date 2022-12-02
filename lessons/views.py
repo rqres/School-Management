@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, RegisterChildForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, RegisterChildForm
 from .models import Booking , Invoice ,RequestForLessons
 from django.http import HttpResponseForbidden
 
@@ -164,13 +164,20 @@ def register_child(request):
             form = RegisterChildForm(request.POST)
             if form.is_valid():
                 form.authenticate(request.user)
-                print(request.user.children)
                 return render(request, "register_child.html", 
                               {"form": form, "parent": request.user, "children": request.user.children.all()})
+            else:
+                return redirect('account')
         else:
             form = RegisterChildForm()
             return render(request, "register_child.html", 
                           {"form": form, "parent": request.user, "children": request.user.children.all()})
     else:
         return redirect('account')
+
+def select_child(request):
+    if request.user.is_parent:
+        form = SelectChildForm(request.user.children.all())
+        return render(request, "select_child.html", {"form": form})
+    return redirect('account')
     

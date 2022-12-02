@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
@@ -175,3 +176,24 @@ class RegisterChildForm(forms.Form):
             child.parents.add(parent)
         else:
             self.message = "Incorrect e-mail or password specified."
+
+class SelectChildForm(forms.Form):
+    child_list = []
+    child_select_field = forms.CharField(label='Select which child you want to view options for.', widget=forms.Select(choices = child_list))
+    
+    def __init__(self, children):
+        super().__init__()
+        for child in children:
+            self.child_list.append((child.email, child.first_name + " " + child.last_name))
+        print(self.child_list)
+        
+        
+    #def set_children(self, children):
+    #    for child in children:
+    #        self.child_list.append((child.email, child.first_name + " " + child.last_name))
+    #    print(self.child_list)
+        
+    
+    
+        
+    
