@@ -17,17 +17,17 @@ class PaymentFormTest(TestCase):
         self.url = reverse("payment_form")
         self.user = User.objects.get(email="john.doe@example.org")
         self.student = Student.objects.get(user=self.user)
-        
+
         self.user_teacher = User.objects.get(email="jane.doe@example.org")
         self.teacher = Teacher.objects.get(user=self.user_teacher)
 
         self.booking = Booking(
-            num_of_lessons = 10,
-            student = self.student,
-            teacher = self.teacher,
-            description = 'Gutitar lesson on basics',
-            days_between_lessons = 7,
-            lesson_duration = 60,
+            num_of_lessons=10,
+            student=self.student,
+            teacher=self.teacher,
+            description="Gutitar lesson on basics",
+            days_between_lessons=7,
+            lesson_duration=60,
         )
         self.booking.save()
         self.booking.create_invoice()
@@ -72,7 +72,7 @@ class PaymentFormTest(TestCase):
             target_status_code=200,
             fetch_redirect_response=True,
         )
-        self.assertTemplateUsed(response, "account.html")
+        self.assertTemplateUsed(response, "account_student.html")
 
     def test_unsuccessful_new_payment(self):
         self.client.login(email=self.student.user.email, password="Watermelon123")

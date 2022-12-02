@@ -24,8 +24,8 @@ class LogInTest(TestCase, LogInTester):
         )
         self.assertTrue(self.is_logged_in())
 
-        admin_page = reverse("account_admin")
-        self.assertEqual(admin_page, "/adminaccount/")
+        admin_page = reverse("account")
+        self.assertEqual(admin_page, "/account/")
 
     #   response = self.client.get(admin_page, follow=True)
     #   self.assertRedirects(response, admin_page, status_code=302, target_status_code=200, msg_prefix='', fetch_redirect_response=True)
