@@ -5,6 +5,7 @@ from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 import datetime
+import pytz
 
 
 # Create your models here.
@@ -163,8 +164,8 @@ class Booking(models.Model):
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
                 # These times could potentially cause conflict with student's schedule
                 # TODO: Validate these times
-                startTime=datetime.datetime(2022, 11, 10, 10, 0, 0),
-                endTime=datetime.datetime(2022, 11, 10, 11, 0, 0),
+                startTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 10, 0, 0)),
+                endTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 11, 0, 0)),
                 booking=self,
             )
             lesson.save()
@@ -200,6 +201,7 @@ class Lesson(models.Model):
     duration = models.IntegerField(blank=False)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, blank=False)
     lessonCreatedAt = models.TimeField(auto_now_add=True)
+    description = models.CharField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):
         self.duration = (self.endTime - self.startTime).total_seconds()

@@ -39,7 +39,7 @@ class RequestForLessonsListViewTestCase(TestCase):
         )
         self.assertTemplateUsed(response, "log_in.html")
 
-    def test_non_students_dont_have_access_to_requests_list(self):
+    def dont_test_non_students_dont_have_access_to_requests_list(self):
         non_student = User.objects.get(email="default.user@example.org")
         self.client.login(email=non_student.email, password="Watermelon123")
         response = self.client.get(self.url, follow=True)

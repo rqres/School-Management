@@ -89,16 +89,27 @@ def sign_up_admin(request):
 
 @login_required
 def account(request):
+    # redirect school admins to their dashboard template
     if request.user.is_school_admin:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
+    # redirect students to student template
     elif request.user.is_student:
         return render(
             request, "account_student.html", {"student": request.user.student}
         )
+    # redirect sys admins to Django admin page
+    elif request.user.is_admin:
+        return redirect("admin:index")
     # elif request.user.is_parent:
     #   etc...
+    else:
+        # UNRECOGNIZED USER TYPE
+        # this shouldn't happen, log user out and send him to welcome page
+        print("Who are you ?? " + str(request.user))
+        logout(request)
+        return redirect("home")
 
 
 @login_required
