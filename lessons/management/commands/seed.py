@@ -1,8 +1,10 @@
+from datetime import date
 import random
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from faker import Faker
-from lessons.models import RequestForLessons, SchoolAdmin, Student, User
+from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Student, User
 
 
 class Command(BaseCommand):
@@ -17,6 +19,8 @@ class Command(BaseCommand):
         self._seed_students()
         print("Seeding requests for lessons...")
         self._seed_requests()
+        print("Seeding school terms...")
+        self._seed_school_terms()
 
     def _base_seeder(self):
         # create the 3 accounts mentioned in the handbook
@@ -101,9 +105,7 @@ class Command(BaseCommand):
                     other_info=other_info,
                 )
                 # fulfilled request:
-                availability = ",".join(
-                    random.sample(WEEKDAYS, random.randrange(1, 7))
-                )
+                availability = ",".join(random.sample(WEEKDAYS, random.randrange(1, 7)))
                 no_of_lessons = random.randrange(2, 40)
                 days_between_lessons = random.randrange(2, 14)
                 lesson_duration = random.choice((15, 30, 60))
@@ -147,3 +149,32 @@ class Command(BaseCommand):
             user.save()
 
             Student.objects.create(user=user, school_name=school)
+            print(".", end="", flush=True)
+        print("")
+
+    def _seed_school_terms(self):
+        start_dates = [
+            date(2022, 9, 1),
+            date(2022, 10, 31),
+            date(2023, 1, 3),
+            date(2023, 2, 20),
+            date(2023, 4, 17),
+            date(2023, 6, 5),
+        ]
+        end_dates = [
+            date(2022, 10, 21),
+            date(2022, 12, 16),
+            date(2023, 2, 10),
+            date(2023, 3, 31),
+            date(2023, 5, 26),
+            date(2023, 7, 21),
+        ]
+
+        for (start_date, end_date) in zip(start_dates, end_dates):
+            term = SchoolTerm(start_date=start_date, end_date=end_date)
+            try:
+                term.full_clean()
+            except ValidationError:
+                print("     >School term already exists or is invalid - skipping...")
+            else:
+                term.save()

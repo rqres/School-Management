@@ -9,6 +9,7 @@ from lessons.models import (
     SchoolAdmin,
     Invoice,
     RequestForLessons,
+    SchoolTerm,
     Student,
     Teacher,
     User,
@@ -82,6 +83,7 @@ admin.site.register(Booking)
 admin.site.register(Invoice)
 admin.site.register(RequestForLessons)
 admin.site.register(Teacher)
+admin.site.register(SchoolTerm)
 
 # @admin.register(Student)
 # class UserAdmin(admin.ModelAdmin):
