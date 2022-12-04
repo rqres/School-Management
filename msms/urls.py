@@ -87,4 +87,9 @@ urlpatterns = [
         views.create_school_term,
         name="create_school_term",
     ),
+    path(
+        "schoolterms/<int:id>/edit/",
+        views.edit_school_term,
+        name="edit_school_term"
+    ),
 ]

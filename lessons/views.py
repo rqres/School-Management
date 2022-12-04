@@ -219,6 +219,8 @@ def school_terms_list(request):
     return render(request, "school_terms_list.html", {"school_terms": school_terms})
 
 
+@login_required
+# TODO:  @adminrequired
 def create_school_term(request):
     if request.method == "POST":
         form = SchoolTermForm(request.POST)
@@ -229,3 +231,32 @@ def create_school_term(request):
     else:
         form = SchoolTermForm()
     return render(request, "create_school_term.html", {"form": form})
+
+
+@login_required
+def edit_school_term(request, id):
+    term = get_object_or_404(SchoolTerm, id=id)
+
+    if request.method == "POST":
+        form = SchoolTermForm(request.POST, instance=term)
+
+        # form.is_valid() will call term.clean()
+        # the term needs to be hidden right before being cleaned
+        # so as not to check overlapping against itself
+        term.hidden = True
+        term.save()
+        if form.is_valid():
+            # immediately unhide the term after being cleaned
+            term.hidden = False
+            term.save()
+
+            term = form.save(edit=True)
+            term.save()
+            print(SchoolTerm.objects.filter(hidden=False))
+            return redirect("school_terms_list")
+
+    else:
+        form = SchoolTermForm(instance=term)
+    return render(
+        request, "edit_school_term.html", {"school_term_id": id, "form": form}
+    )

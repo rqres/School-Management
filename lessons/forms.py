@@ -106,16 +106,34 @@ class LogInForm(forms.Form):
 
 
 class SchoolTermForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._instance = kwargs.pop("instance", None)
+        super().__init__(*args, **kwargs)
+
+        # this if statement is executed if the user is using the form to
+        # update an existing school term
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            self.fields["start_date"].initial = self._instance.start_date
+            self.fields["end_date"].initial = self._instance.end_date
+
     class Meta:
         model = SchoolTerm
         fields = ["start_date", "end_date"]
 
-    def save(self):
+    def save(self, edit=False):
         super().save(commit=False)
-        school_term = SchoolTerm.objects.create(
-            start_date=self.cleaned_data.get("start_date"),
-            end_date=self.cleaned_data.get("end_date"),
-        )
+        if not edit:
+            school_term = SchoolTerm.objects.create(
+                start_date=self.cleaned_data.get("start_date"),
+                end_date=self.cleaned_data.get("end_date"),
+            )
+        else:
+            # if the user is editing a school term, don't create a new object
+            # but instead update its fields
+            school_term = self._instance
+            school_term.start_date = self.cleaned_data.get("start_date")
+            school_term.end_date = self.cleaned_data.get("end_date")
 
         return school_term
 

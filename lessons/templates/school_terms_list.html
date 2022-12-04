@@ -17,6 +17,7 @@
                 <li>
                   School term starting from {{school_term.start_date}}, ending on {{school_term.end_date}}
                 </li>
+                <div><a href="{% url 'edit_school_term' id=school_term.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
               </div>
               <br>
               {% endfor %}

@@ -286,20 +286,27 @@ class SchoolTerm(models.Model):
     start_date = models.DateField(blank=False)
     end_date = models.DateField(blank=False)
 
+    # vvv i only use this for validation
+    hidden = models.BooleanField(default=False)
+
     class Meta:
-        ordering = ["-start_date"]
+        ordering = ["start_date"]
 
     def clean(self):
         if self.start_date is not None and self.end_date is not None:
             if self.start_date > self.end_date:
                 raise ValidationError("Start date cannot be greater than end date")
 
-            all_terms = SchoolTerm.objects.all()
+            # this case applies only when editing a school term
+            # I only want to check overlapping against visible school terms
+            # while editing a term, it will be marked as hidden
+            # so as not to check overlapping against itself
+            all_terms = SchoolTerm.objects.filter(hidden=False)
+            print(all_terms)
+
             for term in all_terms:
                 if (
-                    self.start_date >= term.start_date
-                    and self.start_date <= term.end_date
-                ) or (
-                    self.end_date <= term.end_date and self.end_date >= term.start_date
+                    self.start_date <= term.end_date
+                    and self.end_date >= term.start_date
                 ):
                     raise ValidationError("School terms cannot overlap!")
