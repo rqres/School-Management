@@ -4,7 +4,9 @@ from lessons.models import RequestForLessons, User
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        regular_users = User.objects.filter(is_admin=False)
+        regular_users = User.objects.filter(is_admin=False).filter(
+            is_school_admin=False
+        )
         for u in regular_users:
             u.delete()
         requests = RequestForLessons.objects.all()

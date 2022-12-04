@@ -83,7 +83,7 @@ class User(AbstractBaseUser):
     def is_staff(self):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
-        return self.is_admin
+        return self.is_admin or self.is_school_admin
 
 
 class Student(models.Model):
@@ -106,6 +106,9 @@ class SchoolAdmin(models.Model):
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.email
 
 
 class Invoice(models.Model):
@@ -227,9 +230,9 @@ class Lesson(models.Model):
 class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     # i am storing the availabilty as a comma separated string of days
-    # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
+    # e.g: "TUE,SAT,SUN" = student is available on tuesday saturday and sunday
     # max length is 28 because at most someone could be avlb every day
-    # len("mon,tue,wed,thu,fri,sat,sun") = 27
+    # len("MON,TUE,WED,THU,FRI,SAT,SUN") = 27
     availability = models.CharField(max_length=27, blank=False)
 
     fulfilled = models.BooleanField(default=False)

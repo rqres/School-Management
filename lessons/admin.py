@@ -27,11 +27,12 @@ class UserAdmin(BaseUserAdmin):
         "email",
         "first_name",
         "last_name",
-        "password",
-        "is_admin",
+        # "password",
         "is_student",
+        "is_school_admin",
+        "is_admin",
     )
-    list_filter = ("is_admin",)
+    list_filter = ("is_school_admin",)
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
@@ -41,8 +42,8 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "is_school_admin",
                     "is_student",
-                    "is_admin",
                     "is_teacher",
+                    "is_admin",
                 )
             },
         ),
@@ -90,6 +91,7 @@ admin.site.register(Teacher)
 #         "last_name",
 #         "is_active",
 #     ]
+
 
 # Admins can edit bookings and create them
 class BookingAdmin(admin.ModelAdmin):
