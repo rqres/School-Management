@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from lessons.models import User, Student
+from lessons.models import User
 from lessons.tests.helpers import LogInTester
 
 
@@ -19,12 +19,13 @@ class LogInTest(TestCase, LogInTester):
 
     def test_admin_log_in_and_redirect(self):
         valid_pass = (self.sample_email, "password")
-        self.assertTrue(self.client.login(username=valid_pass[0], password=valid_pass[1]))
+        self.assertTrue(
+            self.client.login(username=valid_pass[0], password=valid_pass[1])
+        )
         self.assertTrue(self.is_logged_in())
-        
-        admin_page = reverse('account_admin')
-        self.assertEqual(admin_page, "/adminaccount/")
+
+        admin_page = reverse("account")
+        self.assertEqual(admin_page, "/account/")
+
     #   response = self.client.get(admin_page, follow=True)
     #   self.assertRedirects(response, admin_page, status_code=302, target_status_code=200, msg_prefix='', fetch_redirect_response=True)
-        
-        
