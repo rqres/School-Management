@@ -177,21 +177,20 @@ class RegisterChildForm(forms.Form):
         else:
             self.message = "Incorrect e-mail or password specified."
 
-class SelectChildForm(forms.Form):
+class SelectChildForm(forms.ModelForm):
     child_list = []
-    child_select_field = forms.CharField(label='Select which child you want to view options for.', widget=forms.Select(choices = child_list))
-    
-    def __init__(self, children):
-        super().__init__()
+    child_box = forms.ModelChoiceField(label = "Select child", queryset = User.objects.all())
+
+    class Meta:
+        model = User
+        fields = []
+        
+    def set_children(self, children):
+        self.child_list.clear()
         for child in children:
-            self.child_list.append((child.email, child.first_name + " " + child.last_name))
-        print(self.child_list)
+            self.child_list.append(child.email)
+        self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
         
-        
-    #def set_children(self, children):
-    #    for child in children:
-    #        self.child_list.append((child.email, child.first_name + " " + child.last_name))
-    #    print(self.child_list)
         
     
     

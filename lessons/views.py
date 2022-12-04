@@ -175,9 +175,14 @@ def register_child(request):
     else:
         return redirect('account')
 
+@login_required
 def select_child(request):
-    if request.user.is_parent:
-        form = SelectChildForm(request.user.children.all())
-        return render(request, "select_child.html", {"form": form})
-    return redirect('account')
-    
+    if request.method == "POST":
+        form = SelectChildForm(request.POST)
+        form.set_children(request.user.children.all())
+        if form.is_valid():
+            return redirect("requests_list")
+    else:
+        form = SelectChildForm()
+        form.set_children(request.user.children.all())
+    return render(request, "select_child.html", {"form": form})
