@@ -4,7 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, RegisterChildForm
-from .models import Booking , Invoice ,RequestForLessons
+from .models import Booking , Invoice ,RequestForLessons, User
 from django.http import HttpResponseForbidden
 
 #  Create your views here.
@@ -181,8 +181,13 @@ def select_child(request):
         form = SelectChildForm(request.POST)
         form.set_children(request.user.children.all())
         if form.is_valid():
-            return redirect("requests_list")
+            selected_child_email = form.cleaned_data['child_box']
+            user = User.objects.get(email__exact = selected_child_email)
+            child_requests = user.student.requestforlessons_set.all()
+            child_bookings = user.student.booking_set.all()
+            return render(request, "select_child.html", {"form": form, "email": selected_child_email,
+                                                         "bookings": child_bookings, "requests": child_requests})
     else:
         form = SelectChildForm()
         form.set_children(request.user.children.all())
-    return render(request, "select_child.html", {"form": form})
+    return render(request, "select_child.html", {"form": form, "email": ""})
