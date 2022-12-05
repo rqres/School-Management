@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -136,6 +136,16 @@ def show_booking(request, booking_id):
     else:
         return render(request, "show_booking.html", {"lessons": lessons})
 
+@login_required
+def delete_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking_name = str(booking)
+        booking.delete()
+    except ObjectDoesNotExist:
+        return redirect("bookings_list")
+    else:
+        return render(request, "delete_booking.html",{"booking_name": booking_name})
 
 @login_required
 def requests_list(request):
