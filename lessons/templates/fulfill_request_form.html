@@ -8,9 +8,10 @@
           <h2 class="signup-title signup-card-header">
             Payment
           </h2>
-          <form action= "{% url 'fulfill_request' %}" method="post">
+          <form action= "{% url 'admin_fulfill_request' id=request_id %}" method="post">
             {% csrf_token %}
             {% include 'partials/bootstrap_form.html' with form=form %}
+            <input type="submit" value="Submit" class="btn btn-lg btn-warning">
           </form>
         </div>
       </div>
