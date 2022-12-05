@@ -74,7 +74,7 @@ urlpatterns = [
     # ---------- USER's PAYMENT SECTION ----------
     path(
         "account/payment/", views.payment, name="payment_form"
-    ), , # path to payment page
+    ), # path to payment page
 
     # ---------- ADMIN SECTION ----------
     path(
