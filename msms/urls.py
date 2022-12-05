@@ -66,7 +66,7 @@ urlpatterns = [
         name="edit_request"
     ),
     path(
-        "account/requests/<int:id>/delete//",
+        "account/requests/<int:id>/delete/",
         views.delete_request,
         name="delete_request",
     ),

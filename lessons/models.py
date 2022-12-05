@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 import datetime
 import pytz
+import random
 
 
 # Create your models here.
@@ -162,20 +163,22 @@ class Booking(models.Model):
     description = models.CharField(max_length=50, blank=False)
 
     def create_lessons(self):
-        """Creates a set of lessons for the confirmed booking"""
+        """ Creates a set of lessons for the confirmed booking """
+
+        # Generates a random time of the lesson to start
+        timeForLesson = random.randint(9,15)
+        startDate = SchoolTerm.objects.first().start_date
         for lesson_id in range(self.num_of_lessons):
             lesson = Lesson.objects.create(
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
-                # These times could potentially cause conflict with student's schedule
-                # TODO: Validate these times
-                startTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 10, 0, 0)),
-                endTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 11, 0, 0)),
+                date=startDate + datetime.timedelta(self.days_between_lessons),
+                startTime=datetime.time(timeForLesson,0,0),
                 booking=self,
             )
             lesson.save()
 
     def update_lessons(self):
-        """Lessons should be updated depending on the changes made to Booking"""
+        """ Lessons should be updated depending on the changes made to Booking """
         lessons = self.lesson_set.all()
         # for each on lessons and update each of them
         for lesson in lessons:
@@ -183,7 +186,7 @@ class Booking(models.Model):
 
     def create_invoice(self):
         """Invoice should be created for Lesson that has been created"""
-        costOfBooking = self.lesson_duration / 10
+        costOfBooking = self.lesson_duration * self.num_of_lessons / 10
         self.invoice = Invoice.objects.create(
             student=self.student,
             student_num=self.student.user.pk + 1000,
@@ -194,31 +197,32 @@ class Booking(models.Model):
 
     def update_invoice(self):
         """Invoice should be updated depending on the changes made to Lesson"""
-        costOfBooking = self.lesson_duration / 10
+        costOfBooking = self.lesson_duration * self.num_of_lessons / 10
         self.invoice.price = Money(costOfBooking, "GBP")
 
 
 class Lesson(models.Model):
     name = models.CharField(max_length=50, blank=False, unique=True)
-    startTime = models.DateTimeField(blank=False)
-    endTime = models.DateTimeField(blank=False)
-    duration = models.IntegerField(blank=False)
+    date = models.DateField(blank=False)
+    startTime = models.TimeField(blank=False)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, blank=False)
     lessonCreatedAt = models.TimeField(auto_now_add=True)
     description = models.CharField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):
-        self.duration = (self.endTime - self.startTime).total_seconds()
         super(Lesson, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.startTime is not None and self.endTime is not None:
-            duration = self.endTime - self.startTime
-            minutes = round(duration.total_seconds() / 60)
-            if not (minutes == 30 or minutes == 45 or minutes == 60):
-                raise ValidationError(
-                    "Length of lesson should be 30 or 45 or 60 minutes"
-                )
+        # Check that date is within one of the school terms
+        currentTerm = None
+        schoolTerms =  SchoolTerm.objects.all()
+        for term in schoolTerms:
+            if self.date > term.start_date and self.date < term.end_date:
+                currentTerm = term
+        if  currentTerm is None:
+            raise ValidationError(
+                "Date of lesson does not lie in the terms"
+            )
 
     class Meta:
         # Model options
