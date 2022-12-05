@@ -116,6 +116,10 @@ class SchoolTermForm(forms.ModelForm):
     class Meta:
         model = SchoolTerm
         fields = ["start_date", "end_date"]
+        widgets = {
+            "start_date": forms.DateInput(attrs={'type': 'date'}),
+            "end_date": forms.DateInput(attrs={'type': 'date'})
+        }
 
     def save(self):
         super().save(commit=False)
