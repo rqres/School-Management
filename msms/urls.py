@@ -34,7 +34,7 @@ urlpatterns = [
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
     path(
-        "sign_up/admin/", views.sign_up_admin, name="sign_up_admin"
+        "sign_up_admin/", views.sign_up_admin, name="sign_up_admin"
     ),  # path for the student sign-up page
 
 
