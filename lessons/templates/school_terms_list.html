@@ -17,15 +17,18 @@
                 <li>
                   School term starting from {{school_term.start_date}}, ending on {{school_term.end_date}}
                 </li>
-                <div><a href="{% url 'edit_school_term' id=school_term.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
-              </div>
+                <div>
+                  <a href="{% url 'delete_school_term' school_term_id=school_term.id %}" class="btn btn-sm btn-secondary">Delete school term</a>
+                </div>
+                <div>
+                  <a href="{% url 'edit_school_term' id=school_term.id %}" class="btn btn-sm btn-secondary mt-1 mb-1">Edit</a></div>
+                </div>
               <br>
               {% endfor %}
             </ol>
           </div>
-
           <div>
-            <a href="{% url 'create_school_term' %}" class="btn btn-lg btn-secondary">Create new school term</a>
+            <a href="{% url 'create_school_term' %}" class="btn btn-lg btn-secondary mb-3">Create new school term</a>
           </div>
           <div>
             <a href="{% url 'account' %}" class="btn btn-lg btn-secondary"> Return to Admin Dashboard</a>
