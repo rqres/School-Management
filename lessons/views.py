@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, RegisterChildForm
+from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm, LogInForm, ForgotPasswordForm, RegisterChildForm
 from .models import Booking , Invoice ,RequestForLessons, User
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
