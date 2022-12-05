@@ -80,15 +80,17 @@ def sign_up_student(request):
 def sign_up_admin(request):
     if request.method == "POST":
         form = SignUpAdminForm(
-        request.POST
+            request.POST
         )  # creates a bound version of the form with post data
         if form.is_valid():
             form.save()
             return redirect("account")
-        else:
-            form = (SignUpAdminForm())  # create a form with SignUpAdminForm constructor, pass that form to template to render it
+    else:
+        form = (
+            SignUpAdminForm()
+        )  # create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, "sign_up_admin.html", {"form": form})
-            # successful form means you save user record in database and redirect them to the database
+    # successful form means you save user record in database and redirect them to the database
 
 
 @login_required
@@ -175,6 +177,7 @@ def create_request(request):
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
 
+
 @login_required
 def edit_request(request, id):
     req = get_object_or_404(RequestForLessons, id=id)
@@ -191,6 +194,7 @@ def edit_request(request, id):
     else:
         form = RequestForLessonsForm(instance=req)
     return render(request, "edit_request.html", {"request_id": id, "form": form})
+
 
 def payment(request):
     if request.method == "POST":

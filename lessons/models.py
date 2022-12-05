@@ -54,6 +54,9 @@ class User(AbstractBaseUser):
     is_teacher = models.BooleanField(default=False)
     is_parent = models.BooleanField(default=False)
     is_school_admin = models.BooleanField(default=False)
+    # ^^^^^^^^ equivalent of our project's school admins - we care about this
+
+    # vvvvvv equivalent of django sysadmin - we can ignore this
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
@@ -109,10 +112,6 @@ class SchoolAdmin(models.Model):
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
-    createAdmins = models.BooleanField(default=False)
-    editAdmins = models.BooleanField(default=False)
-    deleteAdmins = models.BooleanField(default=False)
-
 
     def __str__(self):
         return self.user.email
