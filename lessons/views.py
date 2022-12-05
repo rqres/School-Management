@@ -182,11 +182,17 @@ def select_child(request):
         form.set_children(request.user.children.all())
         if form.is_valid():
             selected_child_email = form.cleaned_data['child_box']
-            user = User.objects.get(email__exact = selected_child_email)
-            child_requests = user.student.requestforlessons_set.all()
-            child_bookings = user.student.booking_set.all()
+            child = User.objects.get(email__exact = selected_child_email)
+            child_requests = child.student.requestforlessons_set.all()
+            child_bookings = child.student.booking_set.all()
+            
+            request_child_form = RequestForLessonsForm(request.POST, student=child.student)
+            if request_child_form.is_valid():
+                request_child_form.save()
+                
             return render(request, "select_child.html", {"form": form, "email": selected_child_email,
-                                                         "bookings": child_bookings, "requests": child_requests})
+                                                         "bookings": child_bookings, "requests": child_requests,
+                                                         "child_form": request_child_form})
     else:
         form = SelectChildForm()
         form.set_children(request.user.children.all())
