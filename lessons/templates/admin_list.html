@@ -9,37 +9,36 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card signup-card">
-          <h2 class="signup-title signup-card-header">Admin dashboard</h2>
+          <h2 class="signup-title signup-card-header">List of all admins</h2>
 
-  <div>
-    <ul>
-      <h4 class="view-request-text">Admin dashboard:</h4>
-      {% for admin in requests %}
-      <div style="border:1px solid black;">
-        <li> Name - {{admin.first_name}} {{admin.last_name}}, Email - {{admin.email}}</li>
-        {% if admin.is_school_admin.editAdmins is True %}
-        <div>
-          <div><a href="{% url 'edit_admin' lessons_request_id=admin.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
+          <div>
+            <ul>
+              {% for admin in admins %}
+                <div style="border:1px solid black;">
+                  <li> Name - {{admin.user.first_name}} {{admin.user.last_name}}, Email - {{admin.user.email}} </li>
+                  {% if request.user.is_school_admin.directorStatus %}
+                    <div>
+                      <div><a href='{% url 'account' %}' class="btn btn-sm btn-secondary">Edit</a></div>
+                    </div>
+                  {% endif %}
+                  {% if request.user.is_school_admin.directorStatus %}
+                  <div>
+                    <div><a href='{% url 'account' %}' class="btn btn-sm btn-secondary">Delete</a></div>
+                  </div>
+                  {% endif %}
+              </div>
+              <br>
+            {% endfor %}
+          </ul>
         </div>
-        {% endif %}
-        {% if admin.is_school_admin.deleteAdmins is True %}
+
         <div>
-          <div><a href="{% url 'delete_admin' lessons_request_id=admin.id %}" class="btn btn-sm btn-secondary">Delete</a></div>
+          <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
         </div>
-        {% endif %}
-      </div>
-      <br>
-      {% endfor %}
-    </ul>
-  </div>
 
-  <div>
-      <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
-  </div>
-
-          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

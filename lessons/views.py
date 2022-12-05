@@ -1,23 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
-from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm, LogInForm, ForgotPasswordForm, RegisterChildForm
-from .models import Booking , Invoice ,RequestForLessons, User
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404, render, redirect
+from .models import Booking , Invoice ,RequestForLessons, User, SchoolTerm, SchoolAdmin
 from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
     StudentSignUpForm,
+    SelectChildForm,
+    RegisterChildForm,
     PaymentForm,
     LogInForm,
     ForgotPasswordForm,
     SignUpAdminForm,
 )
-from .models import Booking, Invoice, RequestForLessons, SchoolTerm
 
 
 #  Create your views here.
@@ -91,11 +88,6 @@ def sign_up_admin(request):
     return render(request, "sign_up_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
 
-
-def view_admin_list(request):
-    return render(request, "admin_list.html")
-
-
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
@@ -147,6 +139,10 @@ def requests_list(request):
     requests = request.user.student.requestforlessons_set.all()
     return render(request, "requests_list.html", {"requests": requests})
 
+@login_required
+def view_admin_list(request):
+    admins = SchoolAdmin.objects.all()
+    return render(request, "admin_list.html", {"admins": admins})
 
 @login_required
 def show_request(request, id):

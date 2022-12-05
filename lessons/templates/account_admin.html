@@ -28,11 +28,13 @@
             {% endif %}
           </div>
 
-          <!--{% if school_admin.user.directorStatus == True %}
           <div>
-            <a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
+            {% if school_admin.directorStatus %}
+              <div>
+                <a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
+              </div>
+            {% endif %}
           </div>
-          {% endif %}-->
 
           <div>
             <a href='{% url 'create_request' %}' class="btn btn-lg btn-warning mb-4"> Submit a new Request</a>
