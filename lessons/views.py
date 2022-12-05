@@ -7,6 +7,7 @@ from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, Pa
 from .models import Booking , Invoice ,RequestForLessons, User
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
@@ -21,6 +22,9 @@ from .models import Booking, Invoice, RequestForLessons, SchoolTerm
 
 #  Create your views here.
 def home(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+
     return render(request, "home.html")
 
 
@@ -91,16 +95,27 @@ def sign_up_admin(request):
 
 @login_required
 def account(request):
+    # redirect school admins to their dashboard template
     if request.user.is_school_admin:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
+    # redirect students to student template
     elif request.user.is_student:
         return render(
             request, "account_student.html", {"student": request.user.student}
         )
+    # redirect sys admins to Django admin page
+    elif request.user.is_admin:
+        return redirect("admin:index")
     # elif request.user.is_parent:
     #   etc...
+    else:
+        # UNRECOGNIZED USER TYPE
+        # this shouldn't happen, log user out and send him to welcome page
+        # print("Who are you ?? " + str(request.user))
+        logout(request)
+        return redirect("home")
 
 
 @login_required
@@ -131,19 +146,23 @@ def requests_list(request):
 
 
 @login_required
-def show_request(request, lessons_request_id):
-    print("NOT YET IMPLEMENTED")
-    pass
+def show_request(request, id):
+    try:
+        req = RequestForLessons.objects.get(id=id)
+    except ObjectDoesNotExist:
+        return redirect("requests_list")
+    else:
+        return render(request, "show_request.html", {"lessons_request": req})
 
 
 @login_required
-def delete_request(request, lessons_request_id):
-    req = RequestForLessons.objects.get(id=lessons_request_id)
+def delete_request(request, id):
+    req = get_object_or_404(RequestForLessons, id=id)
     if req:
         req.delete()
-        print(f"Request {lessons_request_id} deleted")
-        return redirect("requests_list")
-    print("cant find request")
+        print("success!")
+
+    return redirect("requests_list")
 
 
 @login_required
@@ -157,6 +176,24 @@ def create_request(request):
     else:
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
+
+
+@login_required
+def edit_request(request, id):
+    req = get_object_or_404(RequestForLessons, id=id)
+
+    if request.method == "POST":
+        form = RequestForLessonsForm(
+            request.POST, instance=req, student=request.user.student
+        )
+        if form.is_valid():
+            req = form.save(edit=True)
+            req.save()
+            return redirect("requests_list")
+
+    else:
+        form = RequestForLessonsForm(instance=req)
+    return render(request, "edit_request.html", {"request_id": id, "form": form})
 
 
 def payment(request):
@@ -220,6 +257,7 @@ def select_child(request):
         form.set_children(request.user.children.all())
     return render(request, "select_child.html", {"form": form, "email": ""})
 
+@login_required
 def school_terms_list(request):
     if not request.user.is_school_admin:
         return redirect("account")
@@ -227,7 +265,12 @@ def school_terms_list(request):
     return render(request, "school_terms_list.html", {"school_terms": school_terms})
 
 
+@login_required
+# TODO:  @adminrequired
 def create_school_term(request):
+    if not request.user.is_school_admin:
+        return redirect("account")
+
     if request.method == "POST":
         form = SchoolTermForm(request.POST)
         if form.is_valid():
@@ -237,3 +280,34 @@ def create_school_term(request):
     else:
         form = SchoolTermForm()
     return render(request, "create_school_term.html", {"form": form})
+
+
+@login_required
+def edit_school_term(request, id):
+    if not request.user.is_school_admin:
+        return redirect("account")
+
+    term = get_object_or_404(SchoolTerm, id=id)
+
+    if request.method == "POST":
+        form = SchoolTermForm(request.POST, instance=term)
+
+        # form.is_valid() will call term.clean()
+        # the term needs to be hidden right before being cleaned
+        # so as not to check overlapping against itself
+        term._editing = True
+        term.save()
+        if form.is_valid():
+            # finished editing
+            term._editing = False
+            term.save()
+
+            term = form.save(edit=True)
+            term.save()
+            return redirect("school_terms_list")
+
+    else:
+        form = SchoolTermForm(instance=term)
+    return render(
+        request, "edit_school_term.html", {"school_term_id": id, "form": form}
+    )

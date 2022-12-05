@@ -56,12 +56,17 @@ urlpatterns = [
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
     path(
-        "account/requests/<int:lessons_request_id>/",
+        "account/requests/<int:id>/",
         views.show_request,
         name="show_request",
     ),
     path(
-        "account/requests/<int:lessons_request_id>/delete/",
+        "account/requests/<int:id>/edit/",
+        views.edit_request,
+        name="edit_request"
+    ),
+    path(
+        "account/requests/<int:id>/delete//",
         views.delete_request,
         name="delete_request",
     ),
@@ -73,14 +78,19 @@ urlpatterns = [
 
     # ---------- ADMIN SECTION ----------
     path(
-        "schoolterms/",
+        "school_terms/",
         views.school_terms_list,
         name="school_terms_list",
     ),
     path(
-        "schoolterms/create/",
+        "school_terms/create/",
         views.create_school_term,
         name="create_school_term",
+    ),
+    path(
+        "school_terms/<int:id>/edit/",
+        views.edit_school_term,
+        name="edit_school_term"
     ),
     
     path("account/register_child/", views.register_child, name="register_child"), # path to register children

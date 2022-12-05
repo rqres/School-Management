@@ -3,14 +3,7 @@ from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import (
-    Invoice,
-    RequestForLessons,
-    SchoolTerm,
-    Student,
-    User,
-    SchoolAdmin
-)
+from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
 from django.contrib.auth import authenticate
 
 
@@ -119,16 +112,34 @@ class LogInForm(forms.Form):
 
 
 class SchoolTermForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._instance = kwargs.pop("instance", None)
+        super().__init__(*args, **kwargs)
+
+        # this if statement is executed if the user is using the form to
+        # update an existing school term
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            self.fields["start_date"].initial = self._instance.start_date
+            self.fields["end_date"].initial = self._instance.end_date
+
     class Meta:
         model = SchoolTerm
         fields = ["start_date", "end_date"]
 
-    def save(self):
+    def save(self, edit=False):
         super().save(commit=False)
-        school_term = SchoolTerm.objects.create(
-            start_date=self.cleaned_data.get("start_date"),
-            end_date=self.cleaned_data.get("end_date"),
-        )
+        if not edit:
+            school_term = SchoolTerm.objects.create(
+                start_date=self.cleaned_data.get("start_date"),
+                end_date=self.cleaned_data.get("end_date"),
+            )
+        else:
+            # if the user is editing a school term, don't create a new object
+            # but instead update its fields
+            school_term = self._instance
+            school_term.start_date = self.cleaned_data.get("start_date")
+            school_term.end_date = self.cleaned_data.get("end_date")
 
         return school_term
 
@@ -136,7 +147,21 @@ class SchoolTermForm(forms.ModelForm):
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self._student = kwargs.pop("student", None)
+        self._instance = kwargs.pop("instance", None)
         super().__init__(*args, **kwargs)
+
+        # this if statement is executed if the user is using the form to
+        # update an existing request
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            avlb_list = self._instance.availability.split(",")
+            self.fields["no_of_lessons"].initial = self._instance.no_of_lessons
+            self.fields[
+                "days_between_lessons"
+            ].initial = self._instance.days_between_lessons
+            self.fields["lesson_duration"].initial = self._instance.lesson_duration
+            self.fields["availability_field"].initial = avlb_list
+            self.fields["other_info"].initial = self._instance.other_info
 
     class Meta:
         model = RequestForLessons
@@ -166,16 +191,27 @@ class RequestForLessonsForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
     )
 
-    def save(self):
+    def save(self, edit=False):
         super().save(commit=False)
-        req = RequestForLessons.objects.create(
-            student=self._student,
-            availability=",".join(self.cleaned_data.get("availability_field")),
-            no_of_lessons=self.cleaned_data.get("no_of_lessons"),
-            days_between_lessons=self.cleaned_data.get("days_between_lessons"),
-            lesson_duration=self.cleaned_data.get("lesson_duration"),
-            other_info=self.cleaned_data.get("other_info"),
-        )
+        if not edit:
+            req = RequestForLessons.objects.create(
+                student=self._student,
+                availability=",".join(self.cleaned_data.get("availability_field")),
+                no_of_lessons=self.cleaned_data.get("no_of_lessons"),
+                days_between_lessons=self.cleaned_data.get("days_between_lessons"),
+                lesson_duration=self.cleaned_data.get("lesson_duration"),
+                other_info=self.cleaned_data.get("other_info"),
+            )
+        else:
+            # if the user is editing a request, don't create a new object
+            # but instead update its fields
+            req = self._instance
+            req.availability = ",".join(self.cleaned_data.get("availability_field"))
+            req.no_of_lessons = self.cleaned_data.get("no_of_lessons")
+            req.days_between_lessons = self.cleaned_data.get("days_between_lessons")
+            req.lesson_duration = self.cleaned_data.get("lesson_duration")
+            req.other_info = self.cleaned_data.get("other_info")
+            req.save()
 
         return req
 
