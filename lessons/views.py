@@ -77,9 +77,7 @@ def sign_up_admin(request):
             form.save()
             return redirect("account")
     else:
-        form = (
-            SignUpAdminForm()
-        )  # create a form with SignUpAdminForm constructor, pass that form to template to render it
+        form = (SignUpAdminForm())  # create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, "sign_up_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
 

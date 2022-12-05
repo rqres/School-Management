@@ -29,6 +29,7 @@ class UserAdmin(BaseUserAdmin):
         "password",
         "is_admin",
         "is_student",
+        "is_school_admin"
     )
     list_filter = ("is_admin",)
     fieldsets = (

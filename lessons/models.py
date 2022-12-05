@@ -52,9 +52,6 @@ class User(AbstractBaseUser):
     is_teacher = models.BooleanField(default=False)
     is_parent = models.BooleanField(default=False)
     is_school_admin = models.BooleanField(default=False)
-    # ^^^^^^^^ equivalent of our project's school admins - we care about this
-
-    # vvvvvv equivalent of django sysadmin - we can ignore this
     is_admin = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
