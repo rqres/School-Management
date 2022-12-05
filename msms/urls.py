@@ -33,6 +33,10 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up/admin/", views.sign_up_admin, name="sign_up_admin"
+    ),  # path for the student sign-up page
+
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
     # (all users will be redirected here regardless of usertype)

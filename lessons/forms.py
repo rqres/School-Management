@@ -38,8 +38,8 @@ class StudentSignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
-    
-    
+
+
 
     @transaction.atomic
     def save(self, commit=True):
@@ -285,7 +285,7 @@ class RegisterChildForm(forms.Form):
         elif parent.children.filter(email = checked_email).exists():
             self.message = "This user is already registered as your own child."
         elif child is not None:
-            self.message = ("This user, " + child.first_name + " " + child.last_name + 
+            self.message = ("This user, " + child.first_name + " " + child.last_name +
                             " has been registered as your child.")
             parent.children.add(child)
             child.parents.add(parent)
@@ -299,15 +299,9 @@ class SelectChildForm(forms.ModelForm):
     class Meta:
         model = User
         fields = []
-        
+
     def set_children(self, children):
         self.child_list.clear()
         for child in children:
             self.child_list.append(child.email)
         self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
-        
-        
-    
-    
-        
-    
