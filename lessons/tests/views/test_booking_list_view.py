@@ -1,9 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
 from lessons.models import SchoolTerm, Booking, User, Student, Teacher
+from lessons.tests.helpers import create_test_bookings
 import datetime
-from django.utils import timezone
-
 
 class BookingListTest(TestCase):
 
@@ -32,36 +31,9 @@ class BookingListTest(TestCase):
     def test_booking_list_url(self):
         self.assertEqual(self.url, "/account/bookings/")
 
-    def create_test_bookings(self,booking_count):
-        
-        for booking_id in range(booking_count):
-            user_teacher = User.objects.create_user(
-                f"teacher{booking_id}@example.org",
-                first_name=f"First{booking_id}",
-                last_name=f"Last{booking_id}",
-                password="TestPassword123",
-            )
-
-            user_teacher.is_teacher = True
-
-            new_teacher = Teacher.objects.create(
-                user=user_teacher, school_name="Test School"
-            )
-            booking = Booking.objects.create(
-                num_of_lessons = booking_count,
-                student = self.student,
-                teacher = new_teacher,
-                description = f'Gutitar lesson on basics{booking_id}',
-                days_between_lessons = 7,
-                lesson_duration = 60,
-            )
-            booking.create_lessons()
-            booking.create_invoice()
-            booking.save()
-
     def test_get_booking_list(self):
         self.client.login(email=self.student.user.email, password="Watermelon123")
-        self.create_test_bookings(10)
+        create_test_bookings(10)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "bookings_list.html")
@@ -72,5 +44,8 @@ class BookingListTest(TestCase):
             self.assertContains(response, booking.invoice.urn)
             self.assertContains(response, booking.student.user.first_name)
             self.assertContains(response, booking.teacher.user.first_name)
+
+    def test_cannot_get_booking_when_not_logged_in(self):
+        pass
 
 
