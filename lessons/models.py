@@ -5,6 +5,7 @@ from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 import datetime
+import pytz
 
 
 # Create your models here.
@@ -83,7 +84,7 @@ class User(AbstractBaseUser):
     def is_staff(self):
         "Is the user a member of staff?"
         # Simplest possible answer: All admins are staff
-        return self.is_admin
+        return self.is_admin or self.is_school_admin
 
 
 class Student(models.Model):
@@ -106,6 +107,9 @@ class SchoolAdmin(models.Model):
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user.email
 
 
 class Invoice(models.Model):
@@ -160,8 +164,8 @@ class Booking(models.Model):
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
                 # These times could potentially cause conflict with student's schedule
                 # TODO: Validate these times
-                startTime=datetime.datetime(2022, 11, 10, 10, 0, 0),
-                endTime=datetime.datetime(2022, 11, 10, 11, 0, 0),
+                startTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 10, 0, 0)),
+                endTime=pytz.utc.localize(datetime.datetime(2022, 11, 10, 11, 0, 0)),
                 booking=self,
             )
             lesson.save()
@@ -197,6 +201,7 @@ class Lesson(models.Model):
     duration = models.IntegerField(blank=False)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, blank=False)
     lessonCreatedAt = models.TimeField(auto_now_add=True)
+    description = models.CharField(max_length=500, blank=True)
 
     def save(self, *args, **kwargs):
         self.duration = (self.endTime - self.startTime).total_seconds()
@@ -227,9 +232,9 @@ class Lesson(models.Model):
 class RequestForLessons(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     # i am storing the availabilty as a comma separated string of days
-    # e.g: "tue,sat,sun" = student is available on tuesday saturday and sunday
+    # e.g: "TUE,SAT,SUN" = student is available on tuesday saturday and sunday
     # max length is 28 because at most someone could be avlb every day
-    # len("mon,tue,wed,thu,fri,sat,sun") = 27
+    # len("MON,TUE,WED,THU,FRI,SAT,SUN") = 27
     availability = models.CharField(max_length=27, blank=False)
 
     fulfilled = models.BooleanField(default=False)
@@ -281,20 +286,26 @@ class SchoolTerm(models.Model):
     start_date = models.DateField(blank=False)
     end_date = models.DateField(blank=False)
 
+    # vvv i only use this for model validation
+    _editing = models.BooleanField(default=False)
+
     class Meta:
-        ordering = ["-start_date"]
+        ordering = ["start_date"]
 
     def clean(self):
         if self.start_date is not None and self.end_date is not None:
             if self.start_date > self.end_date:
                 raise ValidationError("Start date cannot be greater than end date")
 
-            all_terms = SchoolTerm.objects.all()
+            # this case applies only when editing a school term
+            # I only want to check overlap against visible school terms
+            # while editing a term, it will be marked with "editing=True"
+            # so as not to check overlapping against itself
+            all_terms = SchoolTerm.objects.filter(_editing=False)
+
             for term in all_terms:
                 if (
-                    self.start_date >= term.start_date
-                    and self.start_date <= term.end_date
-                ) or (
-                    self.end_date <= term.end_date and self.end_date >= term.start_date
+                    self.start_date <= term.end_date
+                    and self.end_date >= term.start_date
                 ):
                     raise ValidationError("School terms cannot overlap!")
