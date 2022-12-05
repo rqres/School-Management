@@ -82,4 +82,9 @@ urlpatterns = [
         views.create_school_term,
         name="create_school_term",
     ),
+    path(
+        "schoolterms/<int:school_term_id>/delete",
+        views.delete_school_term,
+        name="delete_school_term"
+    ),
 ]

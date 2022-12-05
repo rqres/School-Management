@@ -193,3 +193,11 @@ def create_school_term(request):
     else:
         form = SchoolTermForm()
     return render(request, "create_school_term.html", {"form": form})
+
+def delete_school_term(request, school_term_id):
+    term = SchoolTerm.objects.get(id=school_term_id)
+    if term:
+        term.delete()
+        print(f"Request {school_term_id} deleted")
+        return redirect("school_terms_list")
+    print("cant find term")
