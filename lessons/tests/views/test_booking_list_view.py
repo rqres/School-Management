@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from lessons.models import Booking, User, Student, Teacher
+from lessons.models import SchoolTerm, Booking, User, Student, Teacher
 import datetime
 from django.utils import timezone
 
@@ -22,6 +22,11 @@ class BookingListTest(TestCase):
 
         self.user_teacher = User.objects.get(email="jane.doe@example.org")
         self.teacher = Teacher.objects.get(user=self.user_teacher)
+
+        SchoolTerm.objects.create(
+            start_date=datetime.date(2022,9,1),
+            end_date=datetime.date(2022,10,21),
+        )
 
 
     def test_booking_list_url(self):
