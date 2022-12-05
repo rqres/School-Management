@@ -1,7 +1,7 @@
 import random
 from django.core.management.base import BaseCommand
 from faker import Faker
-from lessons.models import RequestForLessons, Student, User
+from lessons.models import RequestForLessons, Student, User, SchoolAdmin
 
 
 class Command(BaseCommand):
@@ -56,3 +56,41 @@ class Command(BaseCommand):
             user.save()
 
             Student.objects.create(user=user, school_name=school)
+
+        def _seed_directors(self):
+            for i in range(10):
+                fname = self.faker.first_name()
+                lname = self.faker.last_name()
+
+                school_names = [
+                    "danish",
+                    "cheesecake",
+                    "sugar",
+                    "Lollipop",
+                    "wafer",
+                    "Gummies",
+                    "sesame",
+                    "Jelly",
+                    "beans",
+                    "pie",
+                    "bar",
+                    "Ice",
+                    "oat",
+                ]
+
+                school = random.choice(school_names) + "School"
+
+                # uname = "@" + fname.lower() + lname.lower()
+                email = fname.lower() + "." + lname.lower() + str(i) + "@fox.org"
+
+                user = User.objects.create_user(
+                email,
+                first_name=fname,
+                last_name=lname,
+                password=(self.faker.password()),
+                )
+                user.is_school_admin = True
+
+                user.save()
+
+                SchoolAdmin.objects.create(user=user, school_name=school, directorStatus=True)
