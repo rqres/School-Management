@@ -9,7 +9,9 @@ from lessons.models import (
     SchoolAdmin,
     Invoice,
     RequestForLessons,
+    SchoolTerm,
     Student,
+    Teacher,
     User,
 )
 
@@ -26,12 +28,12 @@ class UserAdmin(BaseUserAdmin):
         "email",
         "first_name",
         "last_name",
-        "password",
-        "is_admin",
+        # "password",
         "is_student",
-        "is_school_admin"
+        "is_school_admin",
+        "is_admin",
     )
-    list_filter = ("is_admin",)
+    list_filter = ("is_school_admin",)
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
@@ -41,8 +43,8 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "is_school_admin",
                     "is_student",
-                    "is_admin",
                     "is_teacher",
+                    "is_admin",
                 )
             },
         ),
@@ -80,6 +82,8 @@ admin.site.register(SchoolAdmin)
 admin.site.register(Booking)
 admin.site.register(Invoice)
 admin.site.register(RequestForLessons)
+admin.site.register(Teacher)
+admin.site.register(SchoolTerm)
 
 # @admin.register(Student)
 # class UserAdmin(admin.ModelAdmin):
@@ -89,6 +93,7 @@ admin.site.register(RequestForLessons)
 #         "last_name",
 #         "is_active",
 #     ]
+
 
 # Admins can edit bookings and create them
 class BookingAdmin(admin.ModelAdmin):

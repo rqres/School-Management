@@ -33,7 +33,6 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
-    path("sign_up_admin/", views.sign_up_admin, name="sign_up_admin"),
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
     # (all users will be redirected here regardless of usertype)
@@ -57,12 +56,17 @@ urlpatterns = [
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
     path(
-        "account/requests/<int:lessons_request_id>/",
+        "account/requests/<int:id>/",
         views.show_request,
         name="show_request",
     ),
     path(
-        "account/requests/<int:lessons_request_id>/delete",
+        "account/requests/<int:id>/edit/",
+        views.edit_request,
+        name="edit_request"
+    ),
+    path(
+        "account/requests/<int:id>/delete/",
         views.delete_request,
         name="delete_request",
     ),
@@ -70,18 +74,22 @@ urlpatterns = [
     # ---------- USER's PAYMENT SECTION ----------
     path(
         "account/payment/", views.payment, name="payment_form"
-    ),  # path to payment page
+    ), # path to payment page
 
     # ---------- ADMIN SECTION ----------
     path(
-        "schoolterms/",
+        "school_terms/",
         views.school_terms_list,
         name="school_terms_list",
     ),
     path(
-        "schoolterms/create/",
+        "school_terms/create/",
         views.create_school_term,
         name="create_school_term",
     ),
-    path("view_admin_list/", views.view_admin_list, name="view_admin_list")
+    path("view_admin_list/", views.view_admin_list, name="view_admin_list"),
+
+    path("account/register_child/", views.register_child, name="register_child"), # path to register children
+
+    path("account/select_child/", views.select_child, name="select_child"), # path to book lessons for children
 ]

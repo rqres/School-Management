@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
+</script>
+
+<script type="text/javascript">
+// https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      // Does this cookie string begin with the name we want?
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+const cancelRequest = (reqId, theButton) => {
+  // workaround for passing a JS variable to a python reverse url
+  // https://stackoverflow.com/a/11262921
+  var url = "{% url 'show_request' 999%}".replace(999, reqId);
+  fetch(url, {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: {
+      "X-Requested-With": "XMLHttpRequest",
+      "X-CSRFToken": getCookie("csrftoken"),
+    }
+  })
+    .then(response => response.json())
+    .then(data => {
+      // hide the enclosing div
+      theButton.parentNode.remove();
+    });
+};
+</script>
+
+{% endblock %}
+
+{% block body %}
+<div id="background-image">
+  <div class="container vh-100">
+    <div class="row h-100">
+      <div class="col-12">
+        <div class="card login-card mx-auto">
+          <h2 class="login-title login-card-header"> View children</h2>
+          <p> <form action= '{% url 'select_child' %}' method="post">
+            {% csrf_token %}
+            {% include 'partials/bootstrap_form.html' with form=form %}
+            <input type="submit" value="Select Child">
+          </form> </p>
+          
+        {% if email != "" %}
+        <div><p> Viewing data for: {{ email }} </p></div>
+          <div>
+            <ol>
+              <h4 class="view-request-text">Unfulfilled requests:</h4>
+              {% for request in requests %}
+              {% if request.fulfilled is False %}
+              <div style="border:1px solid black;">
+                <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+                  {{request.days_between_lessons}} days between lessons</li>
+                <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button>
+              </div>
+              <br>
+              {% endif %}
+              {% endfor %}
+            </ol>
+          </div>
+        
+          <div>
+            <ul>
+              <h4 class="view-request-text">Fulfilled requests:</h4>
+              {% for request in requests %}
+              {% if request.fulfilled is True %}
+              <div style="border:1px solid black;">
+                <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+                  {{request.days_between_lessons}} days between lessons</li>
+              </div>
+              <br>
+                {% endif %}
+                {% endfor %}
+            </ul>
+          </div>
+
+          <div>
+            <h2>Bookings:</h2>
+            <table class="table">
+                {% for booking in bookings %}
+                <tr>
+                    <td> {{ booking.name }}</td>
+                    <td> {{ booking.description }}</td>
+                    <td>{{ booking.invoice.urn }}</td>
+                    <td>{{ booking.startTime}}</td>
+                    <td>{{ booking.endTime}}</td>
+                    <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
+                </tr>
+                {% endfor %}
+            </table>
+          </div>
+
+          <div class="card signup-card">
+            
+            <form action="{% url 'create_request' %}" method="post">
+              {% csrf_token %}
+              {% include 'partials/bootstrap_form.html' with form=child_form %}
+              <input type="submit" value="Submit" class="btn btn-lg btn-warning">
+            </form>
+          </div>
+        {% endif %}
+          <div><a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
