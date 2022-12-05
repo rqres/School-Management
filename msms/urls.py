@@ -66,7 +66,7 @@ urlpatterns = [
         name="edit_request"
     ),
     path(
-        "account/requests/<int:id>/delete/",
+        "account/requests/<int:id>/delete//",
         views.delete_request,
         name="delete_request",
     ),
@@ -74,7 +74,7 @@ urlpatterns = [
     # ---------- USER's PAYMENT SECTION ----------
     path(
         "account/payment/", views.payment, name="payment_form"
-    ),  # path to payment page
+    ), , # path to payment page
 
     # ---------- ADMIN SECTION ----------
     path(
@@ -92,4 +92,8 @@ urlpatterns = [
         views.edit_school_term,
         name="edit_school_term"
     ),
+    
+    path("account/register_child/", views.register_child, name="register_child"), # path to register children
+    
+    path("account/select_child/", views.select_child, name="select_child") # path to book lessons for children
 ]

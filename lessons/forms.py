@@ -1,12 +1,15 @@
 from django import forms
+from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from django.contrib.auth import authenticate
 
 
 class StudentSignUpForm(UserCreationForm):
-    school_name = forms.CharField(max_length=100)
+    school_name = forms.CharField(max_length=100, required=True)
+    is_parent = forms.BooleanField(label="Are you a Parent?", required=False)
 
     class Meta:
         model = User
@@ -35,6 +38,8 @@ class StudentSignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+    
+    
 
     @transaction.atomic
     def save(self, commit=True):
@@ -43,6 +48,7 @@ class StudentSignUpForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_student = True
+            user.is_parent = self.cleaned_data["is_parent"]
             user.save()
 
         Student.objects.create(
@@ -101,7 +107,7 @@ class SignUpAdminForm(UserCreationForm):
 
 
 class LogInForm(forms.Form):
-    email = forms.CharField(label="Email", required=True)
+    email = forms.EmailField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 
@@ -260,3 +266,44 @@ class ForgotPasswordForm(forms.Form):
             )
         else:
             self.message = "This e-mail address is not registered to any account."
+
+class RegisterChildForm(forms.Form):
+    email = forms.EmailField(label="Email", required=True)
+    password = password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    message = ""
+
+    def authenticate(self, parent):
+        checked_email = self.cleaned_data.get("email")
+        checked_pass = self.cleaned_data.get("password")
+        child = authenticate(username = checked_email, password = checked_pass)
+        if child == parent:
+            self.message = "You cannot add yourself as your own child."
+        elif parent.children.filter(email = checked_email).exists():
+            self.message = "This user is already registered as your own child."
+        elif child is not None:
+            self.message = ("This user, " + child.first_name + " " + child.last_name + 
+                            " has been registered as your child.")
+            parent.children.add(child)
+            child.parents.add(parent)
+        else:
+            self.message = "Incorrect e-mail or password specified."
+
+class SelectChildForm(forms.ModelForm):
+    child_list = []
+    child_box = forms.ModelChoiceField(label = "Select child", queryset = User.objects.all())
+
+    class Meta:
+        model = User
+        fields = []
+        
+    def set_children(self, children):
+        self.child_list.clear()
+        for child in children:
+            self.child_list.append(child.email)
+        self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
+        
+        
+    
+    
+        
+    

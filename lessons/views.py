@@ -1,6 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
+from .forms import RequestForLessonsForm, StudentSignUpForm, SelectChildForm, PaymentForm,LogInForm, AdminLoginForm, ForgotPasswordForm, RegisterChildForm
+from .models import Booking , Invoice ,RequestForLessons, User
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404, render, redirect
 from .forms import (
     RequestForLessonsForm,
@@ -211,6 +217,45 @@ def payment(request):
         form = PaymentForm(request.POST)
     return render(request, "payment_form.html", {"form": form})
 
+def register_child(request):
+    if request.user.is_parent:
+        if request.method == "POST":
+            form = RegisterChildForm(request.POST)
+            if form.is_valid():
+                form.authenticate(request.user)
+                return render(request, "register_child.html", 
+                              {"form": form, "parent": request.user, "children": request.user.children.all()})
+            else:
+                return redirect('account')
+        else:
+            form = RegisterChildForm()
+            return render(request, "register_child.html", 
+                          {"form": form, "parent": request.user, "children": request.user.children.all()})
+    else:
+        return redirect('account')
+
+@login_required
+def select_child(request):
+    if request.method == "POST":
+        form = SelectChildForm(request.POST)
+        form.set_children(request.user.children.all())
+        if form.is_valid():
+            selected_child_email = form.cleaned_data['child_box']
+            child = User.objects.get(email__exact = selected_child_email)
+            child_requests = child.student.requestforlessons_set.all()
+            child_bookings = child.student.booking_set.all()
+            
+            request_child_form = RequestForLessonsForm(request.POST, student=child.student)
+            if request_child_form.is_valid():
+                request_child_form.save()
+                
+            return render(request, "select_child.html", {"form": form, "email": selected_child_email,
+                                                         "bookings": child_bookings, "requests": child_requests,
+                                                         "child_form": request_child_form})
+    else:
+        form = SelectChildForm()
+        form.set_children(request.user.children.all())
+    return render(request, "select_child.html", {"form": form, "email": ""})
 
 @login_required
 def school_terms_list(request):
