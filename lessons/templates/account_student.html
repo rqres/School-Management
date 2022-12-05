@@ -21,10 +21,18 @@
             <a href='{% url 'requests_list' %}' class="btn btn-lg btn-warning mb-4"> View your Requests</a>
           </div>
           <div>
-            <a href='{% url 'create_request' %}' class="btn btn-lg btn-warning mb-4"> Submit a new Request</a>
+            <a href='{% url 'log_out' %}' class="btn btn-sm btn-secondary"> Log Out</a>
           </div>
           <div>
-            <a href='{% url 'log_out' %}' class="btn btn-sm btn-secondary"> Log Out</a>
+            {% if student.user.is_parent %}
+              <p> Parent Dashboard: As a parent you may... </p>
+              <div>
+                <a href = '{% url 'register_child' %}' class="btn btn-lg btn-warning mb-4"> Register children</a>
+              </div>
+              <div>
+                <a href = '{% url 'select_child' %}' class="btn btn-lg btn-warning mb-4"> View options for a child</a>
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>

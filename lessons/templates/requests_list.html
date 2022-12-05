@@ -19,8 +19,8 @@
         <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
           {{request.days_between_lessons}} days between lessons</li>
         <!-- <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button> -->
-        <div><a href="{% url 'show_request' lessons_request_id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
-        <div><a href="{% url 'delete_request' lessons_request_id=request.id %}" class="btn btn-sm btn-secondary">Delete request</a></div>
+        <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
+        <div><a href="{% url 'delete_request' id=request.id %}" class="btn btn-sm btn-secondary">Delete request</a></div>
 
       </div>
       <br>
@@ -37,11 +37,16 @@
       <div style="border:1px solid black;">
         <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
           {{request.days_between_lessons}} days between lessons</li>
+        <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
       </div>
       <br>
         {% endif %}
         {% endfor %}
     </ul>
+  </div>
+
+  <div>
+      <a href='{% url 'create_request' %}' class="btn btn-lg btn-secondary">New request</a>
   </div>
 
   <div>

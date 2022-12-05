@@ -1,19 +1,15 @@
 from django import forms
+from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import (
-    Invoice,
-    RequestForLessons,
-    SchoolTerm,
-    Student,
-    User,
-    SchoolAdmin
-)
+from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from django.contrib.auth import authenticate
 
 
 class StudentSignUpForm(UserCreationForm):
-    school_name = forms.CharField(max_length=100)
+    school_name = forms.CharField(max_length=100, required=True)
+    is_parent = forms.BooleanField(label="Are you a Parent?", required=False)
 
     class Meta:
         model = User
@@ -42,6 +38,8 @@ class StudentSignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+    
+    
 
     @transaction.atomic
     def save(self, commit=True):
@@ -50,6 +48,7 @@ class StudentSignUpForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_student = True
+            user.is_parent = self.cleaned_data["is_parent"]
             user.save()
 
         Student.objects.create(
@@ -108,21 +107,39 @@ class SignUpAdminForm(UserCreationForm):
 
 
 class LogInForm(forms.Form):
-    email = forms.CharField(label="Email", required=True)
+    email = forms.EmailField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 
 class SchoolTermForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._instance = kwargs.pop("instance", None)
+        super().__init__(*args, **kwargs)
+
+        # this if statement is executed if the user is using the form to
+        # update an existing school term
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            self.fields["start_date"].initial = self._instance.start_date
+            self.fields["end_date"].initial = self._instance.end_date
+
     class Meta:
         model = SchoolTerm
         fields = ["start_date", "end_date"]
 
-    def save(self):
+    def save(self, edit=False):
         super().save(commit=False)
-        school_term = SchoolTerm.objects.create(
-            start_date=self.cleaned_data.get("start_date"),
-            end_date=self.cleaned_data.get("end_date"),
-        )
+        if not edit:
+            school_term = SchoolTerm.objects.create(
+                start_date=self.cleaned_data.get("start_date"),
+                end_date=self.cleaned_data.get("end_date"),
+            )
+        else:
+            # if the user is editing a school term, don't create a new object
+            # but instead update its fields
+            school_term = self._instance
+            school_term.start_date = self.cleaned_data.get("start_date")
+            school_term.end_date = self.cleaned_data.get("end_date")
 
         return school_term
 
@@ -130,7 +147,21 @@ class SchoolTermForm(forms.ModelForm):
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self._student = kwargs.pop("student", None)
+        self._instance = kwargs.pop("instance", None)
         super().__init__(*args, **kwargs)
+
+        # this if statement is executed if the user is using the form to
+        # update an existing request
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            avlb_list = self._instance.availability.split(",")
+            self.fields["no_of_lessons"].initial = self._instance.no_of_lessons
+            self.fields[
+                "days_between_lessons"
+            ].initial = self._instance.days_between_lessons
+            self.fields["lesson_duration"].initial = self._instance.lesson_duration
+            self.fields["availability_field"].initial = avlb_list
+            self.fields["other_info"].initial = self._instance.other_info
 
     class Meta:
         model = RequestForLessons
@@ -160,16 +191,27 @@ class RequestForLessonsForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple,
     )
 
-    def save(self):
+    def save(self, edit=False):
         super().save(commit=False)
-        req = RequestForLessons.objects.create(
-            student=self._student,
-            availability=",".join(self.cleaned_data.get("availability_field")),
-            no_of_lessons=self.cleaned_data.get("no_of_lessons"),
-            days_between_lessons=self.cleaned_data.get("days_between_lessons"),
-            lesson_duration=self.cleaned_data.get("lesson_duration"),
-            other_info=self.cleaned_data.get("other_info"),
-        )
+        if not edit:
+            req = RequestForLessons.objects.create(
+                student=self._student,
+                availability=",".join(self.cleaned_data.get("availability_field")),
+                no_of_lessons=self.cleaned_data.get("no_of_lessons"),
+                days_between_lessons=self.cleaned_data.get("days_between_lessons"),
+                lesson_duration=self.cleaned_data.get("lesson_duration"),
+                other_info=self.cleaned_data.get("other_info"),
+            )
+        else:
+            # if the user is editing a request, don't create a new object
+            # but instead update its fields
+            req = self._instance
+            req.availability = ",".join(self.cleaned_data.get("availability_field"))
+            req.no_of_lessons = self.cleaned_data.get("no_of_lessons")
+            req.days_between_lessons = self.cleaned_data.get("days_between_lessons")
+            req.lesson_duration = self.cleaned_data.get("lesson_duration")
+            req.other_info = self.cleaned_data.get("other_info")
+            req.save()
 
         return req
 
@@ -224,3 +266,44 @@ class ForgotPasswordForm(forms.Form):
             )
         else:
             self.message = "This e-mail address is not registered to any account."
+
+class RegisterChildForm(forms.Form):
+    email = forms.EmailField(label="Email", required=True)
+    password = password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    message = ""
+
+    def authenticate(self, parent):
+        checked_email = self.cleaned_data.get("email")
+        checked_pass = self.cleaned_data.get("password")
+        child = authenticate(username = checked_email, password = checked_pass)
+        if child == parent:
+            self.message = "You cannot add yourself as your own child."
+        elif parent.children.filter(email = checked_email).exists():
+            self.message = "This user is already registered as your own child."
+        elif child is not None:
+            self.message = ("This user, " + child.first_name + " " + child.last_name + 
+                            " has been registered as your child.")
+            parent.children.add(child)
+            child.parents.add(parent)
+        else:
+            self.message = "Incorrect e-mail or password specified."
+
+class SelectChildForm(forms.ModelForm):
+    child_list = []
+    child_box = forms.ModelChoiceField(label = "Select child", queryset = User.objects.all())
+
+    class Meta:
+        model = User
+        fields = []
+        
+    def set_children(self, children):
+        self.child_list.clear()
+        for child in children:
+            self.child_list.append(child.email)
+        self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
+        
+        
+    
+    
+        
+    
