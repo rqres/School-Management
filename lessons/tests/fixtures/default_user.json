@@ -10,6 +10,7 @@
       "is_student": false,
       "is_teacher": false,
       "is_parent": false,
+      "is_school_admin": false,
       "is_admin": false,
       "is_active": true
     }

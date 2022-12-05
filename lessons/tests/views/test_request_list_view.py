@@ -15,8 +15,7 @@ class RequestForLessonsListViewTestCase(TestCase):
 
     def setUp(self):
         self.url = reverse("requests_list")
-        self.user = User.objects.get(email="john.doe@example.org")
-        self.student = Student.objects.get(user=self.user)
+        self.student = Student.objects.get(user__email="john.doe@example.org")
 
     def test_request_list_url(self):
         self.assertEqual(self.url, "/account/requests/")
@@ -33,7 +32,7 @@ class RequestForLessonsListViewTestCase(TestCase):
 
     def test_user_is_redirected_if_not_logged_in(self):
         response = self.client.get(self.url, follow=True)
-        redirect_url = reverse("log_in") + "?next=/account/requests/"
+        redirect_url = reverse("log_in") + "?next=" + reverse("requests_list")
         self.assertRedirects(
             response, redirect_url, status_code=302, target_status_code=200
         )

@@ -107,7 +107,7 @@ def account(request):
     else:
         # UNRECOGNIZED USER TYPE
         # this shouldn't happen, log user out and send him to welcome page
-        print("Who are you ?? " + str(request.user))
+        # print("Who are you ?? " + str(request.user))
         logout(request)
         return redirect("home")
 
@@ -212,6 +212,7 @@ def payment(request):
     return render(request, "payment_form.html", {"form": form})
 
 
+@login_required
 def school_terms_list(request):
     if not request.user.is_school_admin:
         return redirect("account")
@@ -222,6 +223,9 @@ def school_terms_list(request):
 @login_required
 # TODO:  @adminrequired
 def create_school_term(request):
+    if not request.user.is_school_admin:
+        return redirect("account")
+
     if request.method == "POST":
         form = SchoolTermForm(request.POST)
         if form.is_valid():
@@ -235,6 +239,9 @@ def create_school_term(request):
 
 @login_required
 def edit_school_term(request, id):
+    if not request.user.is_school_admin:
+        return redirect("account")
+
     term = get_object_or_404(SchoolTerm, id=id)
 
     if request.method == "POST":
@@ -243,16 +250,15 @@ def edit_school_term(request, id):
         # form.is_valid() will call term.clean()
         # the term needs to be hidden right before being cleaned
         # so as not to check overlapping against itself
-        term.hidden = True
+        term._editing = True
         term.save()
         if form.is_valid():
-            # immediately unhide the term after being cleaned
-            term.hidden = False
+            # finished editing
+            term._editing = False
             term.save()
 
             term = form.save(edit=True)
             term.save()
-            print(SchoolTerm.objects.filter(hidden=False))
             return redirect("school_terms_list")
 
     else:
