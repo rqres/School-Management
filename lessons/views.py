@@ -63,7 +63,6 @@ def sign_up_student(request):
             return redirect("account")
     else:
         form = StudentSignUpForm()
-
     return render(request, "sign_up_student.html", {"form": form})
 
 
@@ -80,6 +79,10 @@ def sign_up_admin(request):
             form = (SignUpAdminForm())  # create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, "sign_up_admin.html", {"form": form})
             # successful form means you save user record in database and redirect them to the database
+
+
+def view_admin_list(request):
+    return render(request, "admin_list.html")
 
 
 @login_required

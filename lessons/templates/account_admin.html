@@ -20,11 +20,16 @@
           <div>
             <p><a href='{% url 'school_terms_list' %}' class="btn btn-lg btn-warning mb-4">View school terms</a></p>
           </div>
-          <!--{% if request.is_school_admin.directorStatus is True %}-->
+          {% if request.is_school_admin.directorStatus is True %}
           <div>
             <p><a href='{% url 'sign_up_admin' %}' class="btn btn-lg btn-warning mb-4">Create admins</a></p>
           </div>
-          <!---{% endif %}-->
+          {% endif %}
+          {% if request.is_school_admin.directorStatus is True || request.is_school_admin.editAdmins is True || request.is_school_admin.deleteAdmins is True %}
+          <div>
+            <p><a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
+          </div>
+          {% endif %}
           <div>
             <a href='{% url 'create_request' %}' class="btn btn-lg btn-warning mb-4"> Submit a new Request</a>
           </div>

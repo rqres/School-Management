@@ -83,4 +83,5 @@ urlpatterns = [
         views.create_school_term,
         name="create_school_term",
     ),
+    path("view_admin_list/", views.view_admin_list, name="view_admin_list")
 ]
