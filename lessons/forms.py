@@ -3,7 +3,7 @@ from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from .models import Booking, Invoice, RequestForLessons, SchoolTerm, Teacher, Student, User, SchoolAdmin
 from django.contrib.auth import authenticate
 
 
@@ -301,9 +301,27 @@ class SelectChildForm(forms.ModelForm):
         for child in children:
             self.child_list.append(child.email)
         self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
-        
-        
-    
-    
+
+class FulfuilLessonRequestForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(label = "Select teacher", queryset = Teacher.objects.all())
+    def __init__(self, *args, **kwargs):
+        self.lesson_request = kwargs.pop("lesson_request", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["student"].initial = self.lesson_request.student
+        self.fields["num_of_lessons"].initial = self.lesson_request.no_of_lessons
+        self.fields["days_between_lessons"].initial = self.lesson_request.days_between_lessons
+        self.fields["lesson_duration"].initial = self.lesson_request.lesson_duration
+
+    class Meta:
+        model = Booking 
+        fields = [ "num_of_lessons", 
+                   "days_between_lessons", 
+                   "lesson_duration",
+                   "description",
+                   "teacher",
+                   "student"]
+
+   
         
     

@@ -11,6 +11,7 @@ from .forms import (
     LogInForm,
     ForgotPasswordForm,
     RegisterChildForm,
+    FulfuilLessonRequestForm,
 )
 from .models import Booking, Invoice, RequestForLessons, SchoolTerm, User
 
@@ -167,9 +168,15 @@ def delete_request(request, id):
         return redirect("requests_list")
 
 
-@login_required
+
 def fulfill_request(request, id):
-    pass
+    if request.method == "POST":
+        form = FulfuilLessonRequestForm(request.POST)
+        if form.is_valid():
+            pass
+    else:
+        form = FulfuilLessonRequestForm(request.POST)
+    return render(request, "fulfill_request_form.html", {"form": form})
 
 
 @login_required

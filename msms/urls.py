@@ -47,7 +47,9 @@ urlpatterns = [
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show a booking
-
+    path(
+        "fulfill_request/", views.fulfill_request, name="fulfill_request"
+    ),
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
         "account/requests/", views.requests_list, name="requests_list"
