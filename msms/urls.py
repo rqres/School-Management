@@ -19,54 +19,69 @@ from lessons import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
     path("", views.home, name="home"),  # path for the home page
-    
-    path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
-    
-    path(
-        "sign_up/student/", views.sign_up_student, name="sign_up_student"
-    ),  # path for the student sign-up page
-    
+
+    # ---------- LOG IN SECTION ----------
     path("log_in/", views.log_in, name="log_in"),  # path to log-in page
-    
+    path("log_out/", views.log_out, name="log_out"),  # path to log-out page
     path(
         "forgot_password/", views.forgot_password, name="forgot_password"
     ),  # path to reset password
-    
+
+    # ---------- SIGN UP SECTION ----------
+    path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
+    path(
+        "sign_up/student/", views.sign_up_student, name="sign_up_student"
+    ),  # path for the student sign-up page
+
+    # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
+    # (all users will be redirected here regardless of usertype)
+    path(
+        "account/", views.account, name="account"
+    ),  # path to account overview (currently a simple redirect)
+
+    # ---------- USER's BOOKINGS SECTION ----------
     path(
         "account/bookings/", views.bookings_list, name="bookings_list"
     ),  # path to list of bookings
-    
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show a booking
-    
-    path("log_out/", views.log_out, name="log_out"),  # path to log-out page
-    
-    path("account/", views.account, name="account"), # path to account overview (currently a simple redirect)
-    
-    path("adminaccount/", views.account_admin, name="account_admin"), 
-    # this should probably be renamed or we should decide on a convention for different account dashboards.
-    
+
+    # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
         "account/requests/", views.requests_list, name="requests_list"
     ),  # path to view my requests for lessons
-    
     path(
         "account/requests/create/", views.create_request, name="create_request"
     ),  # path to create new request
-    
-    path(
-        "account/payment/", views.payment, name="payment_form"
-    ),# path to payment page
-    
     path(
         "account/requests/<int:lessons_request_id>/",
         views.show_request,
         name="show_request",
     ),
-    path("adminlogin/", views.adminlogin, name="adminlogin"), #path to admin login page
+    path(
+        "account/requests/<int:lessons_request_id>/delete/",
+        views.delete_request,
+        name="delete_request",
+    ),
+
+    # ---------- USER's PAYMENT SECTION ----------
+    path(
+        "account/payment/", views.payment, name="payment_form"
+    ), , # path to payment page
+
+    # ---------- ADMIN SECTION ----------
+    path(
+        "schoolterms/",
+        views.school_terms_list,
+        name="school_terms_list",
+    ),
+    path(
+        "schoolterms/create/",
+        views.create_school_term,
+        name="create_school_term",
+    ),
     
     path("account/register_child/", views.register_child, name="register_child"), # path to register children
     

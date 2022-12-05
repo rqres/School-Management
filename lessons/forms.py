@@ -3,8 +3,14 @@ from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, Student, User
-from django.core.validators import RegexValidator
+from .models import (
+    Invoice,
+    RequestForLessons,
+    SchoolTerm,
+    Student,
+    User,
+    SchoolAdmin
+)
 from django.contrib.auth import authenticate
 
 
@@ -59,14 +65,72 @@ class StudentSignUpForm(UserCreationForm):
         return user
 
 
+class SignUpAdminForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100)
+    directorStatus = forms.BooleanField(label="Director?", required=False)
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "school_name", "directorStatus"]
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+
+    @transaction.atomic
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(SignUpAdminForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.is_school_admin = True
+            user.save()
+        SchoolAdmin.objects.create(
+            user=user,
+            school_name=self.cleaned_data.get("school_name"),
+            directorStatus=self.cleaned_data.get("directorStatus"),
+        )
+
+        return user
+
+
 class LogInForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
     password = forms.CharField(label="Password", widget=forms.PasswordInput())
 
 
-class AdminLoginForm(forms.Form):
-    adminemail = forms.EmailField(label="Email", required=True)
-    adminpassword = forms.CharField(label="Password", widget=forms.PasswordInput())
+class SchoolTermForm(forms.ModelForm):
+    class Meta:
+        model = SchoolTerm
+        fields = ["start_date", "end_date"]
+
+    def save(self):
+        super().save(commit=False)
+        school_term = SchoolTerm.objects.create(
+            start_date=self.cleaned_data.get("start_date"),
+            end_date=self.cleaned_data.get("end_date"),
+        )
+
+        return school_term
 
 
 class RequestForLessonsForm(forms.ModelForm):
@@ -86,16 +150,27 @@ class RequestForLessonsForm(forms.ModelForm):
             "other_info": forms.Textarea(),
         }
 
-    # availability_field = forms.MultipleChoiceField(
-    #     choices=[("mon", "Monday"), ("tue", "Tuesday"), ("wed", "Wednesday")],
-    #     label="Which days are you available?",
-    #     widget=forms.CheckboxSelectMultiple(),
-    # )
+    WEEKDAYS = [
+        ("MON", "Monday"),
+        ("TUE", "Tuesday"),
+        ("WED", "Wednesday"),
+        ("THU", "Thursday"),
+        ("FRI", "Friday"),
+        ("SAT", "Saturday"),
+        ("SUN", "Sunday"),
+    ]
+
+    availability_field = forms.MultipleChoiceField(
+        choices=WEEKDAYS,
+        label="Which days are you available?",
+        widget=forms.CheckboxSelectMultiple,
+    )
 
     def save(self):
         super().save(commit=False)
         req = RequestForLessons.objects.create(
             student=self._student,
+            availability=",".join(self.cleaned_data.get("availability_field")),
             no_of_lessons=self.cleaned_data.get("no_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),

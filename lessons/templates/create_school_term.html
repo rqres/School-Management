@@ -5,10 +5,10 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card signup-card">
-          <h2 class="create-request-title signup-card-header">
-            Complete the form below to create a new request for music lessons!
+          <h2 class="create-school-term-title signup-card-header">
+            Complete the form below to create a new school term
           </h2>
-          <form action="{% url 'create_request' %}" method="post">
+          <form action="{% url 'create_school_term' %}" method="post">
             {% csrf_token %}
             <!-- bootstrap doesnt display checkboxes correctly -->
             {{ form.as_p }}

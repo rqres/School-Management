@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lessons.models import Student,User
+from lessons.models import Student, User
 from django.core.exceptions import ValidationError
 
 # Create your tests here.

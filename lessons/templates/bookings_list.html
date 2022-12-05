@@ -15,11 +15,11 @@
             <table class="table">
                 {% for booking in bookings %}
                 <tr>
-                    <td> {{ booking.name }}</td>
+                    <td> {{ booking.num_of_lessons }}</td>
                     <td> {{ booking.description }}</td>
                     <td>{{ booking.invoice.urn }}</td>
-                    <td>{{ booking.startTime}}</td>
-                    <td>{{ booking.endTime}}</td>
+                    <td>{{ booking.student.user.first_name }}</td>
+                    <td>{{ booking.teacher.user.first_name }}</td>
                     <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
                 </tr>
                 {% endfor %}

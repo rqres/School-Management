@@ -1,7 +1,7 @@
 from django.core.validators import ValidationError
 from django.test import TestCase
 
-from lessons.models import RequestForLessons, Student ,User
+from lessons.models import RequestForLessons, Student, User
 
 
 class RequestModelTestCase(TestCase):
@@ -12,7 +12,7 @@ class RequestModelTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.get(email="john.doe@example.org")
-        student = Student.objects.get(user=self.user)                                 
+        student = Student.objects.get(user=self.user)
         self.request = student.requestforlessons_set.first()
 
     def test_corresponding_student_must_not_be_none(self):
@@ -27,6 +27,22 @@ class RequestModelTestCase(TestCase):
 
     def test_request_is_unfulfilled_by_default(self):
         self.assertFalse(self.request.fulfilled)
+
+    def test_availability_cannot_be_blank(self):
+        self.request.availability = ""
+        self._assert_request_is_invalid()
+
+    def test_availability_must_not_contain_invalid_days(self):
+        self.request.availability += ",BAD"
+        self._assert_request_is_invalid()
+
+    def test_availability_may_have_27_chars(self):
+        self.request.availability = "MON,TUE,WED,THU,FRI,SAT,SUN"
+        self._assert_request_is_valid()
+
+    def test_availability_cannot_be_over_27_chars(self):
+        self.request.availability = "MON,TUE,WED,THU,FRI,SAT,SUN,"
+        self._assert_request_is_invalid()
 
     def test_no_of_lessons_cannot_be_blank(self):
         self.request.no_of_lessons = ""
