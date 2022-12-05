@@ -103,6 +103,10 @@ class SchoolAdmin(models.Model):
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
+    createAdmins = models.BooleanField(default=False)
+    editAdmins = models.BooleanField(default=False)
+    deleteAdmins = models.BooleanField(default=False)
+
 
 
 class Invoice(models.Model):

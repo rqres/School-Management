@@ -62,14 +62,14 @@ class StudentSignUpForm(UserCreationForm):
 class SignUpAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
     directorStatus = forms.BooleanField(label="Director?", required=False)
+    createAdmins = forms.BooleanField(label="Create Admin privilege?", required=False)
+    editAdmins = forms.BooleanField(label="Edit Admins privilege?", required=False)
+    deleteAdmins = forms.BooleanField(label="Delete Admins privilege?", required=False)
+    editTermDates = forms.BooleanField(label="Edit term dates privilege?", required=False)
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "school_name", "directorStatus"]
-        #widgets = {
-            #'directorStatus': forms.CheckboxInput(attrs={'style':'width:20px;height:20px;'}),
-        #}
-
+        fields = ["first_name", "last_name", "email", "school_name", "directorStatus", "createAdmins", "editAdmins", "deleteAdmins"]
     password1 = forms.CharField(
         label="Password",
         widget=forms.PasswordInput,
@@ -105,6 +105,10 @@ class SignUpAdminForm(UserCreationForm):
             user=user,
             school_name=self.cleaned_data.get("school_name"),
             directorStatus=self.cleaned_data.get("directorStatus"),
+            createAdmins=self.cleaned_data.get("createAdmins"),
+            editAdmins=self.cleaned_data.get("editAdmins"),
+            deleteAdmins=self.cleaned_data.get("deleteAdmins"),
+            editTermDates=self.cleaned_data.get("editTermDates"),
         )
 
         return user
