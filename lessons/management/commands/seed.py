@@ -68,7 +68,7 @@ class Command(BaseCommand):
                 last_name="Major",
                 password="Password123",
             )
-            marty.is_school_admin = True
+            marty.directorStatus=True
             marty.save()
 
             SchoolAdmin.objects.create(

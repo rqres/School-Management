@@ -6,11 +6,8 @@
       <div class="col-12">
         <div class="card signup-card">
           <h2 class="signup-title signup-card-header">
-            Welcome back, {{ admin.user.first_name }} {{ admin.user.last_name }}
+            Welcome back, {{ school_admin.user.first_name }} {{ school_admin.user.last_name }}
           </h2>
-          <h4 style="color: red">
-             You are a System Administrator.
-          </h4>
           <div>
             <a href="" class="btn btn-lg btn-warning mb-2 mt-2">View all Bookings</a>
           </div>
@@ -20,12 +17,12 @@
           <div>
             <a href="{% url 'school_terms_list' %} " class="btn btn-lg btn-warning mb-3 mt-2">View school terms</a>
           </div>
-          {% if request.is_school_admin.directorStatus is True %}
+          {% if school_admin.user.directorStatus == True %}
           <div>
             <p><a href='{% url 'sign_up_admin' %}' class="btn btn-lg btn-warning mb-4">Create admins</a></p>
           </div>
           {% endif %}
-          {% if request.is_school_admin.directorStatus is True || request.is_school_admin.editAdmins is True || request.is_school_admin.deleteAdmins is True %}
+          {% if school_admin.user.directorStatus == True %}
           <div>
             <p><a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
           </div>

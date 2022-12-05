@@ -54,7 +54,6 @@ class User(AbstractBaseUser):
     is_teacher = models.BooleanField(default=False)
     is_parent = models.BooleanField(default=False)
     is_school_admin = models.BooleanField(default=False)
-    # ^^^^^^^^ equivalent of our project's school admins - we care about this
 
     # vvvvvv equivalent of django sysadmin - we can ignore this
     is_admin = models.BooleanField(default=False)
@@ -64,7 +63,7 @@ class User(AbstractBaseUser):
     # child-parent relations (many to many)
     parents = models.ManyToManyField("self", related_name='parents')
     children = models.ManyToManyField("self", related_name='children')
-    
+
     objects = CustomUserManager()
 
     # THIS TELLS DJANGO TO USE THE EMAIL FIELD AS USERNAME
@@ -96,7 +95,7 @@ class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
-    
+
     def __str__(self):
         return self.user.email
 
@@ -112,6 +111,7 @@ class SchoolAdmin(models.Model):
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
     directorStatus = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.user.email
