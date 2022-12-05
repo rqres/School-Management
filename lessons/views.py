@@ -153,7 +153,6 @@ def create_request(request):
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
 
-
 def payment(request):
     if request.method == "POST":
         if request.user.is_authenticated:
