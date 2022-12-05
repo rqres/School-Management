@@ -66,6 +66,9 @@ class SignUpAdminForm(UserCreationForm):
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email", "school_name", "directorStatus"]
+        #widgets = {
+            #'directorStatus': forms.CheckboxInput(attrs={'style':'width:20px;height:20px;'}),
+        #}
 
     password1 = forms.CharField(
         label="Password",

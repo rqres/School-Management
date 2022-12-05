@@ -71,15 +71,15 @@ def sign_up_student(request):
 def sign_up_admin(request):
     if request.method == "POST":
         form = SignUpAdminForm(
-            request.POST
+        request.POST
         )  # creates a bound version of the form with post data
         if form.is_valid():
             form.save()
             return redirect("account")
-    else:
-        form = (SignUpAdminForm())  # create a form with SignUpAdminForm constructor, pass that form to template to render it
+        else:
+            form = (SignUpAdminForm())  # create a form with SignUpAdminForm constructor, pass that form to template to render it
     return render(request, "sign_up_admin.html", {"form": form})
-    # successful form means you save user record in database and redirect them to the database
+            # successful form means you save user record in database and redirect them to the database
 
 
 @login_required
