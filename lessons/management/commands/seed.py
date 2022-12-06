@@ -54,7 +54,14 @@ class Command(BaseCommand):
             petra.is_school_admin = True
             petra.save()
 
-            SchoolAdmin.objects.create(user=petra, school_name="King's College London", directorStatus=False, editAdmins=False, deleteAdmins=False, createAdmins=False)
+            SchoolAdmin.objects.create(
+                user=petra,
+                school_name="King's College London",
+                is_director=False,
+                can_create_admins=False,
+                can_edit_admins=False,
+                can_delete_admins=False,
+            )
         except IntegrityError:
             print("     >School admin object 'Petra' already exists - skipping...")
         else:
@@ -68,14 +75,19 @@ class Command(BaseCommand):
                 last_name="Major",
                 password="Password123",
             )
-            
+
             marty.is_school_admin = True
-            marty.directorStatus=True
+            marty.is_director = True
             marty.save()
 
-            #directors automatically do anything so don't need privileges and hence all have been set to false
+            # directors automatically do anything so don't need privileges and hence all have been set to false
             SchoolAdmin.objects.create(
-                user=marty, directorStatus=True, school_name="King's College London", editAdmins=False, deleteAdmins=False, createAdmins=False
+                user=marty,
+                is_director=True,
+                school_name="King's College London",
+                can_create_admins=True,
+                can_edit_admins=True,
+                can_delete_admins=True,
             )
         except IntegrityError:
             print("     >Director object 'Marty' already exists - skipping...")

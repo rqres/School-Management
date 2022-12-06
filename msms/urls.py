@@ -29,12 +29,10 @@ urlpatterns = [
     ),  # path to reset password
 
     # ---------- SIGN UP SECTION ----------
-    path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
+    path("sign_up/", views.sign_up, name="sign_up"),
+    # path for the signup page
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
-    ),  # path for the student sign-up page
-    path(
-        "sign_up_admin/", views.sign_up_admin, name="sign_up_admin"
     ),  # path for the student sign-up page
 
 
@@ -82,20 +80,44 @@ urlpatterns = [
 
     # ---------- ADMIN SECTION ----------
     path(
-        "school_terms/",
+        "account/school_terms/",
         views.school_terms_list,
         name="school_terms_list",
     ),
     path(
-        "school_terms/create/",
+        "account/school_terms/create/",
         views.create_school_term,
         name="create_school_term",
     ),
-    path("account/view_admin_list/", views.view_admin_list, name="view_admin_list"),
-    path("account/view_admin_list/edit_admin/<int:id>/", views.edit_admin, name="edit_admin"),
-    path("account/view_admin_list/delete_admin/<int:id>/", views.delete_admin, name="delete_admin"),
+    path(
+        "account/school_terms/<int:id>/edit/",
+        views.edit_school_term,
+        name="edit_school_term",
+    ),
+    path(
+        "account/school_terms/<int:id>/delete/",
+        views.delete_school_term,
+        name="delete_school_term",
+    ),
 
-    path("account/register_child/", views.register_child, name="register_child"), # path to register children
+    path("account/all_admins/", views.admin_list, name="admin_list"),
+    path(
+        "account/all_admins/create/",
+        views.create_admin,
+        name="create_admin"
+    ),
+    path(
+        "account/all_admins/<int:id>/edit/",
+        views.edit_admin,
+        name="edit_admin"
+    ),
+    path(
+        "account/all_admins/<int:id>/delete/",
+        views.delete_admin,
+        name="delete_admin"
+    ),
 
-    path("account/select_child/", views.select_child, name="select_child"), # path to book lessons for children
+    path("account/register_child/", views.register_child, name="register_child"),  # path to register children
+
+    path("account/select_child/", views.select_child, name="select_child"),  # path to book lessons for children
 ]

@@ -7,7 +7,7 @@
         <div class="card signup-card">
           <h2 class="signup-title signup-card-header">Create an admin</h2>
           <h4 class="signup-text">Please sign up an admin by filling the sign up form below</h4>
-          <form action="{% url 'sign_up_admin' %}" method="post">
+          <form action="{% url 'create_admin' %}" method="post">
             {% csrf_token %}
             {{ form.as_p }}
             <!--{% include 'partials/bootstrap_form.html' with form=form %}-->

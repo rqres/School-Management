@@ -1,5 +1,4 @@
 from django import forms
-from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
@@ -39,8 +38,6 @@ class StudentSignUpForm(UserCreationForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
-
-
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
@@ -58,16 +55,87 @@ class StudentSignUpForm(UserCreationForm):
         return user
 
 
-class CreateAdminForm(UserCreationForm):
-    school_name = forms.CharField(max_length=100)
-    directorStatus = forms.BooleanField(label="Director?", required=False)
-    editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
-    deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
-    createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
+class EditAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._instance = kwargs.pop("instance", None)
+        super().__init__(*args, **kwargs)
+
+        if self._instance:
+            self.fields["first_name"].initial = self._instance.user.first_name
+            self.fields["last_name"].initial = self._instance.user.last_name
+            self.fields["school_name"].initial = self._instance.school_name
+            self.fields["is_director"].initial = self._instance.is_director
+            self.fields["can_edit_admins"].initial = self._instance.can_edit_admins
+            self.fields["can_delete_admins"].initial = self._instance.can_delete_admins
+            self.fields["can_create_admins"].initial = self._instance.can_create_admins
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "school_name", "directorStatus", "editAdmins", "deleteAdmins", "createAdmins"]
+        fields = [
+            "first_name",
+            "last_name",
+            "school_name",
+            "is_director",
+            "can_create_admins",
+            "can_edit_admins",
+            "can_delete_admins",
+        ]
+
+    school_name = forms.CharField(max_length=100)
+    is_director = forms.BooleanField(label="Director?", required=False)
+    can_create_admins = forms.BooleanField(
+        label="Allow them to create admins?", required=False
+    )
+    can_edit_admins = forms.BooleanField(
+        label="Allow them to edit admins?", required=False
+    )
+    can_delete_admins = forms.BooleanField(
+        label="Allow them to delete admins?", required=False
+    )
+
+    def save(self):
+        super().save(commit=False)
+        admin = self._instance
+        admin.user.first_name = self.cleaned_data.get("first_name")
+        admin.user.last_name = self.cleaned_data.get("last_name")
+        admin.school_name = self.cleaned_data.get("school_name")
+        admin.is_director = self.cleaned_data.get("is_director")
+        admin.can_edit_admins = self.cleaned_data.get("can_edit_admins")
+        admin.can_delete_admins = self.cleaned_data.get("can_delete_admins")
+        admin.can_create_admins = self.cleaned_data.get("can_create_admins")
+        admin.user.save()
+        admin.save()
+
+        return admin
+
+
+class CreateAdminForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100)
+    is_director = forms.BooleanField(label="Director?", required=False)
+    can_create_admins = forms.BooleanField(
+        label="Allow them to create admins?", required=False
+    )
+    can_edit_admins = forms.BooleanField(
+        label="Allow them to edit admins?", required=False
+    )
+    can_delete_admins = forms.BooleanField(
+        label="Allow them to delete admins?", required=False
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "school_name",
+            "is_director",
+            "can_create_admins",
+            "can_edit_admins",
+            "can_delete_admins",
+            "password1",
+            "password2",
+        ]
 
     password1 = forms.CharField(
         label="Password",
@@ -100,16 +168,15 @@ class CreateAdminForm(UserCreationForm):
         if commit:
             user.is_school_admin = True
             user.save()
-        SchoolAdmin.objects.create(
+        admin = SchoolAdmin.objects.create(
             user=user,
             school_name=self.cleaned_data.get("school_name"),
-            directorStatus=self.cleaned_data.get("directorStatus"),
-            editAdmins=self.cleaned_data.get("editAdmins"),
-            deleteAdmins=self.cleaned_data.get("deleteAdmins"),
-            createAdmins=self.cleaned_data.get("createAdmins"),
+            is_director=self.cleaned_data.get("is_director"),
+            can_create_admins=self.cleaned_data.get("can_create_admins"),
+            can_edit_admins=self.cleaned_data.get("can_edit_admins"),
+            can_delete_admins=self.cleaned_data.get("can_delete_admins"),
         )
-
-        return user
+        return admin
 
 
 class LogInForm(forms.Form):
@@ -133,8 +200,8 @@ class SchoolTermForm(forms.ModelForm):
         model = SchoolTerm
         fields = ["start_date", "end_date"]
         widgets = {
-            "start_date": forms.DateInput(attrs={'type': 'date'}),
-            "end_date": forms.DateInput(attrs={'type': 'date'})
+            "start_date": forms.DateInput(attrs={"type": "date"}),
+            "end_date": forms.DateInput(attrs={"type": "date"}),
         }
 
     def save(self, edit=False):
@@ -277,30 +344,41 @@ class ForgotPasswordForm(forms.Form):
         else:
             self.message = "This e-mail address is not registered to any account."
 
+
 class RegisterChildForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
-    password = password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    password = password = forms.CharField(
+        label="Password", widget=forms.PasswordInput()
+    )
     message = ""
 
     def authenticate(self, parent):
         checked_email = self.cleaned_data.get("email")
         checked_pass = self.cleaned_data.get("password")
-        child = authenticate(username = checked_email, password = checked_pass)
+        child = authenticate(username=checked_email, password=checked_pass)
         if child == parent:
             self.message = "You cannot add yourself as your own child."
-        elif parent.children.filter(email = checked_email).exists():
+        elif parent.children.filter(email=checked_email).exists():
             self.message = "This user is already registered as your own child."
         elif child is not None:
-            self.message = ("This user, " + child.first_name + " " + child.last_name +
-                            " has been registered as your child.")
+            self.message = (
+                "This user, "
+                + child.first_name
+                + " "
+                + child.last_name
+                + " has been registered as your child."
+            )
             parent.children.add(child)
             child.parents.add(parent)
         else:
             self.message = "Incorrect e-mail or password specified."
 
+
 class SelectChildForm(forms.ModelForm):
     child_list = []
-    child_box = forms.ModelChoiceField(label = "Select child", queryset = User.objects.all())
+    child_box = forms.ModelChoiceField(
+        label="Select child", queryset=User.objects.all()
+    )
 
     class Meta:
         model = User
@@ -310,4 +388,6 @@ class SelectChildForm(forms.ModelForm):
         self.child_list.clear()
         for child in children:
             self.child_list.append(child.email)
-        self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
+        self.fields["child_box"].queryset = User.objects.filter(
+            email__in=self.child_list
+        )

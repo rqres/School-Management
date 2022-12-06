@@ -5,7 +5,6 @@ from djmoney.money import Money
 from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 import datetime
-import pytz
 import random
 
 
@@ -61,8 +60,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
 
     # child-parent relations (many to many)
-    parents = models.ManyToManyField("self", related_name='parents')
-    children = models.ManyToManyField("self", related_name='children')
+    parents = models.ManyToManyField("self", related_name="parents")
+    children = models.ManyToManyField("self", related_name="children")
 
     objects = CustomUserManager()
 
@@ -110,11 +109,10 @@ class SchoolAdmin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
-    directorStatus = models.BooleanField(default=False)
-    editAdmins = models.BooleanField(default=False)
-    deleteAdmins = models.BooleanField(default=False)
-    createAdmins = models.BooleanField(default=False)
-
+    is_director = models.BooleanField(default=False)
+    can_create_admins = models.BooleanField(default=False)
+    can_edit_admins = models.BooleanField(default=False)
+    can_delete_admins = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email
@@ -166,22 +164,22 @@ class Booking(models.Model):
     description = models.CharField(max_length=50, blank=False)
 
     def create_lessons(self):
-        """ Creates a set of lessons for the confirmed booking """
+        """Creates a set of lessons for the confirmed booking"""
 
         # Generates a random time of the lesson to start
-        timeForLesson = random.randint(9,15)
+        timeForLesson = random.randint(9, 15)
         startDate = SchoolTerm.objects.first().start_date
         for lesson_id in range(self.num_of_lessons):
             lesson = Lesson.objects.create(
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
                 date=startDate + datetime.timedelta(self.days_between_lessons),
-                startTime=datetime.time(timeForLesson,0,0),
+                startTime=datetime.time(timeForLesson, 0, 0),
                 booking=self,
             )
             lesson.save()
 
     def update_lessons(self):
-        """ Lessons should be updated depending on the changes made to Booking """
+        """Lessons should be updated depending on the changes made to Booking"""
         lessons = self.lesson_set.all()
         # for each on lessons and update each of them
         for lesson in lessons:
@@ -218,14 +216,12 @@ class Lesson(models.Model):
     def clean(self):
         # Check that date is within one of the school terms
         currentTerm = None
-        schoolTerms =  SchoolTerm.objects.all()
+        schoolTerms = SchoolTerm.objects.all()
         for term in schoolTerms:
             if self.date > term.start_date and self.date < term.end_date:
                 currentTerm = term
-        if  currentTerm is None:
-            raise ValidationError(
-                "Date of lesson does not lie in the terms"
-            )
+        if currentTerm is None:
+            raise ValidationError("Date of lesson does not lie in the terms")
 
     class Meta:
         # Model options
