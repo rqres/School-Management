@@ -331,8 +331,6 @@ class FulfillLessonRequestForm(forms.ModelForm):
         self._lesson_request = kwargs.pop("lesson_request", None)
         super().__init__(*args, **kwargs)
 
-        self.fields["student"].initial = self._lesson_request.student.user.email
-        self.fields["student"].disabled = True
         self.fields["num_of_lessons"].initial = self._lesson_request.no_of_lessons
         self.fields[
             "days_between_lessons"
@@ -342,26 +340,34 @@ class FulfillLessonRequestForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = [
-            "student",
+            # student should not be a field in this
             "teacher",
             "num_of_lessons",
             "days_between_lessons",
             "lesson_duration",
             "description",
         ]
-        widgets = {
-            "student": forms.TextInput(),
-        }
 
+    # transaction atomic means that if anything fails in this function
+    # then everything will revert to the state it was in before running the function
+    # aka all operations in this function are part of one single (atomic) operation
+    # this is useful because we do not want e.g to mark the request as fulfilled
+    # in case creating the booking fails
+    @transaction.atomic
     def save(self):
         super().save(commit=False)
+
         booking = Booking.objects.create(
             num_of_lessons=self.cleaned_data.get("num_of_lessons"),
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
-            descritpion=self.cleaned_data.get("description"),
-            student=self._lesson_request.student.user.email,
+            description=self.cleaned_data.get("description"),
+            student=self._lesson_request.student,
             teacher=self.cleaned_data.get("teacher"),
         )
+
+        # booking created, mark request as fulfilled
+        self._lesson_request.fulfilled = True
+        self._lesson_request.save()
 
         return booking

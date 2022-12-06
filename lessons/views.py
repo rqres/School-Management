@@ -179,8 +179,17 @@ def fulfill_request(request, id):
             return redirect("all_requests_list")
     else:
         form = FulfillLessonRequestForm(lesson_request=lesson_request)
+
+    student_name = (
+        lesson_request.student.user.first_name
+        + " "
+        + lesson_request.student.user.last_name
+    )
+
     return render(
-        request, "fulfill_request_form.html", {"request_id": id, "form": form}
+        request,
+        "fulfill_request_form.html",
+        {"request_id": id, "form": form, "student_name": student_name},
     )
 
 
