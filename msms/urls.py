@@ -88,6 +88,11 @@ urlpatterns = [
         name="create_school_term",
     ),
     path(
+        "school_terms/<int:school_term_id>/delete",
+        views.delete_school_term,
+        name="delete_school_term"
+    ),
+    path(
         "school_terms/<int:id>/edit/",
         views.edit_school_term,
         name="edit_school_term"
