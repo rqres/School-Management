@@ -65,6 +65,25 @@ class CreateAdminForm(UserCreationForm):
     deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
     createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
 
+    def __init__(self, *args, **kwargs):
+        self._schooladmin = kwargs.pop("schooladmin", None)
+        self._instance = kwargs.pop("instance", None)
+        self.school_name = forms.CharField(max_length=100)
+        self.directorStatus = forms.BooleanField(label="Director?", required=False)
+        self.editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
+        self.deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
+        self.createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
+        super().__init__(*args, **kwargs)
+        # this if statement is executed if the user is using the form to
+        # update an existing request
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            self.fields["school_name"] = self.school_name
+            self.fields["directorStatus"] = self.directorStatus
+            self.fields["editAdmins"] = self.editAdmins
+            self.fields["deleteAdmins"]= self.deleteAdmins
+            self.fields["createAdmins"] = self.createAdmins
+
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email", "school_name", "directorStatus", "editAdmins", "deleteAdmins", "createAdmins"]
@@ -92,14 +111,41 @@ class CreateAdminForm(UserCreationForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
+    def save(self, edit=False):
+        super().save(commit=False)
+        # Save the provided password in hashed format
+        currentadmin = super(CreateAdminForm, self).save(commit=False)
+        currentadmin.set_password(self.cleaned_data["password1"])
+        if not edit:
+            currentadmin = CreateAdminForm.objects.create(
+                schooladmin=self._schooladmin,
+                school_name=self.cleaned_data.get("school_name"),
+                directorStatus=self.cleaned_data.get("directorStatus"),
+                editAdmins=self.cleaned_data.get("editAdmins"),
+                deleteAdmins=self.cleaned_data.get("deleteAdmins"),
+                createAdmins=self.cleaned_data.get("createAdmins"),
+            )
+        else:
+            # if the user is editing a request, don't create a new object
+            # but instead update its fields
+            currentadmin = self._instance
+            currentadmin.school_name = self.cleaned_data.get("school_name")
+            currentadmin.directorStatus = self.cleaned_data.get("directorStatus")
+            currentadmin.editAdmins = self.cleaned_data.get("editAdmins")
+            currentadmin.deleteAdmins = self.cleaned_data.get("deleteAdmins")
+            currentadmin.createAdmins = self.cleaned_data.get("createAdmins")
+            currentadmin.save()
+
+        return currentadmin
+
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
-        user = super(CreateAdminForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
+        currentadmin = super(CreateAdminForm, self).save(commit=False)
+        currentadmin.set_password(self.cleaned_data["password1"])
         if commit:
-            user.is_school_admin = True
-            user.save()
+            currentadmin.is_school_admin = True
+            currentadmin.save()
         SchoolAdmin.objects.create(
             user=user,
             school_name=self.cleaned_data.get("school_name"),
@@ -109,8 +155,7 @@ class CreateAdminForm(UserCreationForm):
             createAdmins=self.cleaned_data.get("createAdmins"),
         )
 
-        return user
-
+        return currentadmin
 
 class LogInForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)

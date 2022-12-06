@@ -90,7 +90,7 @@ def sign_up_admin(request):
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
-    if request.user.is_school_admin:
+    if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
@@ -223,6 +223,7 @@ def edit_admin(request, id):
 def delete_admin(request, id):
     currentadmin = SchoolAdmin.objects.get(pk=id)
     if currentadmin:
+        currentadmin.user.is_active=False
         currentadmin.delete()
         return render(request, "delete_admin.html")
 
