@@ -13,7 +13,7 @@ from .forms import (
     PaymentForm,
     LogInForm,
     ForgotPasswordForm,
-    SignUpAdminForm,
+    CreateAdminForm,
 )
 
 #  Create your views here.
@@ -74,7 +74,7 @@ def sign_up_student(request):
 # check if the user is a director then display sign up page
 def sign_up_admin(request):
     if request.method == "POST":
-        form = SignUpAdminForm(
+        form = CreateAdminForm(
             request.POST
         )  # creates a bound version of the form with post data
         if form.is_valid():
@@ -82,8 +82,8 @@ def sign_up_admin(request):
             return redirect("account")
     else:
         form = (
-            SignUpAdminForm()
-        )  # create a form with SignUpAdminForm constructor, pass that form to template to render it
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
     return render(request, "sign_up_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
 
@@ -201,16 +201,21 @@ def edit_request(request, id):
 def edit_admin(request, id):
     currentadmin = get_object_or_404(SchoolAdmin, user_id=id)
     if request.method == "POST":
-        form = SignUpAdminForm(
-            request.POST, instance=currentadmin, admin=request.user.schooladmin
+        form = CreateAdminForm(
+            request.POST, instance=currentadmin, schooladmin=request.user.schooladmin
         )
         if form.is_valid():
             currentadmin = form.save(edit=True)
             currentadmin.save()
             return redirect("admin_list")
     else:
-        form = SignUpAdminForm(instance=currentadmin)
-    return render(request, "admin_list.html", {"form" : form})
+        form = CreateAdminForm(instance=currentadmin)
+    return render(request, "edit_admin.html", {"admin.user.id":id, "form" : form})
+
+def delete_admin(request, id):
+    currentadmin = get_object_or_404(SchoolAdmin, user_id=id)
+    currentadmin.user.is_Active=False
+    return render(request, "delete_admin.html")
 
 
 def payment(request):

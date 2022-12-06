@@ -58,7 +58,7 @@ class StudentSignUpForm(UserCreationForm):
         return user
 
 
-class SignUpAdminForm(UserCreationForm):
+class CreateAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
     directorStatus = forms.BooleanField(label="Director?", required=False)
     editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
@@ -95,7 +95,7 @@ class SignUpAdminForm(UserCreationForm):
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
-        user = super(SignUpAdminForm, self).save(commit=False)
+        user = super(CreateAdminForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_school_admin = True

@@ -20,11 +20,11 @@
                       <div><a href="{% url 'edit_admin' admin.user.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
                     </div>
                   <div>
-                    <div><a href='{% url 'account' %}' class="btn btn-sm btn-secondary">Delete</a></div>
+                    <div><a href="{% url 'delete_admin' admin.user.id %}"  class="btn btn-sm btn-secondary">Delete</a></div>
                   </div>
               </div>
               <br>
-            {% endfor %}
+             {% endfor %}
           </ul>
         </div>
 
