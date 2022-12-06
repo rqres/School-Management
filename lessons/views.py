@@ -123,7 +123,7 @@ def bookings_list(request):
         bookings = Booking.objects.all()
     else:
         bookings = request.user.student.booking_set.all()
-    return render(request, "bookings_list.html", {"bookings": bookings})
+    return render(request, "bookings_list.html", {"bookings": bookings, "user": request.user})
 
 @login_required
 def show_booking(request, booking_id):

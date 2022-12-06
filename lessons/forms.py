@@ -260,7 +260,16 @@ class EditBookingForm(forms.ModelForm):
         return self._booking
 
 class PaymentForm(forms.Form):
-    invoice_urn = forms.CharField(label="Invoice reference number")
+    invoice_urn = forms.ModelChoiceField(
+        label="Invoice reference number",queryset=Invoice.objects.none()
+    )
+    def __init__(self, *args, **kwargs):
+        self._student = kwargs.pop("student", None)
+        super().__init__(*args, **kwargs)
+        if self._student:
+            invoices = self._student.invoice_set.all()  
+            self.fields["teacher"].queryset = invoices
+    
     account_name = forms.CharField(max_length=50)
     account_number = forms.CharField(
         min_length=8,
