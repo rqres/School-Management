@@ -61,10 +61,13 @@ class StudentSignUpForm(UserCreationForm):
 class SignUpAdminForm(UserCreationForm):
     school_name = forms.CharField(max_length=100)
     directorStatus = forms.BooleanField(label="Director?", required=False)
+    editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
+    deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
+    createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "school_name", "directorStatus"]
+        fields = ["first_name", "last_name", "email", "school_name", "directorStatus", "editAdmins", "deleteAdmins", "createAdmins"]
 
     password1 = forms.CharField(
         label="Password",
@@ -101,6 +104,9 @@ class SignUpAdminForm(UserCreationForm):
             user=user,
             school_name=self.cleaned_data.get("school_name"),
             directorStatus=self.cleaned_data.get("directorStatus"),
+            editAdmins=self.cleaned_data.get("editAdmins"),
+            deleteAdmins=self.cleaned_data.get("deleteAdmins"),
+            createAdmins=self.cleaned_data.get("createAdmins"),
         )
 
         return user

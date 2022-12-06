@@ -16,7 +16,6 @@ from .forms import (
     SignUpAdminForm,
 )
 
-
 #  Create your views here.
 def home(request):
     if request.user.is_authenticated:
@@ -141,8 +140,15 @@ def requests_list(request):
 
 @login_required
 def view_admin_list(request):
-    admins = SchoolAdmin.objects.all()
-    return render(request, "admin_list.html", {"admins": admins})
+    if request.user.schooladmin.directorStatus:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list.html", {"admins": admins})
+    elif request.user.schooladmin.editAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list_edit_only.html", {"admins": admins})
+    elif request.user.schooladmin.deleteAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list_delete_only.html", {"admins": admins})
 
 @login_required
 def show_request(request, id):
