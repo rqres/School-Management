@@ -41,8 +41,8 @@ class BookingListTest(TestCase):
             self.assertContains(response, booking.num_of_lessons)
             self.assertContains(response, booking.description)
             self.assertContains(response, booking.invoice.urn)
-            self.assertContains(response, booking.student.user.first_name)
-            self.assertContains(response, booking.teacher.user.first_name)
+            self.assertContains(response, booking.student.user.email)
+            self.assertContains(response, booking.teacher.user.email)
 
     def test_cannot_get_booking_when_not_logged_in(self):
         pass

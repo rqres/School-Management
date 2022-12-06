@@ -16,9 +16,9 @@
             <table class="table">
                 {% for lesson in lessons %}
                 <tr>
+                    <td>{{ lesson.name }}</td>
+                    <td> {{ lesson.date }}</td>
                     <td> {{ lesson.startTime }}</td>
-                    <td> {{ lesson.endTime }}</td>
-                    <td>{{ lesson.duration }}</td>
                 </tr>
                 {% endfor %}
             </table>

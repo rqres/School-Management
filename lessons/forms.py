@@ -225,10 +225,20 @@ class RequestForLessonsForm(forms.ModelForm):
 
         return req
 
-class BookingForm(forms.ModelForm):
+class EditBookingForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(
+        label="Select teacher", queryset=Teacher.objects.all()
+    )
     def __init__(self, *args, **kwargs):
         self._booking = kwargs.pop("booking", None)
         super().__init__(*args, **kwargs)
+
+        if self._booking:
+            self.fields["teacher"].initial = self._booking.teacher
+            self.fields["num_of_lessons"].initial = self._booking.num_of_lessons
+            self.fields["days_between_lessons"].initial = self._booking.days_between_lessons
+            self.fields["lesson_duration"].initial = self._booking.lesson_duration
+            self.fields["description"].initial = self._booking.description
 
     class Meta:
         model = Booking
@@ -239,8 +249,15 @@ class BookingForm(forms.ModelForm):
             "teacher",
             "description"
         ]
-        
+    def save(self):
+        super().save(commit=False)
+        self._booking.num_of_lessons = self.cleaned_data.get("num_of_lessons")
+        self._booking.days_between_lessons = self.cleaned_data.get("days_between_lessons")
+        self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
+        self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.save()
 
+        return self._booking
 
 class PaymentForm(forms.Form):
     invoice_urn = forms.CharField(label="Invoice reference number")

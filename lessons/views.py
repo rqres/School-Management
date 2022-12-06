@@ -12,6 +12,7 @@ from .forms import (
     ForgotPasswordForm,
     RegisterChildForm,
     FulfillLessonRequestForm,
+    EditBookingForm,
 )
 from .models import Booking, Invoice, RequestForLessons, SchoolTerm, User
 
@@ -147,6 +148,25 @@ def delete_booking(request, booking_id):
     else:
         return render(request, "delete_booking.html",{"booking_name": booking_name})
 
+@login_required  # needs to be admin login
+def edit_booking(request, booking_id):
+    if request.user.is_school_admin is False:
+        return redirect("account")
+    try:
+        booking = Booking.objects.get(id=booking_id)  
+        if request.method == "POST":
+            form = EditBookingForm(request.POST, booking=booking)
+            if form.is_valid():
+                booking = form.save()
+                return redirect("bookings_list")
+            else:
+                form = EditBookingForm(booking=booking)
+    except ObjectDoesNotExist:
+        return redirect("bookings_list")
+    else:
+        form = EditBookingForm(booking=booking)
+        return render(request, "edit_booking.html",{"booking": booking, "form": form})
+
 @login_required
 def requests_list(request):
     if request.user.is_student is False:
@@ -245,7 +265,7 @@ def all_requests_list(request):
     all_requests = RequestForLessons.objects.all()
     return render(request, "all_requests_list.html", {"all_requests": all_requests})
 
-
+@login_required
 def payment(request):
     if request.method == "POST":
         form = PaymentForm(request.POST)
