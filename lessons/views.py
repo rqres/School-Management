@@ -212,10 +212,12 @@ def edit_admin(request, id):
         form = CreateAdminForm(instance=currentadmin)
     return render(request, "edit_admin.html", {"admin.user.id":id, "form" : form})
 
-def delete_admin(request, id):
-    currentadmin = get_object_or_404(SchoolAdmin, user_id=id)
-    currentadmin.user.is_Active=False
-    return render(request, "delete_admin.html")
+@login_required
+def delete_admin(request, user_id):
+    currentadmin = SchoolAdmin.objects.get(id=id)
+    if currentadmin:
+        currentadmin.delete()
+        return render(request, "delete_admin.html")
 
 
 def payment(request):

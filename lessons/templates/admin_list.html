@@ -14,15 +14,17 @@
           <div>
             <ul>
               {% for admin in admins %}
-                <div style="border:1px solid black;">
-                  <li> Name - {{admin.user.first_name}} {{admin.user.last_name}}, Email - {{admin.user.email}} </li>
-                    <div>
-                      <div><a href="{% url 'edit_admin' admin.user.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
+                {% if admin.user.is_active %}
+                  <div style="border:1px solid black;">
+                    <li> Name - {{admin.user.first_name}} {{admin.user.last_name}}, Email - {{admin.user.email}} </li>
+                      <div>
+                        <div><a href="{% url 'edit_admin' id=admin.user.id %}" class="btn btn-sm btn-secondary">Edit</a></div>
+                      </div>
+                      <div>
+                        <div><a href="{% url 'delete_admin' id=admin.user.id %}"  class="btn btn-sm btn-secondary">Delete</a></div>
                     </div>
-                  <div>
-                    <div><a href="{% url 'delete_admin' admin.user.id %}"  class="btn btn-sm btn-secondary">Delete</a></div>
-                  </div>
-              </div>
+                </div>
+                {% endif %}
               <br>
              {% endfor %}
           </ul>
