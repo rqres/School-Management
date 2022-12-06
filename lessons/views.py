@@ -144,6 +144,9 @@ def view_admin_list(request):
     if request.user.schooladmin.directorStatus:
         admins = SchoolAdmin.objects.all()
         return render(request, "admin_list.html", {"admins": admins})
+    elif request.user.schooladmin.deleteAdmins and request.user.schooladmin.editAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list.html", {"admins": admins})
     elif request.user.schooladmin.editAdmins:
         admins = SchoolAdmin.objects.all()
         return render(request, "admin_list_edit_only.html", {"admins": admins})
