@@ -46,7 +46,7 @@ class PaymentFormTest(TestCase):
     def test_new_payment_redirects_when_not_logged_in(self):
         invoice_to_be_paid = Invoice.objects.get(urn=self.data["invoice_urn"])
         self.assertFalse(invoice_to_be_paid.is_paid)
-        redirect_url = reverse("log_in")
+        redirect_url = "/log_in/?next=%2Faccount%2Fpayment%2F"
         response = self.client.post(self.url, self.data, follow=True)
         self.assertRedirects(
             response,

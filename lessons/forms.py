@@ -3,7 +3,7 @@ from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from .models import Booking, Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
 from django.contrib.auth import authenticate
 
 
@@ -218,6 +218,22 @@ class RequestForLessonsForm(forms.ModelForm):
             req.save()
 
         return req
+
+class BookingForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._booking = kwargs.pop("booking", None)
+        super().__init__(*args, **kwargs)
+
+    class Meta:
+        model = Booking
+        fields = [
+            "num_of_lessons",
+            "days_between_lessons",
+            "lesson_duration",
+            "teacher",
+            "description"
+        ]
+        
 
 
 class PaymentForm(forms.Form):

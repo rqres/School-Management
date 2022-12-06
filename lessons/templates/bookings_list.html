@@ -19,6 +19,7 @@
             <td>{{ booking.student.user.first_name }}</td>
             <td>{{ booking.teacher.user.first_name }}</td>
             <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
+            <td><a href="{% url 'delete_booking' booking.id %}">{{ booking.name }}</a></td>
           </tr>
           {% endfor %}
           </table>

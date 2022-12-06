@@ -48,7 +48,7 @@ urlpatterns = [
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show a booking
     path(
-        "account/bookings/delete/", views.delete_booking, name="delete_booking"
+        "account/bookings/delete/<int:booking_id>/", views.delete_booking, name="delete_booking"
     ),  # path to delete a booking
 
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------

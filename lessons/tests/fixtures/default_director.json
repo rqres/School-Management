@@ -1,7 +1,7 @@
 [
   {
     "model": "lessons.user",
-    "pk": 1,
+    "pk": 6,
     "fields": {
       "password": "pbkdf2_sha256$390000$UuRoW4swCRUXszUmhyY7pa$B6MpbPGv5dYUa4Nyx1uMq1INGKcjyAPE5+Z0+XPoanM=",
       "first_name": "Bob",
@@ -17,7 +17,7 @@
   },
   {
     "model": "lessons.schooladmin",
-    "pk": 1,
+    "pk": 6,
     "fields": {
       "school_name": "King's College London",
       "directorStatus": true

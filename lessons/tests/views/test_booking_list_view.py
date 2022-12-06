@@ -18,7 +18,6 @@ class BookingListTest(TestCase):
         self.user = User.objects.get(email="john.doe@example.org")
         self.student = Student.objects.get(user=self.user)
 
-
         self.user_teacher = User.objects.get(email="jane.doe@example.org")
         self.teacher = Teacher.objects.get(user=self.user_teacher)
 

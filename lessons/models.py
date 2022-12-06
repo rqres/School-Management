@@ -161,7 +161,7 @@ class Booking(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
-
+    #startTime = models.TimeField(blank=false)
     def create_lessons(self):
         """ Creates a set of lessons for the confirmed booking """
 

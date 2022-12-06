@@ -120,11 +120,13 @@ def account(request):
 
 @login_required
 def bookings_list(request):
-    if request.user.is_student is False:
+    if request.user.is_student is False and request.user.is_school_admin is False:
         return redirect("account")
-    bookings = request.user.student.booking_set.all()
+    if request.user.is_school_admin is True:
+        bookings = Booking.objects.all()
+    else:
+        bookings = request.user.student.booking_set.all()
     return render(request, "bookings_list.html", {"bookings": bookings})
-
 
 @login_required
 def show_booking(request, booking_id):
@@ -136,8 +138,10 @@ def show_booking(request, booking_id):
     else:
         return render(request, "show_booking.html", {"lessons": lessons})
 
-@login_required
+@login_required  # needs to be admin login
 def delete_booking(request, booking_id):
+    if request.user.is_school_admin is False:
+        return redirect("account")
     try:
         booking = Booking.objects.get(id=booking_id)
         booking_name = str(booking)
@@ -205,24 +209,21 @@ def edit_request(request, id):
         form = RequestForLessonsForm(instance=req)
     return render(request, "edit_request.html", {"request_id": id, "form": form})
 
-
+@login_required
 def payment(request):
     if request.method == "POST":
-        if request.user.is_authenticated:
-            form = PaymentForm(request.POST)
-            if form.is_valid():
-                try:
-                    invoice = Invoice.objects.get(
-                        urn=form.cleaned_data.get("invoice_urn")
-                    )
-                    invoice.is_paid = True
-                    invoice.save()
-                except ObjectDoesNotExist:
-                    form = PaymentForm()
-                    return render(request, "payment_form.html", {"form": form})
-                return redirect("account")
-        else:
-            return redirect("log_in")
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            try:
+                invoice = Invoice.objects.get(
+                    urn=form.cleaned_data.get("invoice_urn")
+                )
+                invoice.is_paid = True
+                invoice.save()
+            except ObjectDoesNotExist:
+                form = PaymentForm()
+                return render(request, "payment_form.html", {"form": form})
+            return redirect("account")
     else:
         form = PaymentForm(request.POST)
     return render(request, "payment_form.html", {"form": form})
