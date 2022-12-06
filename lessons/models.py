@@ -137,6 +137,8 @@ class Invoice(models.Model):
             "student_num",
             "invoice_num",
         )
+    def __str__(self):
+        return self.urn
 
 
 class Booking(models.Model):
@@ -158,12 +160,15 @@ class Booking(models.Model):
         ],
     )
     invoice = models.ForeignKey(
-        Invoice, on_delete=models.SET_NULL, blank=True, null=True
+        Invoice, on_delete=models.CASCADE, blank=False
     )
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=False)
     #startTime = models.TimeField(blank=false)
+    def save(self, *args, **kwargs):
+        self.create_invoice()
+        super(Booking, self).save(*args, **kwargs)
     def create_lessons(self):
         """Creates a set of lessons for the confirmed booking"""
 
@@ -173,7 +178,7 @@ class Booking(models.Model):
         for lesson_id in range(self.num_of_lessons):
             lesson = Lesson.objects.create(
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
-                date=startDate + datetime.timedelta(self.days_between_lessons),
+                date=startDate + datetime.timedelta(days=self.days_between_lessons),
                 startTime=datetime.time(timeForLesson, 0, 0),
                 booking=self,
             )
@@ -196,6 +201,7 @@ class Booking(models.Model):
             price=Money(costOfBooking, "GBP"),
         )
         self.invoice.save()
+        
 
     def update_invoice(self):
         """Invoice should be updated depending on the changes made to Lesson"""
@@ -211,8 +217,7 @@ class Lesson(models.Model):
     lessonCreatedAt = models.TimeField(auto_now_add=True)
     description = models.CharField(max_length=500, blank=True)
 
-    def save(self, *args, **kwargs):
-        super(Lesson, self).save(*args, **kwargs)
+    
 
     def clean(self):
         # Check that date is within one of the school terms

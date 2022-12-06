@@ -268,7 +268,7 @@ def all_requests_list(request):
 @login_required
 def payment(request):
     if request.method == "POST":
-        form = PaymentForm(request.POST)
+        form = PaymentForm(request.POST,student=request.user)
         if form.is_valid():
             try:
                 invoice = Invoice.objects.get(
@@ -276,12 +276,11 @@ def payment(request):
                 )
                 invoice.is_paid = True
                 invoice.save()
+                return redirect("account")
             except ObjectDoesNotExist:
-                form = PaymentForm()
-                return render(request, "payment_form.html", {"form": form})
-            return redirect("account")
+                form = PaymentForm(student=request.user)
     else:
-        form = PaymentForm(request.POST)
+        form = PaymentForm(student=request.user)
     return render(request, "payment_form.html", {"form": form})
 
 

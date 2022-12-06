@@ -260,16 +260,16 @@ class EditBookingForm(forms.ModelForm):
         return self._booking
 
 class PaymentForm(forms.Form):
-    invoice_urn = forms.ModelChoiceField(
-        label="Invoice reference number",queryset=Invoice.objects.none()
-    )
     def __init__(self, *args, **kwargs):
-        self._student = kwargs.pop("student", None)
-        super().__init__(*args, **kwargs)
-        if self._student:
-            invoices = self._student.invoice_set.all()  
-            self.fields["teacher"].queryset = invoices
-    
+            self._student = kwargs.pop("student", None)
+            super().__init__(*args, **kwargs)
+            if self._student:
+                invoices = self._student.student.invoice_set.filter(is_paid=False)
+                self.fields["invoice_urn"].queryset = invoices
+
+    invoice_urn = forms.ModelChoiceField(
+        label="Invoice reference number",queryset=Invoice.objects.all()
+    )
     account_name = forms.CharField(max_length=50)
     account_number = forms.CharField(
         min_length=8,
@@ -300,6 +300,7 @@ class PaymentForm(forms.Form):
         ],
     )
 
+        
     def clean_invoice(self):
         invoice_urn = self.cleaned_data.get("invoice_urn")
         if not Invoice.objects.filter(urn=invoice_urn).exists():
@@ -411,6 +412,7 @@ class FulfillLessonRequestForm(forms.ModelForm):
             student=self._lesson_request.student,
             teacher=self.cleaned_data.get("teacher"),
         )
+        booking.create_lessons()
 
         # booking created, mark request as fulfilled
         self._lesson_request.fulfilled = True
