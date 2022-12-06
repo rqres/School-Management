@@ -17,7 +17,7 @@
                 <div style="border:1px solid black;">
                   <li> Name - {{admin.user.first_name}} {{admin.user.last_name}}, Email - {{admin.user.email}} </li>
                   <div>
-                    <div><a href='{% url 'account' %}' class="btn btn-sm btn-secondary">Edit</a></div>
+                    <div><a href="{% url 'edit_admin' id=admin.schooladmin.email %}" class="btn btn-sm btn-secondary">Edit</a></div>
                   </div>
               </div>
               <br>

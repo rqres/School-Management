@@ -6,9 +6,9 @@
       <div class="col-12">
         <div class="card signup-card">
           <h2 class="create-request-title signup-card-header">
-            Complete the form below to update your request for music lessons!
+            Complete the form below to edit admin information!
           </h2>
-          <form action="{% url 'edit_request' id=request_id %}" method="post">
+          <form action="{% url 'edit_admin' admin.user.id %}" method="post">
             {% csrf_token %}
             <!-- bootstrap doesnt display checkboxes correctly -->
             {{ form.as_p }}

@@ -91,8 +91,8 @@ urlpatterns = [
         views.create_school_term,
         name="create_school_term",
     ),
-    path("view_admin_list/", views.view_admin_list, name="view_admin_list"),
-
+    path("account/view_admin_list", views.view_admin_list, name="view_admin_list"),
+    path("account/view_admin_list/edit_admin/<int:id>/", views.edit_admin, name="edit_admin"),
     path("account/register_child/", views.register_child, name="register_child"), # path to register children
 
     path("account/select_child/", views.select_child, name="select_child"), # path to book lessons for children

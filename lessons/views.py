@@ -177,16 +177,13 @@ def create_request(request):
         if form.is_valid():
             form.save()
             return redirect("requests_list")
-
     else:
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
 
-
 @login_required
 def edit_request(request, id):
     req = get_object_or_404(RequestForLessons, id=id)
-
     if request.method == "POST":
         form = RequestForLessonsForm(
             request.POST, instance=req, student=request.user.student
@@ -195,10 +192,25 @@ def edit_request(request, id):
             req = form.save(edit=True)
             req.save()
             return redirect("requests_list")
-
     else:
         form = RequestForLessonsForm(instance=req)
     return render(request, "edit_request.html", {"request_id": id, "form": form})
+
+
+@login_required
+def edit_admin(request, id):
+    currentadmin = get_object_or_404(SchoolAdmin, user_id=id)
+    if request.method == "POST":
+        form = SignUpAdminForm(
+            request.POST, instance=currentadmin, admin=request.user.schooladmin
+        )
+        if form.is_valid():
+            currentadmin = form.save(edit=True)
+            currentadmin.save()
+            return redirect("admin_list")
+    else:
+        form = SignUpAdminForm(instance=currentadmin)
+    return render(request, "admin_list.html", {"form" : form})
 
 
 def payment(request):
