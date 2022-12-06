@@ -1,9 +1,17 @@
 from django import forms
-from django.forms import Select
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from .models import (
+    Booking,
+    Invoice,
+    RequestForLessons,
+    SchoolTerm,
+    Teacher,
+    Student,
+    User,
+    SchoolAdmin,
+)
 from django.contrib.auth import authenticate
 
 
@@ -38,8 +46,6 @@ class StudentSignUpForm(UserCreationForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
-    
-    
 
     @transaction.atomic
     def save(self, commit=True):
@@ -271,43 +277,101 @@ class ForgotPasswordForm(forms.Form):
         else:
             self.message = "This e-mail address is not registered to any account."
 
+
 class RegisterChildForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
-    password = password = forms.CharField(label="Password", widget=forms.PasswordInput())
+    password = password = forms.CharField(
+        label="Password", widget=forms.PasswordInput()
+    )
     message = ""
 
     def authenticate(self, parent):
         checked_email = self.cleaned_data.get("email")
         checked_pass = self.cleaned_data.get("password")
-        child = authenticate(username = checked_email, password = checked_pass)
+        child = authenticate(username=checked_email, password=checked_pass)
         if child == parent:
             self.message = "You cannot add yourself as your own child."
-        elif parent.children.filter(email = checked_email).exists():
+        elif parent.children.filter(email=checked_email).exists():
             self.message = "This user is already registered as your own child."
         elif child is not None:
-            self.message = ("This user, " + child.first_name + " " + child.last_name + 
-                            " has been registered as your child.")
+            self.message = (
+                "This user, "
+                + child.first_name
+                + " "
+                + child.last_name
+                + " has been registered as your child."
+            )
             parent.children.add(child)
             child.parents.add(parent)
         else:
             self.message = "Incorrect e-mail or password specified."
 
+
 class SelectChildForm(forms.ModelForm):
     child_list = []
-    child_box = forms.ModelChoiceField(label = "Select child", queryset = User.objects.all())
+    child_box = forms.ModelChoiceField(
+        label="Select child", queryset=User.objects.all()
+    )
 
     class Meta:
         model = User
         fields = []
-        
+
     def set_children(self, children):
         self.child_list.clear()
         for child in children:
             self.child_list.append(child.email)
-        self.fields['child_box'].queryset = User.objects.filter(email__in = self.child_list)
-        
-        
-    
-    
-        
-    
+        self.fields["child_box"].queryset = User.objects.filter(
+            email__in=self.child_list
+        )
+
+
+class FulfillLessonRequestForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(
+        label="Select teacher", queryset=Teacher.objects.all()
+    )
+
+    def __init__(self, *args, **kwargs):
+        self._lesson_request = kwargs.pop("lesson_request", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["num_of_lessons"].initial = self._lesson_request.no_of_lessons
+        self.fields[
+            "days_between_lessons"
+        ].initial = self._lesson_request.days_between_lessons
+        self.fields["lesson_duration"].initial = self._lesson_request.lesson_duration
+
+    class Meta:
+        model = Booking
+        fields = [
+            # student should not be a field in this
+            "teacher",
+            "num_of_lessons",
+            "days_between_lessons",
+            "lesson_duration",
+            "description",
+        ]
+
+    # transaction atomic means that if anything fails in this function
+    # then everything will revert to the state it was in before running the function
+    # aka all operations in this function are part of one single (atomic) operation
+    # this is useful because we do not want e.g to mark the request as fulfilled
+    # in case creating the booking fails
+    @transaction.atomic
+    def save(self):
+        super().save(commit=False)
+
+        booking = Booking.objects.create(
+            num_of_lessons=self.cleaned_data.get("num_of_lessons"),
+            days_between_lessons=self.cleaned_data.get("days_between_lessons"),
+            lesson_duration=self.cleaned_data.get("lesson_duration"),
+            description=self.cleaned_data.get("description"),
+            student=self._lesson_request.student,
+            teacher=self.cleaned_data.get("teacher"),
+        )
+
+        # booking created, mark request as fulfilled
+        self._lesson_request.fulfilled = True
+        self._lesson_request.save()
+
+        return booking
