@@ -214,7 +214,7 @@ def edit_admin(request, id):
 
 @login_required
 def delete_admin(request, id):
-    currentadmin = SchoolAdmin.objects.get(pk=id)
+    currentadmin = SchoolAdmin.objects.get(user_id=id)
     if currentadmin:
         currentadmin.delete()
         return render(request, "delete_admin.html")
