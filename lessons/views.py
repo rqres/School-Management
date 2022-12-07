@@ -100,7 +100,7 @@ def create_admin(request):
         form = CreateAdminForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("admin_list")
+            return redirect("account")
     else:
         form = (
             CreateAdminForm()
