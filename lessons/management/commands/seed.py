@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from faker import Faker
-from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Student, User
+from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Teacher, Student, User
 
 
 class Command(BaseCommand):
@@ -17,6 +17,8 @@ class Command(BaseCommand):
         self._base_seeder()
         print("Seeding 100 additional students...")
         self._seed_students()
+        print("Seeding 20 additional teachers...")
+        self._seed_teachers()
         print("Seeding requests for lessons...")
         self._seed_requests()
         print("Seeding school terms...")
@@ -152,6 +154,37 @@ class Command(BaseCommand):
             user.save()
 
             Student.objects.create(user=user, school_name=school)
+            print(".", end="", flush=True)
+        print("")
+    def _seed_teachers(self):
+        for i in range(20):
+            fname = self.faker.first_name()
+            lname = self.faker.last_name()
+
+            school_names = [
+                "Imperial",
+                "King's",
+                "Oxford",
+                "Cambridge",
+                "Gummies",
+                "Sesame",
+                "Jelly",
+            ]
+
+            school = random.choice(school_names) + "School"
+            email = fname.lower() + "." + lname.lower() + str(i) + "@example.com"
+
+            user = User.objects.create_user(
+                email,
+                first_name=fname,
+                last_name=lname,
+                password=(self.faker.password()),
+            )
+            user.is_teacher = True
+
+            user.save()
+
+            Teacher.objects.create(user=user, school_name=school)
             print(".", end="", flush=True)
         print("")
 

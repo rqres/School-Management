@@ -3,6 +3,7 @@ from django.test import TestCase
 from lessons.models import SchoolTerm, Booking, Lesson, User, Student, Teacher
 from djmoney.money import Money
 import datetime
+from datetime import timedelta
 
 class LessonTest(TestCase):
     fixtures = [
@@ -76,6 +77,17 @@ class LessonTest(TestCase):
     def test_name_field_is_unique(self):
         self.lesson.name = self.lesson_other.name
         self._assert_lesson_is_invalid()
+
+    def test_startDate_increaces_accordingly(self):
+        startDate = SchoolTerm.objects.first().start_date
+        #print(self.lesson.date)
+        #print( timedelta(days=2))
+        self.lesson.date = startDate + timedelta(days=2)
+        #print(self.lesson.date)
+        try:
+            self.lesson.full_clean()
+        except ValidationError:
+            self.fail("Test lesson should be valids")
 
     def _assert_lesson_is_invalid(self):
         with self.assertRaises(ValidationError):

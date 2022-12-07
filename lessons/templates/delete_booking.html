@@ -1,0 +1,8 @@
+{% extends 'bookings_list.html' %}
+{% block message %}
+<div class="alert alert-success">
+    <h4 class="alert-heading">Success!</h4> 
+    <p>You have deleted the booking :</p>
+    <p class="mb-0">{{ booking_name }}</p>
+</div>
+{% endblock %}
