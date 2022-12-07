@@ -268,19 +268,38 @@ def fulfill_request(request, id):
         {"request_id": id, "form": form, "user_name": user_name},
     )
 
-
+def extract_email(string):
+    email = ""
+    i = len(string) - 1
+    while (string[i] != " "):
+        email += string[i]
+        i -= 1
+    return email[::-1]
+        
 @login_required
 def create_request(request):
     if request.user.is_school_admin:
         raise PermissionDenied
-
+    
+    copy_of_request = request
+    submitted_data = request.POST.get('submit_field')
+    print(submitted_data)
+    if submitted_data is not None:
+        print(extract_email(submitted_data))
+        request.user = User.objects.filter(email__exact = extract_email(submitted_data)).first()
+        
     if request.method == "POST":
         form = RequestForLessonsForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
+            if submitted_data is not None:
+                return redirect("account")
             return redirect("requests_list")
     else:
         form = RequestForLessonsForm(user=request.user)
+        
+    if submitted_data is not None:
+        return render(copy_of_request, "select_child.html", {"form": form, "email": extract_email(submitted_data)})
     return render(request, "create_request.html", {"form": form})
 
 
@@ -406,11 +425,11 @@ def select_child(request):
         if form.is_valid():
             selected_child_email = form.cleaned_data["child_box"]
             child = User.objects.get(email__exact=selected_child_email)
-            child_requests = child.student.requestforlessons_set.all()
-            child_bookings = child.student.booking_set.all()
+            child_requests = child.requestforlessons_set.all()
+            child_bookings = child.booking_set.all()
 
             request_child_form = RequestForLessonsForm(
-                request.POST, student=child.student
+                request.POST, user=child
             )
             if request_child_form.is_valid():
                 request_child_form.save()
