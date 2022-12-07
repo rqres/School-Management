@@ -20,7 +20,7 @@ class LessonTest(TestCase):
 
         self.booking = Booking(
             num_of_lessons=10,
-            student=self.student,
+            user=self.user_student,
             teacher=self.teacher,
             description="Gutitar lesson on basics",
             days_between_lessons=7,

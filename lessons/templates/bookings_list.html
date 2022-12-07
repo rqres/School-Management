@@ -16,7 +16,7 @@
             <td> {{ booking.num_of_lessons }}</td>
             <td> {{ booking.description }}</td>
             <td>{{ booking.invoice.urn }}</td>
-            <td>{{ booking.student.user.email }}</td>
+            <td>{{ booking.user.email }}</td>
             <td>{{ booking.teacher.user.email }}</td>
             <td><a href="{% url 'show_booking' booking.id %}" class="btn btn-sm btn-secondary">Show lessons in Booking</a></td>
             {% if user.is_school_admin %}

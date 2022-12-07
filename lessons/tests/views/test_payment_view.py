@@ -23,7 +23,7 @@ class PaymentFormTest(TestCase):
 
         self.booking = Booking(
             num_of_lessons=10,
-            student=self.student,
+            user=self.user,
             teacher=self.teacher,
             description="Gutitar lesson on basics",
             days_between_lessons=7,
