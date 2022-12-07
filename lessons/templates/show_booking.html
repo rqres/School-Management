@@ -12,7 +12,6 @@
           <table class="table">
               {% for lesson in lessons %}
               <tr>
-                  <td>{{ lesson.name }}</td>
                   <td> {{ lesson.date }}</td>
                   <td> {{ lesson.startTime }}</td>
                   {% if user.is_school_admin %}

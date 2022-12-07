@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from faker import Faker
-from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Teacher, Student, User
+from lessons.models import Booking, RequestForLessons, SchoolAdmin, SchoolTerm, Teacher, Student, User
 
 
 class Command(BaseCommand):
@@ -19,10 +19,10 @@ class Command(BaseCommand):
         self._seed_students()
         print("Seeding 20 additional teachers...")
         self._seed_teachers()
-        print("Seeding requests for lessons...")
-        self._seed_requests()
         print("Seeding school terms...")
         self._seed_school_terms()
+        print("Seeding requests for lessons...")
+        self._seed_requests()
 
     def _base_seeder(self):
         # create the 3 accounts mentioned in the handbook
@@ -124,6 +124,17 @@ class Command(BaseCommand):
                     lesson_duration=lesson_duration,
                     other_info=other_info,
                 )
+                booking = Booking.objects.create(
+                    num_of_lessons=no_of_lessons,
+                    student=st,
+                    teacher=random.choice(Teacher.objects.all()),
+                    description=f'A description about the music lesson',
+                    days_between_lessons=days_between_lessons,
+                    lesson_duration=lesson_duration,
+                )
+                booking.save()
+                booking.create_lessons()
+                print(".", end="", flush=True)
 
     def _seed_students(self):
         for i in range(101):
