@@ -205,7 +205,7 @@ def edit_request(request, id):
 
 @login_required
 def edit_admin(request, id):
-    currentadmin = get_object_or_404(SchoolAdmin, pk=id)
+    currentadmin = get_object_or_404(User, pk=id)
     if request.method == "POST":
         form = CreateAdminForm(
             request.POST, instance=currentadmin, schooladmin=request.user.schooladmin
@@ -342,11 +342,11 @@ def create_school_term(request):
 
 
 @login_required
-def delete_school_term(request, school_term_id):
-    term = SchoolTerm.objects.get(id=school_term_id)
+def delete_school_term(request, id):
+    term = SchoolTerm.objects.get(id=id)
     if term:
         term.delete()
-        print(f"Request {school_term_id} deleted")
+        print(f"Request {id} deleted")
         return redirect("school_terms_list")
     print("cant find term")
 
