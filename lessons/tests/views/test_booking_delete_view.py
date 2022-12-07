@@ -33,7 +33,9 @@ class BookingDeletedTest(TestCase):
         self.booking_to_delete = self.user.booking_set.first()
         self.booking_name = str(self.booking_to_delete)
         self.booking_invoice = self.booking_to_delete.invoice.urn
-        self.url = reverse("delete_booking", kwargs={"id": self.booking_to_delete.id})
+        self.url = reverse(
+            "delete_booking", kwargs={"booking_id": self.booking_to_delete.id}
+        )
 
     def test_delete_booking_url(self):
         self.assertEqual(self.url, "/account/bookings/delete/1/")
