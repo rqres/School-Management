@@ -1,8 +1,9 @@
+import datetime
 from django.test import TestCase
 from django import forms
 
 from lessons.forms import FulfillLessonRequestForm
-from lessons.models import Booking, RequestForLessons, Teacher, User
+from lessons.models import Booking, RequestForLessons, SchoolTerm, Teacher, User
 
 
 # Create your tests here.
@@ -22,6 +23,11 @@ class FulfillRequestFormTestCase(TestCase):
         self.request = RequestForLessons.objects.get(pk=1)
         self.user = User.objects.get(pk=2)
 
+        SchoolTerm.objects.create(
+            start_date=datetime.date(2022, 9, 1),
+            end_date=datetime.date(2022, 10, 21),
+        )
+
         self.form_input = {
             "teacher": self.teacher.pk,
             "num_of_lessons": 14,
@@ -39,7 +45,7 @@ class FulfillRequestFormTestCase(TestCase):
 
     # Form has necessary fields
     def test_form_has_necessary_fields(self):
-        form = FulfillLessonRequestForm()
+        form = FulfillLessonRequestForm(lesson_request=self.request)
         self.assertIn("teacher", form.fields)
         self.assertIn("num_of_lessons", form.fields)
         self.assertIn("days_between_lessons", form.fields)
@@ -58,7 +64,7 @@ class FulfillRequestFormTestCase(TestCase):
             self.request.days_between_lessons,
         )
         self.assertEqual(
-            form.fields["lesson_duration"].initial, self.request.days_between_lessons
+            form.fields["lesson_duration"].initial, self.request.lesson_duration
         )
 
     # No bad input
@@ -67,7 +73,9 @@ class FulfillRequestFormTestCase(TestCase):
         self.form_input["days_between_lessons"] = "seven"
         self.form_input["lesson_duration"] = "sixty"
         self.form_input["teacher"] = "teacher"
-        form = FulfillLessonRequestForm(data=self.form_input)
+        form = FulfillLessonRequestForm(
+            lesson_request=self.request, data=self.form_input
+        )
         self.assertFalse(form.is_valid())
 
     def test_form_must_save_correctly(self):

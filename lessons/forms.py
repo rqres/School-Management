@@ -1,3 +1,4 @@
+from copy import Error
 from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
@@ -513,6 +514,9 @@ class FulfillLessonRequestForm(forms.ModelForm):
             "lesson_duration",
             "description",
         ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
 
     # transaction atomic means that if anything fails in this function
     # then everything will revert to the state it was in before running the function
@@ -531,7 +535,10 @@ class FulfillLessonRequestForm(forms.ModelForm):
             user=self._lesson_request.user,
             teacher=self.cleaned_data.get("teacher"),
         )
-        booking.create_lessons()
+        try:
+            booking.create_lessons()
+        except AttributeError:
+            raise Exception("No School Term in DB")
 
         # booking created, mark request as fulfilled
         self._lesson_request.fulfilled = True

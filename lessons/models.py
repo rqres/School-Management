@@ -177,6 +177,7 @@ class Booking(models.Model):
         # Generates a random time of the lesson to start
         timeForLesson = random.randint(9, 15)
         startDate = SchoolTerm.objects.first().start_date
+
         for lesson_id in range(self.num_of_lessons):
             new_date = startDate + datetime.timedelta(days=self.days_between_lessons)
             lesson = Lesson.objects.create(
