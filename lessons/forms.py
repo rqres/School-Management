@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import (
+    Lesson,
     Booking,
     Invoice,
     RequestForLessons,
@@ -17,7 +18,7 @@ from django.contrib.auth import authenticate
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100, required=True)
-    is_parent = forms.BooleanField(label="Are you a Parent?", required=False)
+    is_parent = forms.BooleanField(label="Are you a Parent?", required=False, widget=forms.CheckboxInput())
 
     class Meta:
         model = User
@@ -347,9 +348,84 @@ class RequestForLessonsForm(forms.ModelForm):
 
         return req
 
+class EditBookingForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(
+        label="Select teacher", queryset=Teacher.objects.all()
+    )
+    def __init__(self, *args, **kwargs):
+        self._booking = kwargs.pop("booking", None)
+        super().__init__(*args, **kwargs)
+
+        if self._booking:
+            self.fields["teacher"].initial = self._booking.teacher
+            self.fields["num_of_lessons"].initial = self._booking.num_of_lessons
+            self.fields["days_between_lessons"].initial = self._booking.days_between_lessons
+            self.fields["lesson_duration"].initial = self._booking.lesson_duration
+            self.fields["description"].initial = self._booking.description
+
+    class Meta:
+        model = Booking
+        fields = [
+            "num_of_lessons",
+            "days_between_lessons",
+            "lesson_duration",
+            "teacher",
+            "description"
+        ]
+    def save(self):
+        super().save(commit=False)
+        self._booking.num_of_lessons = self.cleaned_data.get("num_of_lessons")
+        self._booking.days_between_lessons = self.cleaned_data.get("days_between_lessons")
+        self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
+        self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.save()
+
+        return self._booking
+
+class EditLessonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._lesson = kwargs.pop("lesson", None)
+        super().__init__(*args, **kwargs)
+
+        if self._lesson:
+            self.fields["name"].initial = self._lesson.name
+            self.fields["date"].initial = self._lesson.date
+            self.fields["startTime"].initial = self._lesson.startTime
+            self.fields["description"].initial = self._lesson.description
+
+    class Meta:
+        model = Lesson
+        fields = [
+            "name",
+            "date",
+            "startTime",
+            "description"
+        ]
+        widgets = {
+            "date": forms.DateInput(attrs={'type': 'date'}),
+            'startTime': forms.TimeInput(attrs={'type': 'time'})
+        }
+    def save(self):
+        super().save(commit=False)
+        self._lesson.name = self.cleaned_data.get("name")
+        self._lesson.date= self.cleaned_data.get("date")
+        self._lesson.startTime = self.cleaned_data.get("startTime")
+        self._lesson.description = self.cleaned_data.get("description")
+        self._lesson.save()
+
+        return self._lesson
 
 class PaymentForm(forms.Form):
-    invoice_urn = forms.CharField(label="Invoice reference number")
+    def __init__(self, *args, **kwargs):
+            self._student = kwargs.pop("student", None)
+            super().__init__(*args, **kwargs)
+            if self._student:
+                invoices = self._student.student.invoice_set.filter(is_paid=False)
+                self.fields["invoice_urn"].queryset = invoices
+
+    invoice_urn = forms.ModelChoiceField(
+        label="Invoice reference number",queryset=Invoice.objects.all()
+    )
     account_name = forms.CharField(max_length=50)
     account_number = forms.CharField(
         min_length=8,
@@ -490,6 +566,7 @@ class FulfillLessonRequestForm(forms.ModelForm):
             student=self._lesson_request.student,
             teacher=self.cleaned_data.get("teacher"),
         )
+        booking.create_lessons()
 
         # booking created, mark request as fulfilled
         self._lesson_request.fulfilled = True

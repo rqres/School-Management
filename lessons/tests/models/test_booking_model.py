@@ -79,9 +79,9 @@ class BookingTest(TestCase):
         self.booking.lesson_duration = None
         self._assert_booking_is_invalid()
 
-    def test_invoice_field_may_be_blank(self):
+    def test_invoice_field_must_not_be_blank(self):
         self.booking.invoice = None
-        self._assert_booking_is_valid()
+        self._assert_booking_is_invalid()
 
     def test_invoice_field_accepts_valid_invoice(self):
         self.booking.invoice = self.invoice
