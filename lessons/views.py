@@ -13,6 +13,7 @@ from .forms import (
     ForgotPasswordForm,
     RegisterChildForm,
     FulfillLessonRequestForm,
+    CreateAdminForm,
 )
 
 #  Create your views here.

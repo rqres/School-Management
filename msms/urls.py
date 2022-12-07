@@ -92,7 +92,7 @@ urlpatterns = [
         name="create_school_term",
     ),
     path(
-        "school_terms/<int:school_term_id>/delete",
+        "school_terms/<int:id>/delete",
         views.delete_school_term,
         name="delete_school_term"
     ),

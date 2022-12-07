@@ -153,7 +153,7 @@ class CreateAdminForm(UserCreationForm):
             currentadmin.is_school_admin = True
             currentadmin.save()
         SchoolAdmin.objects.create(
-            user=user,
+            user=currentadmin,
             school_name=self.cleaned_data.get("school_name"),
             directorStatus=self.cleaned_data.get("directorStatus"),
             editAdmins=self.cleaned_data.get("editAdmins"),
