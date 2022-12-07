@@ -177,25 +177,29 @@ class Booking(models.Model):
         # Generates a random time of the lesson to start
         timeForLesson = random.randint(9, 15)
         startDate = SchoolTerm.objects.first().start_date
-
-        for lesson_id in range(self.num_of_lessons):
-            new_date = startDate + datetime.timedelta(days=self.days_between_lessons)
-            lesson = Lesson.objects.create(
-                name=f"{self.user.first_name}{self.teacher.user.first_name}{lesson_id}",
-                date=new_date,
-                startTime=datetime.time(timeForLesson, 0, 0),
-                booking=self,
-                description=self.description,
-            )
-            lesson.save()
+        new_date=startDate+datetime.timedelta(days = self.days_between_lessons)
+        COUNT = 0
+        while COUNT != self.num_of_lessons:
+            try:
+                lesson = Lesson.objects.create(
+                    name=f'{self.user.first_name}{self.teacher.user.first_name}{COUNT}',
+                    date=new_date,
+                    startTime=datetime.time(timeForLesson, 0, 0),
+                    booking=self,
+                    description = self.description
+                )
+                lesson.save()
+                COUNT += 1
+                new_date+=datetime.timedelta(days = self.days_between_lessons)
+            except:
+                new_date+=datetime.timedelta(days = self.days_between_lessons)
+                continue
 
     def update_lessons(self):
         """Lessons should be updated depending on the changes made to Booking"""
-        lessons = self.lesson_set.all()
-        # for each on lessons and update each of them
-        for lesson in lessons:
-            pass
-
+        lessons = self.lesson_set.all().delete()
+        self.create_lessons()
+        
     def create_invoice(self):
         """Invoice should be created for Lesson that has been created"""
         try:
@@ -218,7 +222,7 @@ class Booking(models.Model):
 
 
 class Lesson(models.Model):
-    name = models.CharField(max_length=50, blank=False, unique=True)
+    name = models.CharField(max_length=50, blank=False)
     date = models.DateField(blank=False)
     startTime = models.TimeField(blank=False)
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, blank=False)

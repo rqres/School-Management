@@ -74,16 +74,9 @@ class LessonTest(TestCase):
         self.lesson.name = 'x' * 51
         self._assert_lesson_is_invalid()
 
-    def test_name_field_is_unique(self):
-        self.lesson.name = self.lesson_other.name
-        self._assert_lesson_is_invalid()
-
     def test_startDate_increaces_accordingly(self):
         startDate = SchoolTerm.objects.first().start_date
-        #print(self.lesson.date)
-        #print( timedelta(days=2))
         self.lesson.date = startDate + timedelta(days=2)
-        #print(self.lesson.date)
         try:
             self.lesson.full_clean()
         except ValidationError:

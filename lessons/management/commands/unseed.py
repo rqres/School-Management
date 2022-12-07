@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from lessons.models import RequestForLessons, SchoolTerm, User
+from lessons.models import Booking, RequestForLessons, SchoolTerm, User
 
 
 class Command(BaseCommand):
@@ -13,3 +13,4 @@ class Command(BaseCommand):
 
         RequestForLessons.objects.all().delete()
         SchoolTerm.objects.all().delete()
+        Booking.objects.all().delete()
