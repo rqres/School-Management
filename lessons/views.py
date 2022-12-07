@@ -135,12 +135,10 @@ def account(request):
 
 @login_required
 def bookings_list(request):
-    if request.user.is_student is False and request.user.is_school_admin is False:
-        return redirect("account")
     if request.user.is_school_admin is True:
         bookings = Booking.objects.all()
     else:
-        bookings = request.user.student.booking_set.all()
+        bookings = request.user.booking_set.all()
     return render(
         request, "bookings_list.html", {"bookings": bookings, "user": request.user}
     )
@@ -353,7 +351,7 @@ def delete_admin(request, id):
 @login_required
 def payment(request):
     if request.method == "POST":
-        form = PaymentForm(request.POST, student=request.user)
+        form = PaymentForm(request.POST, user=request.user)
         if form.is_valid():
             try:
                 invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
@@ -361,9 +359,9 @@ def payment(request):
                 invoice.save()
                 return redirect("account")
             except ObjectDoesNotExist:
-                form = PaymentForm(student=request.user)
+                form = PaymentForm(user=request.user)
     else:
-        form = PaymentForm(student=request.user)
+        form = PaymentForm(user=request.user)
     return render(request, "payment_form.html", {"form": form})
 
 
