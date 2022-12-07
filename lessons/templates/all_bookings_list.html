@@ -14,15 +14,14 @@
             <ol>
               <h4 class="view-request-text">All Bookings:</h4>
               {% for booking in bookings %}
-              <div style="border:1px solid black;">
-                <li> {{request.booking.student.first_name}} booked with {{request.booking.teacher.first_name}}
+                <div style="border:1px solid black;">
+                  <li> {{request.booking.student.first_name}} booked with {{request.booking.teacher.first_name}}
                      Number of lessons: {{request.booking.num_of_lessons}}
                      Days between lessons: {{request.booking.days_between_lessons}}
                      Lesson duration: {{request.booking.lesson_duration}}
-                </li>
-
-              </div>
-              <br>
+                   </li>
+                 </div>
+                 <br>
               {% endfor %}
             </ol>
           </div>
