@@ -242,6 +242,15 @@ def all_requests_list(request):
 
     all_requests = RequestForLessons.objects.all()
     return render(request, "all_requests_list.html", {"all_requests": all_requests})
+
+@login_required
+def all_bookings_list(request):
+    if not request.user.is_school_admin:
+        return redirect("account")
+
+    bookings = Booking.objects.all()
+    return render(request, "all_bookings_list.html", {"bookings": bookings})
+
 def edit_admin(request, id):
     currentadmin = get_object_or_404(User, pk=id)
     if request.method == "POST":

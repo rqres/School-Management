@@ -128,6 +128,12 @@ urlpatterns = [
         name="admin_fulfill_request"
     ),
 
+    path(
+        "all_bookings_list/",
+        views.all_bookings_list,
+        name="all_bookings_list"
+    ),
+
     # ---------- PARENT SECTION ----------
     path(
         "account/register_child/",
