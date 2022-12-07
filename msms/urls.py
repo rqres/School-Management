@@ -91,8 +91,55 @@ urlpatterns = [
         views.create_school_term,
         name="create_school_term",
     ),
-    path("edit_school_term/<int:id>/", views.edit_school_term, name="edit_school_term"),
-    path("delete_school_term/<int:id>/", views.delete_school_term, name="delete_school_term"),
+    path(
+        "school_terms/<int:school_term_id>/delete",
+        views.delete_school_term,
+        name="delete_school_term"
+    ),
+    path(
+        "school_terms/<int:id>/edit/",
+        views.edit_school_term,
+        name="edit_school_term"
+    ),
+
+    path(
+        "all_requests/",
+        views.all_requests_list,
+        name="all_requests_list"
+    ),
+    path(
+        "all_requests/<int:id>/",
+        views.show_request,
+        name="admin_show_request",
+    ),
+    path(
+        "all_requests/<int:id>/edit/",
+        views.edit_request,
+        name="admin_edit_request"
+    ),
+    path(
+        "all_requests/<int:id>/delete/",
+        views.delete_request,
+        name="admin_delete_request",
+    ),
+    path(
+        "all_requests/<int:id>/fulfill/",
+        views.fulfill_request,
+        name="admin_fulfill_request"
+    ),
+
+    # ---------- PARENT SECTION ----------
+    path(
+        "account/register_child/",
+        views.register_child,
+        name="register_child"
+    ),  # path to register children
+
+    path(
+        "account/select_child/",
+        views.select_child,
+        name="select_child"
+    ),  # path to book lessons for children
     path("account/view_admin_list/", views.view_admin_list, name="view_admin_list"),
     path("account/view_admin_list/edit_admin/<int:id>/", views.edit_admin, name="edit_admin"),
     path("account/view_admin_list/delete_admin/<int:id>/", views.delete_admin, name="delete_admin"),
