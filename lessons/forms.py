@@ -17,7 +17,7 @@ from django.contrib.auth import authenticate
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100, required=True)
-    is_parent = forms.BooleanField(label="Are you a Parent?", required=False)
+    is_parent = forms.BooleanField(label="Are you a Parent?", required=False, widget=forms.CheckboxInput())
 
     class Meta:
         model = User
