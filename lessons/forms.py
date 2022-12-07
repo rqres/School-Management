@@ -235,7 +235,7 @@ class SchoolTermForm(forms.ModelForm):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._student = kwargs.pop("student", None)
+        self._user = kwargs.pop("user", None)
         self._instance = kwargs.pop("instance", None)
         super().__init__(*args, **kwargs)
 
@@ -284,7 +284,7 @@ class RequestForLessonsForm(forms.ModelForm):
         super().save(commit=False)
         if not edit:
             req = RequestForLessons.objects.create(
-                student=self._student,
+                user=self._user,
                 availability=",".join(self.cleaned_data.get("availability_field")),
                 no_of_lessons=self.cleaned_data.get("no_of_lessons"),
                 days_between_lessons=self.cleaned_data.get("days_between_lessons"),
@@ -525,7 +525,7 @@ class FulfillLessonRequestForm(forms.ModelForm):
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
             description=self.cleaned_data.get("description"),
-            student=self._lesson_request.student,
+            student=self._lesson_request.user,
             teacher=self.cleaned_data.get("teacher"),
         )
         booking.create_lessons()

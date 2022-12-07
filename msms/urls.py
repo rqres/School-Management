@@ -81,6 +81,11 @@ urlpatterns = [
         views.delete_request,
         name="delete_request",
     ),
+    path(
+        "account/requests/<int:id>/fulfill/",
+        views.fulfill_request,
+        name="fulfill_request",
+    ),
 
     # ---------- USER's PAYMENT SECTION ----------
     path(

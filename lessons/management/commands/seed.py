@@ -4,7 +4,14 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from faker import Faker
-from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Student, User, Teacher
+from lessons.models import (
+    RequestForLessons,
+    SchoolAdmin,
+    SchoolTerm,
+    Student,
+    User,
+    Teacher,
+)
 
 
 class Command(BaseCommand):
@@ -98,8 +105,9 @@ class Command(BaseCommand):
 
     def _seed_requests(self):
         # create 3 unfulfilled and 3 fulfilled requests
-        # for every student in the DB
-        for st in Student.objects.all():
+        # for every regular user in the DB
+        reg_users = User.objects.filter(is_school_admin=False).filter(is_admin=False)
+        for u in reg_users:
             for _ in range(3):
                 WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 # unfulfilled request:
@@ -113,7 +121,7 @@ class Command(BaseCommand):
                 lesson_duration = random.choice((15, 30, 60))
                 other_info = self.faker.sentence()
                 RequestForLessons.objects.create(
-                    student=st,
+                    user=u,
                     fulfilled=False,
                     availability=availability,
                     no_of_lessons=no_of_lessons,
@@ -128,7 +136,7 @@ class Command(BaseCommand):
                 lesson_duration = random.choice((15, 30, 60))
                 other_info = self.faker.sentence()
                 RequestForLessons.objects.create(
-                    student=st,
+                    user=u,
                     fulfilled=True,
                     availability=availability,
                     no_of_lessons=no_of_lessons,
@@ -168,6 +176,7 @@ class Command(BaseCommand):
             Student.objects.create(user=user, school_name=school)
             print(".", end="", flush=True)
         print("")
+
     def _seed_teachers(self):
         for i in range(20):
             fname = self.faker.first_name()
@@ -231,7 +240,6 @@ class Command(BaseCommand):
             Teacher.objects.create(user=user, school_name=school)
             print(".", end="", flush=True)
         print("")
-
 
     def _seed_school_terms(self):
         start_dates = [
