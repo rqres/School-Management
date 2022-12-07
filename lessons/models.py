@@ -139,6 +139,7 @@ class Invoice(models.Model):
             "student_num",
             "invoice_num",
         )
+
     def __str__(self):
         return self.urn
 
@@ -161,16 +162,15 @@ class Booking(models.Model):
             MinValueValidator(15, message="A lesson must be at least 15 minutes")
         ],
     )
-    invoice = models.ForeignKey(
-        Invoice, on_delete=models.CASCADE, blank=False
-    )
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
-    description = models.CharField(max_length=50, blank=False)
-    #startTime = models.TimeField(blank=false)
+    description = models.CharField(max_length=50, blank=True)
+    # startTime = models.TimeField(blank=false)
     def save(self, *args, **kwargs):
         self.create_invoice()
         super(Booking, self).save(*args, **kwargs)
+
     def create_lessons(self):
         """Creates a set of lessons for the confirmed booking"""
 
@@ -178,13 +178,13 @@ class Booking(models.Model):
         timeForLesson = random.randint(9, 15)
         startDate = SchoolTerm.objects.first().start_date
         for lesson_id in range(self.num_of_lessons):
-            new_date=startDate+datetime.timedelta(days = self.days_between_lessons)
+            new_date = startDate + datetime.timedelta(days=self.days_between_lessons)
             lesson = Lesson.objects.create(
                 name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
                 date=new_date,
                 startTime=datetime.time(timeForLesson, 0, 0),
                 booking=self,
-                description = self.description
+                description=self.description,
             )
             lesson.save()
 

@@ -332,6 +332,9 @@ class EditBookingForm(forms.ModelForm):
             "teacher",
             "description",
         ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
 
     def save(self):
         super().save(commit=False)

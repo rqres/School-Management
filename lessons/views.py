@@ -7,10 +7,10 @@ from .models import (
     Booking,
     Invoice,
     RequestForLessons,
-    User,
     SchoolTerm,
     SchoolAdmin,
     User,
+    Lesson,
 )
 from .forms import (
     EditAdminForm,
@@ -27,7 +27,6 @@ from .forms import (
     EditLessonForm,
     CreateAdminForm,
 )
-from .models import Lesson, Booking, Invoice, RequestForLessons, SchoolTerm, User
 
 
 #  Create your views here.
@@ -250,6 +249,9 @@ def delete_request(request, id):
 
 
 def fulfill_request(request, id):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
     lesson_request = RequestForLessons.objects.get(id=id)
 
     if request.method == "POST":
