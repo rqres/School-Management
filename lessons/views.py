@@ -3,17 +3,18 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import Booking, Invoice, RequestForLessons, User, SchoolTerm, SchoolAdmin
+from .models import Booking, Invoice, RequestForLessons, User, SchoolTerm, SchoolAdmin, User
 from .forms import (
     EditAdminForm,
     RequestForLessonsForm,
     SchoolTermForm,
     StudentSignUpForm,
     SelectChildForm,
-    RegisterChildForm,
     PaymentForm,
     LogInForm,
     ForgotPasswordForm,
+    RegisterChildForm,
+    FulfillLessonRequestForm,
     CreateAdminForm,
 )
 
@@ -96,11 +97,10 @@ def create_admin(request):
     return render(request, "create_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
 
-
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
-    if request.user.is_school_admin:
+    if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
@@ -155,7 +155,11 @@ def show_request(request, id):
     try:
         req = RequestForLessons.objects.get(id=id)
     except ObjectDoesNotExist:
-        return redirect("requests_list")
+        if request.user.is_school_admin:
+            return redirect("all_requests_list")
+        else:
+            return redirect("requests_list")
+
     else:
         return render(request, "show_request.html", {"lessons_request": req})
 
@@ -167,7 +171,35 @@ def delete_request(request, id):
         req.delete()
         print("success!")
 
-    return redirect("requests_list")
+    if request.user.is_school_admin:
+        return redirect("all_requests_list")
+    else:
+        return redirect("requests_list")
+
+
+def fulfill_request(request, id):
+    lesson_request = RequestForLessons.objects.get(id=id)
+
+    if request.method == "POST":
+        form = FulfillLessonRequestForm(request.POST, lesson_request=lesson_request)
+        if form.is_valid():
+            booking = form.save()
+            print(booking)
+            return redirect("all_requests_list")
+    else:
+        form = FulfillLessonRequestForm(lesson_request=lesson_request)
+
+    student_name = (
+        lesson_request.student.user.first_name
+        + " "
+        + lesson_request.student.user.last_name
+    )
+
+    return render(
+        request,
+        "fulfill_request_form.html",
+        {"request_id": id, "form": form, "student_name": student_name},
+    )
 
 
 @login_required
@@ -228,6 +260,7 @@ def edit_admin(request, id):
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
+
     if request.method == "POST":
         form = EditAdminForm(request.POST, instance=admin)
         if form.is_valid():
@@ -249,6 +282,7 @@ def delete_admin(request, id):
         print("success!")
 
     return redirect("admin_list")
+
 
 
 def payment(request):
@@ -374,6 +408,7 @@ def delete_school_term(request, id):
     if term:
         term.delete()
         print(f"SchoolTerm {id} deleted")
+
         return redirect("school_terms_list")
     print("cant find term")
 

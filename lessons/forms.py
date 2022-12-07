@@ -2,7 +2,16 @@ from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-from .models import Invoice, RequestForLessons, SchoolTerm, Student, User, SchoolAdmin
+from .models import (
+    Booking,
+    Invoice,
+    RequestForLessons,
+    SchoolTerm,
+    Teacher,
+    Student,
+    User,
+    SchoolAdmin,
+)
 from django.contrib.auth import authenticate
 
 
@@ -122,6 +131,25 @@ class CreateAdminForm(UserCreationForm):
         label="Allow them to delete admins?", required=False
     )
 
+    def __init__(self, *args, **kwargs):
+        self._schooladmin = kwargs.pop("schooladmin", None)
+        self._instance = kwargs.pop("instance", None)
+        self.school_name = forms.CharField(max_length=100)
+        self.directorStatus = forms.BooleanField(label="Director?", required=False)
+        self.editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
+        self.deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
+        self.createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
+        super().__init__(*args, **kwargs)
+        # this if statement is executed if the user is using the form to
+        # update an existing request
+        # this block populates the fields with the existing data in the model
+        if self._instance:
+            self.fields["school_name"] = self.school_name
+            self.fields["directorStatus"] = self.directorStatus
+            self.fields["editAdmins"] = self.editAdmins
+            self.fields["deleteAdmins"]= self.deleteAdmins
+            self.fields["createAdmins"] = self.createAdmins
+
     class Meta:
         model = User
         fields = [
@@ -160,11 +188,38 @@ class CreateAdminForm(UserCreationForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
+    def save(self, edit=False):
+        super().save(commit=False)
+        # Save the provided password in hashed format
+        currentadmin = super(CreateAdminForm, self).save(commit=False)
+        currentadmin.set_password(self.cleaned_data["password1"])
+        if not edit:
+            currentadmin = CreateAdminForm.objects.create(
+                schooladmin=self._schooladmin,
+                school_name=self.cleaned_data.get("school_name"),
+                directorStatus=self.cleaned_data.get("directorStatus"),
+                editAdmins=self.cleaned_data.get("editAdmins"),
+                deleteAdmins=self.cleaned_data.get("deleteAdmins"),
+                createAdmins=self.cleaned_data.get("createAdmins"),
+            )
+        else:
+            # if the user is editing a request, don't create a new object
+            # but instead update its fields
+            currentadmin = self._instance
+            currentadmin.school_name = self.cleaned_data.get("school_name")
+            currentadmin.directorStatus = self.cleaned_data.get("directorStatus")
+            currentadmin.editAdmins = self.cleaned_data.get("editAdmins")
+            currentadmin.deleteAdmins = self.cleaned_data.get("deleteAdmins")
+            currentadmin.createAdmins = self.cleaned_data.get("createAdmins")
+            currentadmin.save()
+
+        return currentadmin
+
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
-        user = super(CreateAdminForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password1"])
+        currentadmin = super(CreateAdminForm, self).save(commit=False)
+        currentadmin.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_school_admin = True
             user.save()
@@ -391,3 +446,53 @@ class SelectChildForm(forms.ModelForm):
         self.fields["child_box"].queryset = User.objects.filter(
             email__in=self.child_list
         )
+
+class FulfillLessonRequestForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(
+        label="Select teacher", queryset=Teacher.objects.all()
+    )
+
+    def __init__(self, *args, **kwargs):
+        self._lesson_request = kwargs.pop("lesson_request", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["num_of_lessons"].initial = self._lesson_request.no_of_lessons
+        self.fields[
+            "days_between_lessons"
+        ].initial = self._lesson_request.days_between_lessons
+        self.fields["lesson_duration"].initial = self._lesson_request.lesson_duration
+
+    class Meta:
+        model = Booking
+        fields = [
+            # student should not be a field in this
+            "teacher",
+            "num_of_lessons",
+            "days_between_lessons",
+            "lesson_duration",
+            "description",
+        ]
+
+    # transaction atomic means that if anything fails in this function
+    # then everything will revert to the state it was in before running the function
+    # aka all operations in this function are part of one single (atomic) operation
+    # this is useful because we do not want e.g to mark the request as fulfilled
+    # in case creating the booking fails
+    @transaction.atomic
+    def save(self):
+        super().save(commit=False)
+
+        booking = Booking.objects.create(
+            num_of_lessons=self.cleaned_data.get("num_of_lessons"),
+            days_between_lessons=self.cleaned_data.get("days_between_lessons"),
+            lesson_duration=self.cleaned_data.get("lesson_duration"),
+            description=self.cleaned_data.get("description"),
+            student=self._lesson_request.student,
+            teacher=self.cleaned_data.get("teacher"),
+        )
+
+        # booking created, mark request as fulfilled
+        self._lesson_request.fulfilled = True
+        self._lesson_request.save()
+
+        return booking

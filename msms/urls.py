@@ -117,6 +117,7 @@ urlpatterns = [
         name="delete_admin"
     ),
 
+
     path("account/register_child/", views.register_child, name="register_child"),  # path to register children
 
     path("account/select_child/", views.select_child, name="select_child"),  # path to book lessons for children

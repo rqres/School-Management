@@ -104,6 +104,9 @@ class Teacher(models.Model):
     # add extra fields for teachers here:
     school_name = models.CharField(max_length=100, blank=False)
 
+    def __str__(self):
+        return self.user.email
+
 
 class SchoolAdmin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
