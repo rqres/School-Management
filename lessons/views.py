@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required 
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, render, redirect
+from .models import Booking, Invoice, RequestForLessons, User, SchoolTerm, SchoolAdmin, User
 from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
@@ -14,6 +15,7 @@ from .forms import (
     FulfillLessonRequestForm,
     EditBookingForm,
     EditLessonForm,
+    CreateAdminForm,
 )
 from .models import Lesson, Booking, Invoice, RequestForLessons, SchoolTerm, User
 
@@ -70,31 +72,29 @@ def sign_up_student(request):
             return redirect("account")
     else:
         form = StudentSignUpForm()
-
     return render(request, "sign_up_student.html", {"form": form})
 
 
 # check if the user is a director then display sign up page
-# def sign_up_admin(request):
-#     if request.method == "POST":
-#         form = SignUpAdminForm(
-#             request.POST
-#         )  # creates a bound version of the form with post data
-#         if form.is_valid():
-#             form.save()
-#             return redirect("account")
-#     else:
-#         form = (
-#             SignUpAdminForm()
-#         )  # create a form with SignUpAdminForm constructor, pass that form to template to render it
-#     return render(request, "sign_up_admin.html", {"form": form})
-#     # successful form means you save user record in database and redirect them to the database
-
+def sign_up_admin(request):
+    if request.method == "POST":
+        form = CreateAdminForm(
+            request.POST
+        )  # creates a bound version of the form with post data
+        if form.is_valid():
+            form.save()
+            return redirect("account")
+    else:
+        form = (
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
+    return render(request, "sign_up_admin.html", {"form": form})
+    # successful form means you save user record in database and redirect them to the database
 
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
-    if request.user.is_school_admin:
+    if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
@@ -197,6 +197,22 @@ def requests_list(request):
 
 
 @login_required
+def view_admin_list(request):
+    if request.user.schooladmin.directorStatus:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list.html", {"admins": admins})
+    elif request.user.schooladmin.deleteAdmins and request.user.schooladmin.editAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list.html", {"admins": admins})
+    elif request.user.schooladmin.editAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list_edit_only.html", {"admins": admins})
+    elif request.user.schooladmin.deleteAdmins:
+        admins = SchoolAdmin.objects.all()
+        return render(request, "admin_list_delete_only.html", {"admins": admins})
+
+
+@login_required
 def show_request(request, id):
     try:
         req = RequestForLessons.objects.get(id=id)
@@ -255,7 +271,6 @@ def create_request(request):
         if form.is_valid():
             form.save()
             return redirect("requests_list")
-
     else:
         form = RequestForLessonsForm(student=request.user.student)
     return render(request, "create_request.html", {"form": form})
@@ -264,7 +279,6 @@ def create_request(request):
 @login_required
 def edit_request(request, id):
     req = get_object_or_404(RequestForLessons, id=id)
-
     if request.method == "POST":
         form = RequestForLessonsForm(
             request.POST, instance=req, student=request.user.student
@@ -273,7 +287,6 @@ def edit_request(request, id):
             req = form.save(edit=True)
             req.save()
             return redirect("requests_list")
-
     else:
         form = RequestForLessonsForm(instance=req)
     return render(request, "edit_request.html", {"request_id": id, "form": form})
@@ -285,6 +298,27 @@ def all_requests_list(request):
 
     all_requests = RequestForLessons.objects.all()
     return render(request, "all_requests_list.html", {"all_requests": all_requests})
+def edit_admin(request, id):
+    currentadmin = get_object_or_404(SchoolAdmin, pk=id)
+    if request.method == "POST":
+        form = CreateAdminForm(
+            request.POST, instance=currentadmin, schooladmin=request.user.schooladmin
+        )
+        if form.is_valid():
+            currentadmin = form.save(edit=True)
+            currentadmin.save()
+            return redirect("admin_list")
+    else:
+        form = CreateAdminForm(instance=currentadmin)
+    return render(request, "edit_admin.html", {"admin_user_id": id, "form": form})
+
+@login_required
+def delete_admin(request, id):
+    currentadmin = SchoolAdmin.objects.get(pk=id)
+    if currentadmin:
+        currentadmin.user.is_active=False
+        currentadmin.delete()
+        return render(request, "delete_admin.html")
 
 @login_required
 def payment(request):
@@ -395,6 +429,7 @@ def create_school_term(request):
         form = SchoolTermForm()
     return render(request, "create_school_term.html", {"form": form})
 
+
 @login_required
 def delete_school_term(request, school_term_id):
     term = SchoolTerm.objects.get(id=school_term_id)
@@ -403,6 +438,7 @@ def delete_school_term(request, school_term_id):
         print(f"Request {school_term_id} deleted")
         return redirect("school_terms_list")
     print("cant find term")
+
 
 @login_required
 def edit_school_term(request, id):

@@ -9,9 +9,13 @@
           <h4 class="signup-text">Please sign up an admin by filling the sign up form below</h4>
           <form action="{% url 'sign_up_admin' %}" method="post">
             {% csrf_token %}
-            {% include 'partials/bootstrap_form.html' with form=form %}
+            {{ form.as_p }}
+            <!--{% include 'partials/bootstrap_form.html' with form=form %}-->
             <input type="submit" value="Sign up" class="btn btn-lg btn-warning">
           </form>
+          <div>
+              <a href='{% url 'account' %}' class="btn btn-lg btn-secondary mt-2"> Return to Dashboard</a>
+          </div>
         </div>
       </div>
     </div>

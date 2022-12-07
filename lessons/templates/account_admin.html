@@ -8,20 +8,40 @@
           <h2 class="signup-title signup-card-header">
              Welcome back, {{ school_admin.user.first_name }} {{ school_admin.user.last_name }} 
           </h2>
-          <h4 style="color: red">
-             You are a System Administrator.
-          </h4>
+
           <div>
             <a href="{% url 'bookings_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Bookings</a>
           </div>
+
           <div>
             <a href="{% url 'all_requests_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Requests</a>
           </div>
+
           <div>
             <a href="{% url 'school_terms_list' %}" class="btn btn-lg btn-warning mb-3 mt-2">View school terms</a>
           </div>
           <div>
-            <a href="{% url 'log_out' %}" class="btn btn-sm btn-secondary">Log Out</a>
+            {% if school_admin.directorStatus or school_admin.createAdmins%}
+              <div>
+                <a href="{% url 'sign_up_admin' %}" class="btn btn-lg btn-warning mb-3 mt-2">Create admins</a>
+              </div>
+            {% endif %}
+          </div>
+
+          <div>
+            {% if school_admin.directorStatus or school_admin.editAdmins or school_admin.deleteAdmins %}
+              <div>
+                <a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
+              </div>
+            {% endif %}
+          </div>
+
+          <div>
+            <a href='{% url 'create_request' %}' class="btn btn-lg btn-warning mb-4"> Submit a new Request</a>
+          </div>
+          <div>
+
+            <a href='{% url 'log_out' %}' class="btn btn-sm btn-secondary"> Log Out</a>
           </div>
         </div>
       </div>
