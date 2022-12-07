@@ -9,7 +9,7 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card home-card mx-auto offset-md-1 offset-lg-2 text-center">
-          <h1 class="card-title home-title home-card-header mx-auto mb-4">All requests</h1>
+          <h1 class="card-title home-title home-card-header mx-auto mb-4">All bookings</h1>
           <div>
             <ol>
               <h4 class="view-request-text">All Bookings:</h4>
@@ -20,7 +20,9 @@
                      Days between lessons: {{booking.days_between_lessons}}
                      Lesson duration: {{booking.lesson_duration}}
                    </li>
-                 </div>
+                </div>
+                 <div><a href="{% url 'admin_edit_booking' id=booking.id %}" class="btn btn-sm btn-secondary">Edit lesson booking</a></div>
+                 <div><a href="{% url 'admin_delete_booking' id=booking.id %}" class="btn btn-sm btn-secondary">Delete booking</a></div>
                  <br>
               {% endfor %}
             </ol>

@@ -251,6 +251,43 @@ def all_bookings_list(request):
     bookings = Booking.objects.all()
     return render(request, "all_bookings_list.html", {"bookings": bookings})
 
+def admin_delete_booking(request, id):
+    req = get_object_or_404(Booking, id=id)
+    if req:
+        req.delete()
+        print("success!")
+
+    if request.user.is_school_admin:
+        return redirect("all_bookings_list")
+    else:
+        return redirect("account")
+
+
+def admin_edit_booking(request, id):
+    lesson_request = RequestForLessons.objects.get(id=id)
+
+    if request.method == "POST":
+        form = FulfillLessonRequestForm(request.POST, lesson_request=lesson_request)
+        if form.is_valid():
+            booking = form.save()
+            print(booking)
+            return redirect("all_bookings_list")
+    else:
+        form = FulfillLessonRequestForm(lesson_request=lesson_request)
+
+    student_name = (
+        lesson_request.student.user.first_name
+        + " "
+        + lesson_request.student.user.last_name
+    )
+
+    return render(
+        request,
+        "edit_booking_form.html",
+        {"request_id": id, "form": form, "student_name": student_name},
+    )
+
+
 def edit_admin(request, id):
     currentadmin = get_object_or_404(User, pk=id)
     if request.method == "POST":

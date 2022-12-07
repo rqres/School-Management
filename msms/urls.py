@@ -133,6 +133,16 @@ urlpatterns = [
         views.all_bookings_list,
         name="all_bookings_list"
     ),
+    path(
+        "all_bookings_list/admin_edit_booking/<int:id>/",
+        views.admin_edit_booking,
+        name="admin_edit_booking",
+    ),
+    path(
+        "all_bookings_list/admin_delete_booking/<int:id>/",
+        views.admin_delete_booking,
+        name="admin_delete_booking"
+    ),
 
     # ---------- PARENT SECTION ----------
     path(
