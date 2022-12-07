@@ -10,28 +10,28 @@
           </h2>
 
           <div>
-            <a href="{% url 'all_bookings_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Bookings</a>
+            <a href="{% url 'bookings_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Bookings</a>
           </div>
 
           <div>
-            <a href="{% url 'all_requests_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Requests</a>
+            <a href="{% url 'requests_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Requests</a>
           </div>
 
           <div>
             <a href="{% url 'school_terms_list' %}" class="btn btn-lg btn-warning mb-3 mt-2">View school terms</a>
           </div>
           <div>
-            {% if school_admin.directorStatus or school_admin.createAdmins%}
+            {% if school_admin.is_director or school_admin.can_create_admins%}
               <div>
-                <a href="{% url 'sign_up_admin' %}" class="btn btn-lg btn-warning mb-3 mt-2">Create admins</a>
+                <a href="{% url 'create_admin' %}" class="btn btn-lg btn-warning mb-3 mt-2">Create admins</a>
               </div>
             {% endif %}
           </div>
 
           <div>
-            {% if school_admin.directorStatus or school_admin.editAdmins or school_admin.deleteAdmins %}
+            {% if school_admin.is_director or school_admin.can_edit_admins or school_admin.can_delete_admins %}
               <div>
-                <a href='{% url 'view_admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
+                <a href='{% url 'admin_list' %}' class="btn btn-lg btn-warning mb-4">Make changes to admins</a></p>
               </div>
             {% endif %}
           </div>

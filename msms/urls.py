@@ -29,12 +29,10 @@ urlpatterns = [
     ),  # path to reset password
 
     # ---------- SIGN UP SECTION ----------
-    path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
+    path("sign_up/", views.sign_up, name="sign_up"),
+    # path for the signup page
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
-    ),  # path for the student sign-up page
-    path(
-        "sign_up_admin/", views.sign_up_admin, name="sign_up_admin"
     ),  # path for the student sign-up page
 
 
@@ -50,7 +48,16 @@ urlpatterns = [
     ),  # path to list of bookings
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
+    ),  # path to show lessons in a booking
+    path(
+        "account/bookings/<int:booking_id>/<int:lesson_id>", views.edit_lesson, name="edit_lesson"
+    ),  # path to edit lesson in a booking
+    path(
+        "account/bookings/edit/<int:booking_id>/", views.edit_booking, name="edit_booking"
     ),  # path to show a booking
+    path(
+        "account/bookings/delete/<int:booking_id>/", views.delete_booking, name="delete_booking"
+    ),  # path to delete a booking
 
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
@@ -82,85 +89,45 @@ urlpatterns = [
 
     # ---------- ADMIN SECTION ----------
     path(
-        "school_terms/",
+        "account/school_terms/",
         views.school_terms_list,
         name="school_terms_list",
     ),
     path(
-        "school_terms/create/",
+        "account/school_terms/create/",
         views.create_school_term,
         name="create_school_term",
     ),
     path(
-        "school_terms/<int:id>/delete",
-        views.delete_school_term,
-        name="delete_school_term"
-    ),
-    path(
-        "school_terms/<int:id>/edit/",
+        "account/school_terms/<int:id>/edit/",
         views.edit_school_term,
-        name="edit_school_term"
+        name="edit_school_term",
+    ),
+    path(
+        "account/school_terms/<int:id>/delete/",
+        views.delete_school_term,
+        name="delete_school_term",
     ),
 
+    path("account/all_admins/", views.admin_list, name="admin_list"),
     path(
-        "all_requests/",
-        views.all_requests_list,
-        name="all_requests_list"
+        "account/all_admins/create/",
+        views.create_admin,
+        name="create_admin"
     ),
     path(
-        "all_requests/<int:id>/",
-        views.show_request,
-        name="admin_show_request",
+        "account/all_admins/<int:id>/edit/",
+        views.edit_admin,
+        name="edit_admin"
     ),
     path(
-        "all_requests/<int:id>/edit/",
-        views.edit_request,
-        name="admin_edit_request"
-    ),
-    path(
-        "all_requests/<int:id>/delete/",
-        views.delete_request,
-        name="admin_delete_request",
-    ),
-    path(
-        "all_requests/<int:id>/fulfill/",
-        views.fulfill_request,
-        name="admin_fulfill_request"
+        "account/all_admins/<int:id>/delete/",
+        views.delete_admin,
+        name="delete_admin"
     ),
 
-    path(
-        "all_bookings_list/",
-        views.all_bookings_list,
-        name="all_bookings_list"
-    ),
-    path(
-        "all_bookings_list/admin_edit_booking/<int:id>/",
-        views.admin_edit_booking,
-        name="admin_edit_booking",
-    ),
-    path(
-        "all_bookings_list/admin_delete_booking/<int:id>/",
-        views.admin_delete_booking,
-        name="admin_delete_booking"
-    ),
 
-    # ---------- PARENT SECTION ----------
-    path(
-        "account/register_child/",
-        views.register_child,
-        name="register_child"
-    ),  # path to register children
+    path("account/register_child/", views.register_child, name="register_child"),  # path to register children
 
-    path(
-        "account/select_child/",
-        views.select_child,
-        name="select_child"
-    ),  # path to book lessons for children
-    path("account/view_admin_list/", views.view_admin_list, name="view_admin_list"),
-    path("account/view_admin_list/edit_admin/<int:id>/", views.edit_admin, name="edit_admin"),
-    path("account/view_admin_list/delete_admin/<int:id>/", views.delete_admin, name="delete_admin"),
-
-    path("account/register_child/", views.register_child, name="register_child"), # path to register children
-
-    path("account/select_child/", views.select_child, name="select_child"), # path to book lessons for children
+    path("account/select_child/", views.select_child, name="select_child"),  # path to book lessons for children
 ]
