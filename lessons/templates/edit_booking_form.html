@@ -5,14 +5,13 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card signup-card">
-          <h2 class="create-request-title signup-card-header">
-            Complete the form below to edit admin information!
+          <h2 class="signup-title signup-card-header">
+            Edit booking
           </h2>
-          <form action="{% url 'edit_admin' id=admin_id %}" method="post">
+          <p class="lead"> Edit booking for {{ student_name }} </p>
+          <form action= "{% url 'admin_edit_booking' id=request_id %}" method="post">
             {% csrf_token %}
-            <!-- bootstrap doesnt display checkboxes correctly -->
-            {{ form.as_p }}
-            <!-- {% include 'partials/bootstrap_form.html' with form=form %} -->
+            {% include 'partials/bootstrap_form.html' with form=form %}
             <input type="submit" value="Submit" class="btn btn-lg btn-warning">
           </form>
         </div>

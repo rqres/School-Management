@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import IntegrityError
 from faker import Faker
-from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Teacher, Student, User
+from lessons.models import RequestForLessons, SchoolAdmin, SchoolTerm, Student, User, Teacher
 
 
 class Command(BaseCommand):
@@ -56,7 +56,14 @@ class Command(BaseCommand):
             petra.is_school_admin = True
             petra.save()
 
-            SchoolAdmin.objects.create(user=petra, school_name="King's College London", directorStatus=False, editAdmins=False, deleteAdmins=False, createAdmins=False)
+            SchoolAdmin.objects.create(
+                user=petra,
+                school_name="King's College London",
+                is_director=False,
+                can_create_admins=False,
+                can_edit_admins=False,
+                can_delete_admins=False,
+            )
         except IntegrityError:
             print("     >School admin object 'Petra' already exists - skipping...")
         else:
@@ -70,14 +77,19 @@ class Command(BaseCommand):
                 last_name="Major",
                 password="Password123",
             )
-            
+
             marty.is_school_admin = True
-            marty.directorStatus=True
+            marty.is_director = True
             marty.save()
 
-            #directors automatically do anything so don't need privileges and hence all have been set to false
+            # directors automatically do anything so don't need privileges and hence all have been set to false
             SchoolAdmin.objects.create(
-                user=marty, directorStatus=True, school_name="King's College London", editAdmins=False, deleteAdmins=False, createAdmins=False
+                user=marty,
+                is_director=True,
+                school_name="King's College London",
+                can_create_admins=True,
+                can_edit_admins=True,
+                can_delete_admins=True,
             )
         except IntegrityError:
             print("     >Director object 'Marty' already exists - skipping...")
@@ -187,6 +199,39 @@ class Command(BaseCommand):
             Teacher.objects.create(user=user, school_name=school)
             print(".", end="", flush=True)
         print("")
+
+    def _seed_teachers(self):
+        for i in range(2):
+            fname = self.faker.first_name()
+            lname = self.faker.last_name()
+
+            school_names = [
+                "Imperial",
+                "King's",
+                "Oxford",
+                "Cambridge",
+                "Gummies",
+                "Sesame",
+                "Jelly",
+            ]
+
+            school = random.choice(school_names) + "School"
+            email = fname.lower() + "." + lname.lower() + str(i) + "@example.com"
+
+            user = User.objects.create_user(
+                email,
+                first_name=fname,
+                last_name=lname,
+                password=(self.faker.password()),
+            )
+            user.is_teacher = True
+
+            user.save()
+
+            Teacher.objects.create(user=user, school_name=school)
+            print(".", end="", flush=True)
+        print("")
+
 
     def _seed_school_terms(self):
         start_dates = [

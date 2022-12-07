@@ -20,7 +20,7 @@
     "pk": 6,
     "fields": {
       "school_name": "King's College London",
-      "directorStatus": true
+      "is_director": true
     }
   }
 ]
