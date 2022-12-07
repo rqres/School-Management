@@ -110,7 +110,7 @@ const cancelRequest = (reqId, theButton) => {
             <form action="{% url 'create_request' %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=child_form %}
-              <input type="submit" value="Submit" class="btn btn-lg btn-warning">
+              <input type="submit" name = "submit_field" value= "Submit for {{ email }}" class="btn btn-lg btn-warning">
             </form>
           </div>
         {% endif %}
