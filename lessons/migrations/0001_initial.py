@@ -77,6 +77,9 @@ class Migration(migrations.Migration):
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to=settings.AUTH_USER_MODEL)),
                 ('school_name', models.CharField(max_length=100)),
                 ('directorStatus', models.BooleanField(default=False)),
+                ('editAdmins', models.BooleanField(default=False)),
+                ('deleteAdmins', models.BooleanField(default=False)),
+                ('createAdmins', models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
