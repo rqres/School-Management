@@ -165,7 +165,7 @@ class Booking(models.Model):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
-    description = models.CharField(max_length=50, blank=False)
+    description = models.CharField(max_length=50, blank=True)
     # startTime = models.TimeField(blank=false)
     def save(self, *args, **kwargs):
         self.create_invoice()

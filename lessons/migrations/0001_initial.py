@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 ('num_of_lessons', models.IntegerField()),
                 ('days_between_lessons', models.IntegerField(default=7, validators=[django.core.validators.MinValueValidator(1, message='Number of days between lessons must be greater than 1!')])),
                 ('lesson_duration', models.IntegerField(default=60, validators=[django.core.validators.MinValueValidator(15, message='A lesson must be at least 15 minutes')])),
-                ('description', models.CharField(max_length=50)),
+                ('description', models.CharField(blank=True, max_length=50)),
             ],
         ),
         migrations.CreateModel(

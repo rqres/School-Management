@@ -6,15 +6,15 @@ from lessons.models import RequestForLessons, Student, User
 
 class RequestModelTestCase(TestCase):
     fixtures = [
-        "lessons/tests/fixtures/default_student.json",
+        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_request.json",
     ]
 
     def setUp(self):
-        self.user = User.objects.get(email="john.doe@example.org")
+        self.user = User.objects.get(email="default.user@example.org")
         self.request = self.user.requestforlessons_set.first()
 
-    def test_corresponding_student_must_not_be_none(self):
+    def test_corresponding_user_must_not_be_none(self):
         self.request.user = None
         self._assert_request_is_invalid()
 

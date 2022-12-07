@@ -11,6 +11,7 @@
       "is_teacher": true,
       "is_parent": false,
       "is_admin": false,
+      "is_school_admin": false,
       "is_active": true
     }
   },

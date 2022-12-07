@@ -4,6 +4,7 @@ from lessons.models import SchoolAdmin, SchoolTerm, Booking, User, Student, Teac
 from lessons.tests.helpers import create_test_bookings
 import datetime
 
+
 class BookingDeletedTest(TestCase):
 
     fixtures = [
@@ -23,22 +24,24 @@ class BookingDeletedTest(TestCase):
 
         self.user_director = User.objects.get(email="bob.dylan@example.org")
         self.director = SchoolAdmin.objects.get(user=self.user_director)
-        
+
         SchoolTerm.objects.create(
-            start_date=datetime.date(2022,9,1),
-            end_date=datetime.date(2022,10,21),
+            start_date=datetime.date(2022, 9, 1),
+            end_date=datetime.date(2022, 10, 21),
         )
         create_test_bookings(10)
         self.booking_to_delete = self.user.booking_set.first()
         self.booking_name = str(self.booking_to_delete)
         self.booking_invoice = self.booking_to_delete.invoice.urn
-        self.url = reverse("delete_booking",  kwargs={'booking_id': self.booking_to_delete.id})
+        self.url = reverse(
+            "delete_booking", kwargs={"booking_id": self.booking_to_delete.id}
+        )
 
     def test_delete_booking_url(self):
         self.assertEqual(self.url, "/account/bookings/delete/1/")
 
     def test_booking_list_has_updated(self):
-        """ New booking list must not contain deleted booking"""
+        """New booking list must not contain deleted booking"""
         self.client.login(email=self.director.user.email, password="Watermelon123")
         num_of_bookings_before = Booking.objects.count()
         response = self.client.get(self.url)
@@ -48,8 +51,8 @@ class BookingDeletedTest(TestCase):
         new_response = self.client.get(response_url)
         self.assertEqual(new_response.status_code, 200)
         num_of_bookings_after = Booking.objects.count()
-        self.assertEqual(num_of_bookings_before, num_of_bookings_after+1)
-        #self.assertNotContains(new_response, self.booking_invoice)
+        self.assertEqual(num_of_bookings_before, num_of_bookings_after + 1)
+        # self.assertNotContains(new_response, self.booking_invoice)
 
     def test_delete_booking_message_appears(self):
         self.client.login(email=self.director.user.email, password="Watermelon123")
@@ -57,7 +60,6 @@ class BookingDeletedTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "You have deleted the booking :")
         self.assertContains(response, self.booking_name)
-
 
     def test_delete_booking_not_as_director_redirects(self):
         self.client.login(email=self.student.user.email, password="Watermelon123")
@@ -73,5 +75,3 @@ class BookingDeletedTest(TestCase):
         )
         num_of_bookings_after = Booking.objects.count()
         self.assertEqual(num_of_bookings_before, num_of_bookings_after)
-        
-        
