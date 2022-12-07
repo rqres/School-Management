@@ -20,7 +20,7 @@ class BookingTest(TestCase):
         self.teacher = Teacher.objects.get(user=self.user_teacher)
 
         self.invoice = Invoice(
-            student=self.student,
+            user=self.user_student,
             student_num=self.student.user.pk + 1000,
             invoice_num=Invoice.objects.filter(student_num=self.student.user.pk).count()
             + 1,
@@ -30,7 +30,7 @@ class BookingTest(TestCase):
 
         self.booking = Booking(
             num_of_lessons=10,
-            student=self.student,
+            user=self.user_student,
             teacher=self.teacher,
             description="Gutitar lesson on basics",
             days_between_lessons=7,
@@ -39,7 +39,7 @@ class BookingTest(TestCase):
         self.booking.save()
         self.booking_other = Booking(
             num_of_lessons=10,
-            student=self.student,
+            user=self.user_student,
             teacher=self.teacher,
             description="Gutitar lesson on basics",
             days_between_lessons=7,
@@ -63,8 +63,8 @@ class BookingTest(TestCase):
         self.booking.teacher = None
         self._assert_booking_is_invalid()
 
-    def test_student_field_must_not_be_blank(self):
-        self.booking.student = None
+    def test_user_field_must_not_be_blank(self):
+        self.booking.user = None
         self._assert_booking_is_invalid()
 
     def test_description_field_must_not_be_blank(self):
@@ -116,7 +116,7 @@ class BookingTest(TestCase):
         except (ValidationError):
             self.fail("Student should be valid")
         self.assertEqual(self.booking.invoice.student_num, self.student.pk + 1000)
-        self.assertEqual(self.booking.invoice.student, self.student)
+        self.assertEqual(self.booking.invoice.user, self.user_student)
         costOfBooking = Money(self.booking.lesson_duration * self.booking.num_of_lessons/ 10, "GBP")
         self.assertEqual(self.booking.invoice.price, costOfBooking)
 

@@ -21,6 +21,9 @@
         <!-- <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button> -->
         <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
         <div><a href="{% url 'delete_request' id=request.id %}" class="btn btn-sm btn-secondary">Delete request</a></div>
+        {% if user.is_school_admin %}
+        <div><a href="{% url 'fulfill_request' id=request.id %}" class="btn btn-sm btn-secondary">Fulfill request</a></div>
+        {% endif %}
 
       </div>
       <br>

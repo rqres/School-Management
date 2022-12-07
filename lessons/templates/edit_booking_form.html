@@ -8,7 +8,7 @@
           <h2 class="signup-title signup-card-header">
             Edit booking
           </h2>
-          <p class="lead"> Edit booking for {{ student_name }} </p>
+          <p class="lead"> Edit booking for {{ user_name }} </p>
           <form action= "{% url 'admin_edit_booking' id=request_id %}" method="post">
             {% csrf_token %}
             {% include 'partials/bootstrap_form.html' with form=form %}
