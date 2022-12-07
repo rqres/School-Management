@@ -182,7 +182,7 @@ class Booking(models.Model):
         while COUNT != self.num_of_lessons:
             try:
                 lesson = Lesson.objects.create(
-                    name=f'{self.student.user.first_name}{self.teacher.user.first_name}{COUNT}',
+                    name=f'{self.user.first_name}{self.teacher.user.first_name}{COUNT}',
                     date=new_date,
                     startTime=datetime.time(timeForLesson, 0, 0),
                     booking=self,
@@ -197,11 +197,9 @@ class Booking(models.Model):
 
     def update_lessons(self):
         """Lessons should be updated depending on the changes made to Booking"""
-        lessons = self.lesson_set.all()
-        # for each on lessons and update each of them
-        for lesson in lessons:
-            pass
-
+        lessons = self.lesson_set.all().delete()
+        self.create_lessons()
+        
     def create_invoice(self):
         """Invoice should be created for Lesson that has been created"""
         try:
