@@ -13,8 +13,9 @@ from .forms import (
     RegisterChildForm,
     FulfillLessonRequestForm,
     EditBookingForm,
+    EditLessonForm,
 )
-from .models import Booking, Invoice, RequestForLessons, SchoolTerm, User
+from .models import Lesson, Booking, Invoice, RequestForLessons, SchoolTerm, User
 
 
 #  Create your views here.
@@ -133,7 +134,27 @@ def show_booking(request, booking_id):
     except ObjectDoesNotExist:
         return redirect("bookings_list")
     else:
-        return render(request, "show_booking.html", {"lessons": lessons})
+        return render(request, "show_booking.html", {"lessons": lessons, "user": request.user})
+
+@login_required
+def edit_lesson(request,booking_id,lesson_id):
+    if request.user.is_school_admin is False:
+        return redirect("account")
+    try:
+        booking = Booking.objects.get(id=booking_id)  
+        lesson = Lesson.objects.get(id=lesson_id)
+        if request.method == "POST":
+            form = EditLessonForm(request.POST,lesson=lesson)
+            if form.is_valid():
+                lesson = form.save()
+                return redirect("show_booking")
+            else:
+                form = EditLessonForm(lesson=lesson)
+    except ObjectDoesNotExist:
+        return redirect("show_booking")
+    else:
+        form = EditLessonForm(lesson=lesson)
+        return render(request, "edit_lesson.html",{"lesson": lesson, "booking": booking, "form": form})
 
 @login_required  # needs to be admin login
 def delete_booking(request, booking_id):

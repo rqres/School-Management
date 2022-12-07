@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import (
+    Lesson,
     Booking,
     Invoice,
     RequestForLessons,
@@ -259,6 +260,39 @@ class EditBookingForm(forms.ModelForm):
 
         return self._booking
 
+class EditLessonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._lesson = kwargs.pop("lesson", None)
+        super().__init__(*args, **kwargs)
+
+        if self._lesson:
+            self.fields["name"].initial = self._lesson.name
+            self.fields["date"].initial = self._lesson.date
+            self.fields["startTime"].initial = self._lesson.startTime
+            self.fields["description"].initial = self._lesson.description
+
+    class Meta:
+        model = Lesson
+        fields = [
+            "name",
+            "date",
+            "startTime",
+            "description"
+        ]
+        widgets = {
+            "date": forms.DateInput(attrs={'type': 'date'}),
+            'startTime': forms.TimeInput(attrs={'type': 'time'})
+        }
+    def save(self):
+        super().save(commit=False)
+        self._lesson.name = self.cleaned_data.get("name")
+        self._lesson.date= self.cleaned_data.get("date")
+        self._lesson.startTime = self.cleaned_data.get("startTime")
+        self._lesson.description = self.cleaned_data.get("description")
+        self._lesson.save()
+
+        return self._lesson
+
 class PaymentForm(forms.Form):
     def __init__(self, *args, **kwargs):
             self._student = kwargs.pop("student", None)
@@ -300,7 +334,6 @@ class PaymentForm(forms.Form):
         ],
     )
 
-        
     def clean_invoice(self):
         invoice_urn = self.cleaned_data.get("invoice_urn")
         if not Invoice.objects.filter(urn=invoice_urn).exists():

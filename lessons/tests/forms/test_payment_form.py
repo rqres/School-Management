@@ -24,7 +24,7 @@ class PaymentFormTestCase(TestCase):
         self.invoice.save() 
 
         self.form_input = {
-            'invoice_urn': '1001-1',
+            'invoice_urn': self.invoice,
             'account_name' : 'John Doe',
             'account_number' : '12345678',
             'sort_code' : '123456',
