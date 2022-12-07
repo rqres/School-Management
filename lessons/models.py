@@ -112,11 +112,10 @@ class SchoolAdmin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
-    directorStatus = models.BooleanField(default=False)
-    editAdmins = models.BooleanField(default=False)
-    deleteAdmins = models.BooleanField(default=False)
-    createAdmins = models.BooleanField(default=False)
-
+    is_director = models.BooleanField(default=False)
+    can_create_admins = models.BooleanField(default=False)
+    can_edit_admins = models.BooleanField(default=False)
+    can_delete_admins = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.email
