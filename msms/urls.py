@@ -33,6 +33,10 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up_admin/", views.sign_up_admin, name="sign_up_admin"
+    ),  # path for the student sign-up page
+
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
     # (all users will be redirected here regardless of usertype)
@@ -136,4 +140,11 @@ urlpatterns = [
         views.select_child,
         name="select_child"
     ),  # path to book lessons for children
+    path("account/view_admin_list/", views.view_admin_list, name="view_admin_list"),
+    path("account/view_admin_list/edit_admin/<int:id>/", views.edit_admin, name="edit_admin"),
+    path("account/view_admin_list/delete_admin/<int:id>/", views.delete_admin, name="delete_admin"),
+
+    path("account/register_child/", views.register_child, name="register_child"), # path to register children
+
+    path("account/select_child/", views.select_child, name="select_child"), # path to book lessons for children
 ]
