@@ -134,12 +134,10 @@ def account(request):
 
 @login_required
 def bookings_list(request):
-    if request.user.is_student is False and request.user.is_school_admin is False:
-        return redirect("account")
     if request.user.is_school_admin is True:
         bookings = Booking.objects.all()
     else:
-        bookings = request.user.student.booking_set.all()
+        bookings = request.user.booking_set.all()
     return render(
         request, "bookings_list.html", {"bookings": bookings, "user": request.user}
     )
@@ -222,7 +220,7 @@ def requests_list(request):
     if request.user.is_school_admin:
         requests = RequestForLessons.objects.all()
     else:
-        requests = request.user.student.requestforlessons_set.all()
+        requests = request.user.requestforlessons_set.all()
 
     return render(request, "requests_list.html", {"requests": requests})
 
@@ -263,44 +261,38 @@ def fulfill_request(request, id):
     else:
         form = FulfillLessonRequestForm(lesson_request=lesson_request)
 
-    student_name = (
-        lesson_request.student.user.first_name
-        + " "
-        + lesson_request.student.user.last_name
-    )
+    user_name = lesson_request.user.first_name + " " + lesson_request.user.last_name
 
     return render(
         request,
         "fulfill_request_form.html",
-        {"request_id": id, "form": form, "student_name": student_name},
+        {"request_id": id, "form": form, "user_name": user_name},
     )
 
 
 @login_required
 def create_request(request):
-    if not request.user.is_student:
+    if request.user.is_school_admin:
         raise PermissionDenied
 
     if request.method == "POST":
-        form = RequestForLessonsForm(request.POST, student=request.user.student)
+        form = RequestForLessonsForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
             return redirect("requests_list")
     else:
-        form = RequestForLessonsForm(student=request.user.student)
+        form = RequestForLessonsForm(user=request.user)
     return render(request, "create_request.html", {"form": form})
 
 
 @login_required
 def edit_request(request, id):
-    if not request.user.is_student:
+    if request.user.is_school_admin:
         raise PermissionDenied
 
     req = get_object_or_404(RequestForLessons, id=id)
     if request.method == "POST":
-        form = RequestForLessonsForm(
-            request.POST, instance=req, student=request.user.student
-        )
+        form = RequestForLessonsForm(request.POST, instance=req, user=request.user)
         if form.is_valid():
             req = form.save(edit=True)
             req.save()
@@ -361,7 +353,7 @@ def delete_admin(request, id):
 @login_required
 def payment(request):
     if request.method == "POST":
-        form = PaymentForm(request.POST, student=request.user)
+        form = PaymentForm(request.POST, user=request.user)
         if form.is_valid():
             try:
                 invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
@@ -369,9 +361,9 @@ def payment(request):
                 invoice.save()
                 return redirect("account")
             except ObjectDoesNotExist:
-                form = PaymentForm(student=request.user)
+                form = PaymentForm(user=request.user)
     else:
-        form = PaymentForm(student=request.user)
+        form = PaymentForm(user=request.user)
     return render(request, "payment_form.html", {"form": form})
 
 

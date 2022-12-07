@@ -3,7 +3,7 @@
     "model": "lessons.requestforlessons",
     "pk": 1,
     "fields": {
-      "user": 2,
+      "user": 1,
       "fulfilled": false,
       "availability": "MON,WED,SAT",
       "request_created_at": "2022-12-01T20:17:45.026Z",

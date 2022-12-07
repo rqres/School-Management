@@ -29,7 +29,7 @@ class BookingDeletedTest(TestCase):
             end_date=datetime.date(2022,10,21),
         )
         create_test_bookings(10)
-        self.booking_to_delete = self.student.booking_set.first()
+        self.booking_to_delete = self.user.booking_set.first()
         self.booking_name = str(self.booking_to_delete)
         self.booking_invoice = self.booking_to_delete.invoice.urn
         self.url = reverse("delete_booking",  kwargs={'booking_id': self.booking_to_delete.id})

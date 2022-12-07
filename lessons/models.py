@@ -122,7 +122,7 @@ class SchoolAdmin(models.Model):
 
 
 class Invoice(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
     urn = models.CharField(max_length=50)
@@ -130,7 +130,7 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.student_num = self.student.pk + 1000
+        self.student_num = self.user.pk + 1000
         self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
 
@@ -163,7 +163,7 @@ class Booking(models.Model):
         ],
     )
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, blank=False)
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=True)
     # startTime = models.TimeField(blank=false)
@@ -180,7 +180,7 @@ class Booking(models.Model):
         for lesson_id in range(self.num_of_lessons):
             new_date = startDate + datetime.timedelta(days=self.days_between_lessons)
             lesson = Lesson.objects.create(
-                name=f"{self.student.user.first_name}{self.teacher.user.first_name}{lesson_id}",
+                name=f"{self.user.first_name}{self.teacher.user.first_name}{lesson_id}",
                 date=new_date,
                 startTime=datetime.time(timeForLesson, 0, 0),
                 booking=self,
@@ -203,9 +203,9 @@ class Booking(models.Model):
         except ObjectDoesNotExist:
             costOfBooking = self.lesson_duration * self.num_of_lessons / 10
             self.invoice = Invoice.objects.create(
-                student=self.student,
-                student_num=self.student.user.pk + 1000,
-                invoice_num=self.student.invoice_set.all().count() + 1,
+                user=self.user,
+                student_num=self.user.pk + 1000,
+                invoice_num=self.user.invoice_set.all().count() + 1,
                 price=Money(costOfBooking, "GBP"),
             )
             self.invoice.save()
@@ -241,7 +241,7 @@ class Lesson(models.Model):
 
 
 class RequestForLessons(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     # i am storing the availabilty as a comma separated string of days
     # e.g: "TUE,SAT,SUN" = student is available on tuesday saturday and sunday
     # max length is 28 because at most someone could be avlb every day
