@@ -168,11 +168,12 @@ def edit_lesson(request, booking_id, lesson_id):
             form = EditLessonForm(request.POST, lesson=lesson)
             if form.is_valid():
                 lesson = form.save()
-                return redirect("show_booking")
+                lessons = booking.lesson_set.all()
+                return redirect("show_booking", booking_id=booking.id)
             else:
                 form = EditLessonForm(lesson=lesson)
     except ObjectDoesNotExist:
-        return redirect("show_booking")
+        return redirect("show_booking", booking_id=booking.id)
     else:
         form = EditLessonForm(lesson=lesson)
         return render(
