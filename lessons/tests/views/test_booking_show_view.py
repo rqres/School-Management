@@ -54,8 +54,8 @@ class BookingShowTest(TestCase):
     def test_show_booking_url(self):
         self.assertEqual(self.url, "/account/bookings/1/")
 
-    def donot_test_show_booking_redirects_when_not_logged_in(self):
-        response = self.client.get(self.url)
+    def test_show_booking_redirects_when_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
         redirect_url = "/log_in/?next=/account/bookings/1/"
         self.assertRedirects(
             response,

@@ -147,10 +147,9 @@ def account(request):
     # elif request.user.is_parent:
     #   etc...
     else:
-        # UNRECOGNIZED USER TYPE
-        # this shouldn't happen, log user out and send him to welcome page
-        logout(request)
-        return redirect("account")
+        return render(
+            request, "account_user.html", {"user": request.user}
+        )
 
 
 @login_required
