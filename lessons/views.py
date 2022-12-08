@@ -473,10 +473,9 @@ def select_child(request):
                         "child_form": request_child_form,
                     },
                 )
-        else: 
-            form = SelectChildForm()
-            form.set_children(request.user.children.all())
-            return render(request, "select_child.html", {"form": form, "email": ""})
+        form = SelectChildForm()
+        form.set_children(request.user.children.all())
+        return render(request, "select_child.html", {"form": form, "email": ""})
     else: 
         return redirect('account')
 
