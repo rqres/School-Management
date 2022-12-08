@@ -7,6 +7,7 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card home-card mx-auto offset-md-1 offset-lg-2 text-center">
+        <div>
           <h1 class="card-title home-title home-card-header mx-auto mb-4">Lessons in Booking</h1>
           <h2>Lessons in Booking:</h2>
           <table class="table">
@@ -24,9 +25,9 @@
               </tr>
               {% endfor %}
           </table>
-            <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
-
+          <div></div>
           </div>
+          <a href="{% url 'bookings_list' %}" class="btn btn-lg btn-secondary mb-2 mt-2">Continue viewing bookings</a>
         </div>
       </div>
     </div>

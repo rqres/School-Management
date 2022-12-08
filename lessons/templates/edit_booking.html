@@ -11,10 +11,11 @@
           <form action="{% url 'edit_booking' booking.id %}" method="post">
             {% csrf_token %}
             <!-- bootstrap doesnt display checkboxes correctly -->
-            {{ form.as_p }}
-            <!-- {% include 'partials/bootstrap_form.html' with form=form %} -->
+            <!--{{ form.as_p }}-->
+            {% include 'partials/bootstrap_form.html' with form=form %}
             <input type="submit" value="Submit" class="btn btn-lg btn-warning">
           </form>
+            <a href="{% url 'bookings_list' %}" class="btn btn-lg btn-secondary mb-2 mt-2">Continue viewing bookings</a>
         </div>
       </div>
     </div>

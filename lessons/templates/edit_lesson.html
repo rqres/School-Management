@@ -11,11 +11,11 @@
           <form action="{% url 'edit_lesson' booking_id=booking.id lesson_id=lesson.id %}" method="post">
             {% csrf_token %}
             <!-- bootstrap doesnt display checkboxes correctly -->
-            {{ form.as_p }}
-            <!-- {% include 'partials/bootstrap_form.html' with form=form %} -->
-            <input type="submit" value="Submit" class="btn btn-lg btn-warning">
+            <!--{{ form.as_p }}-->
+            {% include 'partials/bootstrap_form.html' with form=form %}
+            <input type="submit" value="Submit" class="btn btn-lg mb-2 btn-warning">
           </form>
-          <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
+          <a href='{% url 'show_booking' booking.id %}' class="btn btn-lg btn-secondary"> Return to lessons</a>
         </div>
       </div>
     </div>
