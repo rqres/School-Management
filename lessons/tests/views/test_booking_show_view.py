@@ -54,8 +54,8 @@ class BookingShowTest(TestCase):
     def test_show_booking_url(self):
         self.assertEqual(self.url, "/account/bookings/1/")
 
-    def donot_test_show_booking_redirects_when_not_logged_in(self):
-        response = self.client.get(self.url)
+    def test_show_booking_redirects_when_not_logged_in(self):
+        response = self.client.get(self.url, follow=True)
         redirect_url = "/log_in/?next=/account/bookings/1/"
         self.assertRedirects(
             response,
@@ -88,7 +88,7 @@ class BookingShowTest(TestCase):
         self.assertNotContains(response,"Edit Lesson") # Edit button
 
 
-    def donot_test_show_booking_displays_correctly_as_a_director(self):
+    def test_show_booking_displays_correctly_as_a_director(self):
         self.client.login(email=self.director.user.email, password="Watermelon123")
         lessons_in_booking = Lesson.objects.filter(booking=self.booking_to_show)
         response = self.client.get(self.url)
@@ -96,7 +96,10 @@ class BookingShowTest(TestCase):
         self.assertTemplateUsed(response,"show_booking.html")
         self.assertContains(response,"Edit Lesson") # Edit button
         for lesson in lessons_in_booking:
-            self.assertContains(response, lesson.date)
-            #self.assertContains(response, lesson.startTime)
-
+            self.assertContains(response, f'{lesson.date.day}, {lesson.date.year}')
+            if lesson.startTime.hour > 12:
+                self.assertContains(response, f'{lesson.startTime.hour-12} p.m.')
+            else:
+                self.assertContains(response, f'{lesson.startTime.hour} a.m.')
+ 
    

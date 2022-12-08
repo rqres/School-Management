@@ -45,4 +45,12 @@ class BookingListTest(TestCase):
             self.assertContains(response, booking.teacher.user.email)
 
     def test_cannot_get_booking_when_not_logged_in(self):
-        pass
+        response = self.client.get(self.url, follow=True)
+        redirect_url = "/log_in/?next=%2Faccount%2Fbookings%2F"
+        self.assertRedirects(
+            response,
+            redirect_url,
+            status_code=302,
+            target_status_code=200,
+            fetch_redirect_response=True,
+        )

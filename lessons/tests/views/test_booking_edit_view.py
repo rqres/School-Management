@@ -35,7 +35,7 @@ class BookingEditTest(TestCase):
             "edit_booking", kwargs={"booking_id": self.booking_to_edit.id}
         )
         self.data = {
-            "teacher": self.teacher,
+            "teacher": self.teacher.pk,
             "num_of_lessons": 14,
             "days_between_lessons": 7,
             "lesson_duration": 60,
@@ -60,14 +60,14 @@ class BookingEditTest(TestCase):
         num_of_bookings_after = Booking.objects.count()
         self.assertEqual(num_of_bookings_before, num_of_bookings_after)
 
-    def donot_test_successful_booking_edit(self):
+    def test_successful_booking_edit(self):
         self.client.login(email=self.director.user.email, password="Watermelon123")
         response = self.client.post(self.url, self.data, follow=True)
         updated_booking = Booking.objects.get(id=self.booking_to_edit.id)
-        self.assertEqual(updated_booking.teacher, self.data["teacher"])
-        self.assertEqual(str(updated_booking.num_of_lessons), self.data["num_of_lessons"])
-        self.assertEqual(str(updated_booking.days_between_lessons), self.data["days_between_lessons"])
-        self.assertEqual(str(updated_booking.lesson_duration), self.data["lesson_duration"])
+        self.assertEqual(updated_booking.teacher, self.teacher)
+        self.assertEqual(updated_booking.num_of_lessons, self.data["num_of_lessons"])
+        self.assertEqual(updated_booking.days_between_lessons, self.data["days_between_lessons"])
+        self.assertEqual(updated_booking.lesson_duration, self.data["lesson_duration"])
         self.assertEqual(updated_booking.description, self.data["description"])
         self.assertTemplateUsed(response, "bookings_list.html")
 
@@ -77,3 +77,4 @@ class BookingEditTest(TestCase):
         response = self.client.post(self.url, self.data, follow=True)
         updated_booking = Booking.objects.get(id=self.booking_to_edit.id)
         self.assertTemplateUsed(response, "edit_booking.html")
+        self.assertEqual(updated_booking, self.booking_to_edit)

@@ -34,6 +34,9 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up/parent/", views.sign_up_parent, name="sign_up_parent"
+    ),  # path for the parent sign-up page
 
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
