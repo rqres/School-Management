@@ -197,7 +197,7 @@ class Booking(models.Model):
 
     def update_lessons(self):
         """Lessons should be updated depending on the changes made to Booking"""
-        lessons = self.lesson_set.all().delete()
+        self.lesson_set.all().delete()
         self.create_lessons()
         
     def create_invoice(self):

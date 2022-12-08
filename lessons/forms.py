@@ -346,6 +346,7 @@ class EditBookingForm(forms.ModelForm):
         self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
         self._booking.teacher = self.cleaned_data.get("teacher")
         self._booking.save()
+        self._booking.update_lessons()
 
         return self._booking
 

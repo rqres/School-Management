@@ -135,7 +135,10 @@ def account(request):
 @login_required
 def bookings_list(request):
     if request.user.is_school_admin is True:
-        bookings = Booking.objects.all()
+        try:
+            bookings = Booking.objects.all()
+        except ObjectDoesNotExist:
+            return redirect("bookings_list")
     else:
         bookings = request.user.booking_set.all()
     return render(
@@ -148,6 +151,9 @@ def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         lessons = booking.lesson_set.all()
+        if request.user.is_school_admin is False and booking.user != request.user:
+            # Users can only their bookings
+            return redirect("account")
     except ObjectDoesNotExist:
         return redirect("bookings_list")
     else:

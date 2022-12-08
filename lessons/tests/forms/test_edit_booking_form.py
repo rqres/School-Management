@@ -127,4 +127,3 @@ class EditBookingFormTestCase(TestCase):
         self.assertEqual(booking.teacher,self.form_input['teacher'])
         self.assertEqual(booking.num_of_lessons,self.form_input['num_of_lessons'])
         self.assertEqual(booking.days_between_lessons,self.form_input['days_between_lessons'])
-        #self.assertEqual(booking.description,self.form_input['description'])
