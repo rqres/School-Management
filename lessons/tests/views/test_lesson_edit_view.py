@@ -76,3 +76,4 @@ class LessonEditTest(TestCase):
         response = self.client.post(self.url, self.data, follow=True)
         updated_lesson = Lesson.objects.get(id=self.lesson_to_edit.id)
         self.assertTemplateUsed(response, "edit_lesson.html")
+        self.assertEqual(updated_lesson, self.lesson_to_edit)
