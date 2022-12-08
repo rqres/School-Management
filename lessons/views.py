@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls.exceptions import Http404
 from .models import (
     Booking,
     Invoice,
@@ -109,21 +110,21 @@ def sign_up_parent(request):
         form = ParentSignUpForm()
     return render(request, "sign_up_parent.html", {"form": form})
 
+
 def create_admin(request):
     if request.method == "POST":
         # create a bound version of the form with post data
         form = CreateAdminForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("admin_list")
+            return redirect("account")
     else:
         form = (
             CreateAdminForm()
         )  # create a form with CreateAdminForm constructor, pass that form to template to render it
     return render(request, "create_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
-
-
+    
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
@@ -146,6 +147,7 @@ def account(request):
         return redirect("admin:index")
     # elif request.user.is_parent:
     #   etc...
+    # TODO else statement for teachers and parents
     else:
         return render(
             request, "account_user.html", {"user": request.user}
@@ -256,8 +258,7 @@ def show_request(request, id):
     try:
         req = RequestForLessons.objects.get(id=id)
     except ObjectDoesNotExist:
-        return redirect("requests_list")
-
+        raise Http404("Request for lessons does not exist")
     else:
         return render(request, "show_request.html", {"lessons_request": req})
 
@@ -295,44 +296,56 @@ def fulfill_request(request, id):
         {"request_id": id, "form": form, "user_name": user_name},
     )
 
+
 def extract_email(string):
     email = ""
     i = len(string) - 1
-    while (string[i] != " "):
+    while string[i] != " ":
         email += string[i]
         i -= 1
     return email[::-1]
-        
+
+
 @login_required
 def create_request(request):
     if request.user.is_school_admin:
+        # admins shouldn't be able to create requests for themselves
+        # it doesn't make sense
         raise PermissionDenied
-    
+
     copy_of_request = request
-    submitted_data = request.POST.get('submit_field')
+    submitted_data = request.POST.get("submit_field")
     print(submitted_data)
     if submitted_data is not None:
         print(extract_email(submitted_data))
-        request.user = User.objects.filter(email__exact = extract_email(submitted_data)).first()
-        
+        request.user = User.objects.filter(
+            email__exact=extract_email(submitted_data)
+        ).first()
+
     if request.method == "POST":
         form = RequestForLessonsForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            if submitted_data is not None:
-                return redirect("account")
+            # if submitted_data is not None:
+            #     return redirect("account")
             return redirect("requests_list")
     else:
         form = RequestForLessonsForm(user=request.user)
-        
+
     if submitted_data is not None:
-        return render(copy_of_request, "select_child.html", {"form": form, "email": extract_email(submitted_data)})
+        return render(
+            copy_of_request,
+            "select_child.html",
+            {"form": form, "email": extract_email(submitted_data)},
+        )
     return render(request, "create_request.html", {"form": form})
 
 
 @login_required
 def edit_request(request, id):
     if request.user.is_school_admin:
+        # admins don't edit requests
+        # they can however create a booking to their liking when fulfilling the request
         raise PermissionDenied
 
     req = get_object_or_404(RequestForLessons, id=id)
@@ -351,23 +364,38 @@ def edit_request(request, id):
 def admin_list(request):
     if not request.user.is_school_admin:
         raise PermissionDenied
-
     admins = SchoolAdmin.objects.all().exclude(user=request.user)
     return render(
         request, "admin_list.html", {"admins": admins, "current_user": request.user}
     )
 
-    # if request.user.schooladmin.is_director:
-    #     return render(request, "admin_list.html", {"admins": admins})
-    # elif request.user.schooladmin.editAdmins:
-    #     return render(request, "admin_list_edit_only.html", {"admins": admins})
-    # elif request.user.schooladmin.deleteAdmins:
-    #     return render(request, "admin_list_delete_only.html", {"admins": admins})
+@login_required
+def create_admin(request):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
 
+    if not request.user.schooladmin.can_create_admins:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        # create a bound version of the form with post data
+        form = CreateAdminForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("admin_list")
+    else:
+        form = (
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
+    return render(request, "create_admin.html", {"form": form})
+    # successful form means you save user record in database and redirect them to the database
 
 @login_required
 def edit_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_edit_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
@@ -384,11 +412,15 @@ def edit_admin(request, id):
 
 @login_required
 def delete_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_delete_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
     if admin:
+        admin.user.delete()
         admin.delete()
         print("success!")
 
@@ -412,6 +444,7 @@ def payment(request):
     return render(request, "payment_form.html", {"form": form})
 
 
+@login_required
 def register_child(request):
     if request.user.is_parent:
         if request.method == "POST":

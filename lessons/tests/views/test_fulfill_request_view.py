@@ -1,5 +1,4 @@
 """Tests of the Fulfill Request view"""
-from django.http import HttpResponseForbidden
 from django.test import TestCase
 from django.urls import reverse
 from lessons.forms import FulfillLessonRequestForm
@@ -42,4 +41,4 @@ class FulfillRequestViewTestCase(TestCase):
         default_student = Student.objects.get(pk=1)
         self.client.login(email=default_student.user.email, password="Watermelon123")
         response = self.client.get(self.url, follow=True)
-        self.assertTrue(isinstance(response, HttpResponseForbidden))
+        self.assertEqual(response.status_code, 403)

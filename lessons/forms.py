@@ -232,6 +232,14 @@ class CreateAdminForm(UserCreationForm):
             can_edit_admins=self.cleaned_data.get("can_edit_admins"),
             can_delete_admins=self.cleaned_data.get("can_delete_admins"),
         )
+
+        #if director is true, set all privileges to true and then .save again
+        if admin.is_director:
+            admin.can_create_admins = True
+            admin.can_edit_admins = True
+            admin.can_delete_admins = True
+
+        admin.save()
         return admin
 
 
@@ -303,6 +311,7 @@ class RequestForLessonsForm(forms.ModelForm):
             "days_between_lessons",
             "lesson_duration",
             "other_info",
+            "availability_field",
         ]
         widgets = {
             "other_info": forms.Textarea(),

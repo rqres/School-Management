@@ -9,7 +9,7 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card booking-list-card mx-auto text-center">
-          <h1 class="card-title home-title home-card-header mx-auto mb-4">Your Bookings</h1>
+          <h1 class="card-title home-title home-card-header mx-auto mb-4"> {% if user.is_school_admin %} All {% else %} Your {% endif %} Bookings</h1>
           <table class="table">
             <tr>
               <td class="table-primary"> Number of Lessons</td>
