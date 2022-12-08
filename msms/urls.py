@@ -29,16 +29,21 @@ urlpatterns = [
     ),  # path to reset password
 
     # ---------- SIGN UP SECTION ----------
-    path("sign_up/", views.sign_up, name="sign_up"),  # path for the signup page
+    path("sign_up/", views.sign_up, name="sign_up"),
+    # path for the signup page
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up/parent/", views.sign_up_parent, name="sign_up_parent"
+    ),  # path for the parent sign-up page
+
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
     # (all users will be redirected here regardless of usertype)
     path(
         "account/", views.account, name="account"
-    ),  # path to account overview (currently a simple redirect)
+    ),  # path to account overview
 
     # ---------- USER's BOOKINGS SECTION ----------
     path(
@@ -46,14 +51,27 @@ urlpatterns = [
     ),  # path to list of bookings
     path(
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
+    ),  # path to show lessons in a booking
+    path(
+        "account/bookings/<int:booking_id>/<int:lesson_id>/", views.edit_lesson, name="edit_lesson"
+    ),  # path to edit lesson in a booking
+    path(
+        "account/bookings/edit/<int:booking_id>/", views.edit_booking, name="edit_booking"
     ),  # path to show a booking
+    path(
+        "account/bookings/delete/<int:booking_id>/", views.delete_booking, name="delete_booking"
+    ),  # path to delete a booking
 
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
-        "account/requests/", views.requests_list, name="requests_list"
+        "account/requests/",
+        views.requests_list,
+        name="requests_list"
     ),  # path to view my requests for lessons
     path(
-        "account/requests/create/", views.create_request, name="create_request"
+        "account/requests/create/",
+        views.create_request,
+        name="create_request"
     ),  # path to create new request
     path(
         "account/requests/<int:id>/",
@@ -70,67 +88,68 @@ urlpatterns = [
         views.delete_request,
         name="delete_request",
     ),
+    path(
+        "account/requests/<int:id>/fulfill/",
+        views.fulfill_request,
+        name="fulfill_request",
+    ),
 
     # ---------- USER's PAYMENT SECTION ----------
     path(
-        "account/payment/", views.payment, name="payment_form"
+        "account/payment/",
+        views.payment,
+        name="payment_form"
     ),  # path to payment page
 
     # ---------- ADMIN SECTION ----------
     path(
-        "school_terms/",
+        "account/school_terms/",
         views.school_terms_list,
         name="school_terms_list",
     ),
     path(
-        "school_terms/create/",
+        "account/school_terms/create/",
         views.create_school_term,
         name="create_school_term",
     ),
     path(
-        "school_terms/<int:school_term_id>/delete",
-        views.delete_school_term,
-        name="delete_school_term"
-    ),
-    path(
-        "school_terms/<int:id>/edit/",
+        "account/school_terms/<int:id>/edit/",
         views.edit_school_term,
-        name="edit_school_term"
+        name="edit_school_term",
+    ),
+    path(
+        "account/school_terms/<int:id>/delete/",
+        views.delete_school_term,
+        name="delete_school_term",
     ),
 
     path(
-        "all_requests/",
-        views.all_requests_list,
-        name="all_requests_list"
+        "account/all_admins/",
+        views.admin_list,
+        name="admin_list"
     ),
     path(
-        "all_requests/<int:id>/",
-        views.show_request,
-        name="admin_show_request",
+        "account/all_admins/create/",
+        views.create_admin,
+        name="create_admin"
     ),
     path(
-        "all_requests/<int:id>/edit/",
-        views.edit_request,
-        name="admin_edit_request"
+        "account/all_admins/<int:id>/edit/",
+        views.edit_admin,
+        name="edit_admin"
     ),
     path(
-        "all_requests/<int:id>/delete/",
-        views.delete_request,
-        name="admin_delete_request",
-    ),
-    path(
-        "all_requests/<int:id>/fulfill/",
-        views.fulfill_request,
-        name="admin_fulfill_request"
+        "account/all_admins/<int:id>/delete/",
+        views.delete_admin,
+        name="delete_admin"
     ),
 
-    # ---------- PARENT SECTION ----------
+
     path(
         "account/register_child/",
         views.register_child,
         name="register_child"
     ),  # path to register children
-
     path(
         "account/select_child/",
         views.select_child,

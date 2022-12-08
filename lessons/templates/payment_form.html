@@ -5,13 +5,16 @@
     <div class="row h-100">
       <div class="col-12">
         <div class="card signup-card">
-          <h2 class="signup-title signup-card-header">
+          <h2 class="payment-title signup-card-header">
             Payment
           </h2>
           <form action= "{% url 'payment_form' %}" method="post">
             {% csrf_token %}
             {% include 'partials/bootstrap_form.html' with form=form %}
             <input type="submit" value="Pay" class="btn btn-lg btn-primary">
+            <div>
+              <a href='{% url 'account' %}' class="btn btn-lg btn-secondary mt-3"> Return to Dashboard</a>
+            </div>
           </form>
         </div>
       </div>

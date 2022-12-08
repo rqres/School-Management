@@ -1,48 +1,4 @@
 {% extends 'base.html' %}
-{% block head %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js">
-</script>
-
-<script type="text/javascript">
-// https://docs.djangoproject.com/en/3.2/ref/csrf/#acquiring-the-token-if-csrf-use-sessions-and-csrf-cookie-httponly-are-false
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-const cancelRequest = (reqId, theButton) => {
-  // workaround for passing a JS variable to a python reverse url
-  // https://stackoverflow.com/a/11262921
-  var url = "{% url 'show_request' 999%}".replace(999, reqId);
-  fetch(url, {
-    method: "DELETE",
-    credentials: "same-origin",
-    headers: {
-      "X-Requested-With": "XMLHttpRequest",
-      "X-CSRFToken": getCookie("csrftoken"),
-    }
-  })
-    .then(response => response.json())
-    .then(data => {
-      // hide the enclosing div
-      theButton.parentNode.remove();
-    });
-};
-</script>
-
-{% endblock %}
-
 {% block body %}
 <div id="background-image">
   <div class="container vh-100">
@@ -58,59 +14,79 @@ const cancelRequest = (reqId, theButton) => {
           
         {% if email != "" %}
         <div><p> Viewing data for: {{ email }} </p></div>
-          <div>
-            <ol>
-              <h4 class="view-request-text">Unfulfilled requests:</h4>
-              {% for request in requests %}
-              {% if request.fulfilled is False %}
-              <div style="border:1px solid black;">
-                <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
-                  {{request.days_between_lessons}} days between lessons</li>
-                <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button>
+        <div>
+          <ol>
+            <h4 class="view-request-text">Unfulfilled requests:</h4>
+            {% for request in requests %}
+            {% if request.fulfilled is False %}
+            <div style="border:1px solid black;">
+              <li> {% if user.is_school_admin %} {{request.user.first_name}} {{request.user.last_name}} {% endif %} {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+                {{request.days_between_lessons}} days between lessons</li>
+              <!-- <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button> -->
+              <div>
+                <a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Show request</a>
+                <a href="{% url 'delete_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Delete request</a>
+                {% if user.is_school_admin %}
+                  <a href="{% url 'fulfill_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Fulfill request</a>
+                {% endif %}
               </div>
-              <br>
+      
+            </div>
+            <br>
+            {% endif %}
+            {% endfor %}
+          </ol>
+        </div>
+      
+        <div>
+          <ul>
+            <h4 class="view-request-text">Fulfilled requests:</h4>
+            {% for request in requests %}
+            {% if request.fulfilled is True %}
+            <div style="border:1px solid black;">
+              <li> {% if user.is_school_admin %} {{request.user.first_name}} {{request.user.last_name}} {% endif %} {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+                {{request.days_between_lessons}} days between lessons</li>
+              <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1">Show request</a></div>
+            </div>
+            <br>
               {% endif %}
               {% endfor %}
-            </ol>
-          </div>
-        
-          <div>
-            <ul>
-              <h4 class="view-request-text">Fulfilled requests:</h4>
-              {% for request in requests %}
-              {% if request.fulfilled is True %}
-              <div style="border:1px solid black;">
-                <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
-                  {{request.days_between_lessons}} days between lessons</li>
-              </div>
-              <br>
-                {% endif %}
-                {% endfor %}
-            </ul>
-          </div>
+          </ul>
+        </div>
+        <h4 class="view-request-text">Bookings:</h4>
+          <table class="table">
+            <tr>
+              <td class="table-primary"> Number of Lessons</td>
+              <td class="table-primary"> Description of Lesson</td>
+              <td class="table-primary"> Inovice URN</td>
+              <td class="table-primary"> Cost of Booking</td>
+              <td class="table-primary"> User's email</td>
+              <td class="table-primary"> Teacher's email</td>
 
-          <div>
-            <h2>Bookings:</h2>
-            <table class="table">
-                {% for booking in bookings %}
-                <tr>
-                    <td> {{ booking.name }}</td>
-                    <td> {{ booking.description }}</td>
-                    <td>{{ booking.invoice.urn }}</td>
-                    <td>{{ booking.startTime}}</td>
-                    <td>{{ booking.endTime}}</td>
-                    <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
-                </tr>
-                {% endfor %}
-            </table>
-          </div>
+            <tr>
+          {% for booking in bookings %}
+          <tr>
+            <td> {{ booking.num_of_lessons }}</td>
+            <td> {{ booking.description }}</td>
+            <td>{{ booking.invoice.urn }}</td>
+            <td>{{ booking.invoice.price }}</td>
+            <td>{{ booking.user.email }}</td>
+            <td>{{ booking.teacher.user.email }}</td>
+            <td><a href="{% url 'show_booking' booking.id %}" name="data" value="parent"class="btn btn-sm btn-secondary">Show lessons in Booking</a></td>
+            {% if user.is_school_admin %}
+              <td><a href="{% url 'edit_booking' booking.id %}" class="btn btn-sm btn-secondary">Edit Booking</a></td>
+              <td><a href="{% url 'delete_booking' booking.id %}" class="btn btn-sm btn-secondary">Delete Booking</a></td>
+            {% endif %}
+            </tr>
+          {% endfor %}
+          </table>
 
           <div class="card signup-card">
             
             <form action="{% url 'create_request' %}" method="post">
               {% csrf_token %}
               {% include 'partials/bootstrap_form.html' with form=child_form %}
-              <input type="submit" value="Submit" class="btn btn-lg btn-warning">
+              <input type="submit" name = "submit_field" value= "Submit for {{ email }}" class="btn btn-lg btn-warning">
             </form>
           </div>
         {% endif %}

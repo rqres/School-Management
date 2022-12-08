@@ -17,11 +17,11 @@ class SchoolTermsListView(TestCase):
         self.url = reverse("school_terms_list")
         self.director = SchoolAdmin.objects.get(user__email="bob.dylan@example.org")
 
-    def test_request_list_url(self):
-        self.assertEqual(self.url, "/school_terms/")
+    def test_school_terms_list_url(self):
+        self.assertEqual(self.url, "/account/school_terms/")
 
     # test an HTTP GET request to this page when director is logged in
-    def test_GET_request_list_as_logged_in_user(self):
+    def test_GET_school_terms_list_as_logged_in_user(self):
         self.client.login(email=self.director.user.email, password="Watermelon123")
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
@@ -42,9 +42,5 @@ class SchoolTermsListView(TestCase):
     def test_non_admins_dont_have_access_to_terms_list(self):
         non_admin = User.objects.get(email="default.user@example.org")
         self.client.login(email=non_admin.email, password="Watermelon123")
-        response = self.client.get(self.url, follow=True)
-        redirect_url = reverse("home")
-        self.assertRedirects(
-            response, redirect_url, status_code=302, target_status_code=200
-        )
-        self.assertTemplateUsed(response, "home.html")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)

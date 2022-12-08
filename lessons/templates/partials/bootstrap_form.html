@@ -4,12 +4,12 @@
     {{ field.label_tag }}
     {% if form.is_bound %}
       {% if field.errors %}
-        {% render_field field class="form-control is-invalid" %}
+        {% render_field field class="is-invalid  {{ field|field_type }} {{ field|widget_type }} {{ field.html_name }}" %}
       {% else %}
-        {% render_field field class="form-control is-valid" %}
+        {% render_field field class="is-valid  {{ field|field_type }} {{ field|widget_type }} {{ field.html_name }}" %}
       {% endif %}
     {% else %}
-      {% render_field field class="form-control" %}
+      {% render_field field class="{{ field|field_type }} {{ field|widget_type }} {{ field.html_name }}" %}
     {% endif %}
     <div class="valid-feedback">valid input</div>
     <div class="invalid-feedback">{{ field.errors }}</div>

@@ -2,17 +2,17 @@
 
 ## Team members
 The members of the team are:
-- *<name of team member 1>*
-- *<name of team member 2>*
-- *<name of team member 3>*
-- *<name of team member 4>*
-- *<name of team member 5>*
+- *Melane Navaratnarajah*
+- *Rares Tamasanu*
+- *Andrew Fenn*
+- *Labdhi Mehta*
+- *Riazwaan Mir*
 
 ## Project structure
 The project is called `msms` (Music School Management System).  It currently consists of a single app `lessons` where all functionality resides.
 
 ## Deployed version of the application
-The deployed version of the application can be found at *<[enter URL here](URL)>*.
+The deployed version of the application can be found at *rqres.pythonanywhere.com*.
 
 ## Installation instructions
 To install the software and use it in your local development environment, you must first set up and activate a local development environment.  From the root of the project:

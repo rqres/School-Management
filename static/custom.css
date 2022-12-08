@@ -19,11 +19,12 @@
 }
 
 #background-image {
-  background: url('images/fox-cover.jpg') no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
+  background-image: url('images/fox-cover.jpg');
+  background-position: center;
   background-size: cover;
-  -o-background-size: cover;
+  background-repeat: repeat;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .h-100 {
@@ -93,6 +94,16 @@ h4.view-request-text {
   padding-bottom: 30px;
   border-radius: 45px;
 }
+
+.booking-list-card {
+  background-color: rgba(245, 245, 245, 0.8);
+  padding-top: 30px;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-bottom: 30px;
+  border-radius: 45px;
+}
+
 h1.home-card-header{
   background-color: rgba(96, 95, 95, 0.8);
   width:fit-content;
