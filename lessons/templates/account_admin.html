@@ -8,6 +8,9 @@
           <h2 class="signup-title signup-card-header">
              Welcome back, {{ school_admin.user.first_name }} {{ school_admin.user.last_name }}
           </h2>
+          <h3 class="account-text">
+            You are {% if school_admin.is_director %} a director {% else %} an admin {% endif %} at {{ school_admin.school_name }}
+          </h3>
 
           <div>
             <a href="{% url 'bookings_list' %}" class="btn btn-lg btn-warning mb-2 mt-2">View all Bookings</a>
