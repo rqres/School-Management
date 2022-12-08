@@ -8,9 +8,17 @@
   <div class="container vh-100">
     <div class="row h-100">
       <div class="col-12">
-        <div class="card home-card mx-auto offset-md-1 offset-lg-2 text-center">
+        <div class="card booking-list-card mx-auto text-center">
           <h1 class="card-title home-title home-card-header mx-auto mb-4">Your Bookings</h1>
           <table class="table">
+            <tr>
+              <td class="table-primary"> Number of Lessons</td>
+              <td class="table-primary"> Description of Lesson</td>
+              <td class="table-primary"> Inovice URN</td>
+              <td class="table-primary"> User's email</td>
+              <td class="table-primary"> Teacher's email</td>
+
+            <tr>
           {% for booking in bookings %}
           <tr>
             <td> {{ booking.num_of_lessons }}</td>

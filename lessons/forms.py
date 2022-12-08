@@ -19,9 +19,6 @@ from django.contrib.auth import authenticate
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100, required=True)
-    is_parent = forms.BooleanField(
-        label="Are you a Parent?", required=False, widget=forms.CheckboxInput()
-    )
 
     class Meta:
         model = User
@@ -58,7 +55,53 @@ class StudentSignUpForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_student = True
-            user.is_parent = self.cleaned_data["is_parent"]
+            user.save()
+
+        Student.objects.create(
+            user=user, school_name=self.cleaned_data.get("school_name")
+        )
+
+        return user
+    
+class ParentSignUpForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100, required=True)
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "school_name"]
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+
+    @transaction.atomic
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(ParentSignUpForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.is_student = True
+            user.is_parent = True
             user.save()
 
         Student.objects.create(
@@ -354,8 +397,10 @@ class EditBookingForm(forms.ModelForm):
         )
         self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
         self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.description = self.cleaned_data.get("description")
         self._booking.save()
-
+        self._booking.update_lessons()
+        self._booking.update_invoice()
         return self._booking
 
 
@@ -376,6 +421,7 @@ class EditLessonForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "startTime": forms.TimeInput(attrs={"type": "time"}),
+            "description": forms.Textarea(),
         }
 
     def save(self):

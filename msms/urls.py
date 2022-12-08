@@ -34,6 +34,9 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up/parent/", views.sign_up_parent, name="sign_up_parent"
+    ),  # path for the parent sign-up page
 
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
@@ -50,7 +53,7 @@ urlpatterns = [
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show lessons in a booking
     path(
-        "account/bookings/<int:booking_id>/<int:lesson_id>", views.edit_lesson, name="edit_lesson"
+        "account/bookings/<int:booking_id>/<int:lesson_id>/", views.edit_lesson, name="edit_lesson"
     ),  # path to edit lesson in a booking
     path(
         "account/bookings/edit/<int:booking_id>/", views.edit_booking, name="edit_booking"

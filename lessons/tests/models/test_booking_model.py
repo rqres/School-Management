@@ -67,10 +67,9 @@ class BookingTest(TestCase):
         self.booking.user = None
         self._assert_booking_is_invalid()
 
-    # TODO:
-    def dont_test_description_field_must_not_be_blank(self):
+    def test_description_field_may_be_blank(self):
         self.booking.description = ""
-        self._assert_booking_is_invalid()
+        self._assert_booking_is_valid()
 
     def test_days_between_lessons_field_must_not_be_blank(self):
         self.booking.days_between_lessons = None
@@ -132,18 +131,20 @@ class BookingTest(TestCase):
         )
         self.assertEqual(self.booking.invoice.price, costOfBooking)
 
-    def test_invoice_unique_to_booking(self):
-        pass
-
     def test_create_lessons_for_booking(self):
         self.booking.create_lessons()
         lessons = self.booking.lesson_set.all()
         self.assertEqual(lessons.count(), self.booking.num_of_lessons)
-        for lesson in lessons:
-            pass
+        daysBetweenLesson = lessons[1].date - lessons[0].date
+        self.assertTrue(daysBetweenLesson<=datetime.timedelta(self.booking.days_between_lessons))
 
     def test_update_lessons_for_booking(self):
-        pass
+        self.booking.days_between_lessons = 10
+        self.booking.update_lessons()
+        lessons = self.booking.lesson_set.all()
+        self.assertEqual(lessons.count(), self.booking.num_of_lessons)
+        daysBetweenLesson = lessons[1].date - lessons[0].date
+        self.assertTrue(daysBetweenLesson<=datetime.timedelta(self.booking.days_between_lessons))
 
     def _assert_booking_is_invalid(self):
         with self.assertRaises(ValidationError):

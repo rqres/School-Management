@@ -1,0 +1,12 @@
+{% load widget_tweaks %}
+{% for field in form %}
+  <div class="mb-3">
+    {{ field.label_tag }}
+    {% if form.is_bound %}
+      {% render_field field class="is-invalid  {{ field|field_type }} {{ field|widget_type }} {{ field.html_name }}" %}
+    {% else %}
+      {% render_field field class="{{ field|field_type }} {{ field|widget_type }} {{ field.html_name }}" %}
+    {% endif %}
+    <div class="invalid-feedback">school terms cannot overlap</div>
+  </div>
+{% endfor %}

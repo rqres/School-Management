@@ -18,6 +18,7 @@ from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
     StudentSignUpForm,
+    ParentSignUpForm,
     SelectChildForm,
     PaymentForm,
     LogInForm,
@@ -94,12 +95,47 @@ def sign_up_student(request):
     return render(request, "sign_up_student.html", {"form": form})
 
 
+def sign_up_parent(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+
+    if request.method == "POST":
+        form = ParentSignUpForm(request.POST)
+        if form.is_valid():
+            # create user, add it to db, and log them in
+            user = form.save()
+            login(request, user)
+            return redirect("account")
+    else:
+        form = ParentSignUpForm()
+    return render(request, "sign_up_parent.html", {"form": form})
+
+
+def create_admin(request):
+    if request.method == "POST":
+        # create a bound version of the form with post data
+        form = CreateAdminForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("admin_list")
+    else:
+        form = (
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
+    return render(request, "create_admin.html", {"form": form})
+    # successful form means you save user record in database and redirect them to the database
+    
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
     if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
+        )
+    # reditect parents to their dashboard template
+    elif request.user.is_parent and request.user.is_active:
+        return render(
+            request, "account_parent.html", {"student": request.user.student}
         )
     # redirect students to student template
     elif request.user.is_student:
@@ -113,16 +149,18 @@ def account(request):
     #   etc...
     # TODO else statement for teachers and parents
     else:
-        # UNRECOGNIZED USER TYPE
-        # this shouldn't happen, log user out and send him to welcome page
-        logout(request)
-        return redirect("home")
+        return render(
+            request, "account_user.html", {"user": request.user}
+        )
 
 
 @login_required
 def bookings_list(request):
     if request.user.is_school_admin is True:
-        bookings = Booking.objects.all()
+        try:
+            bookings = Booking.objects.all()
+        except ObjectDoesNotExist:
+            return redirect("bookings_list")
     else:
         bookings = request.user.booking_set.all()
     return render(
@@ -135,6 +173,9 @@ def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         lessons = booking.lesson_set.all()
+        if request.user.is_school_admin is False and booking.user != request.user:
+            # Users can only their bookings
+            return redirect("account")
     except ObjectDoesNotExist:
         return redirect("bookings_list")
     else:
@@ -154,7 +195,6 @@ def edit_lesson(request, booking_id, lesson_id):
             form = EditLessonForm(request.POST, lesson=lesson)
             if form.is_valid():
                 lesson = form.save()
-                lessons = booking.lesson_set.all()
                 return redirect("show_booking", booking_id=booking.id)
             else:
                 form = EditLessonForm(lesson=lesson)
@@ -445,35 +485,37 @@ def register_child(request):
 
 @login_required
 def select_child(request):
-    if request.method == "POST":
-        form = SelectChildForm(request.POST)
-        form.set_children(request.user.children.all())
-        if form.is_valid():
-            selected_child_email = form.cleaned_data["child_box"]
-            child = User.objects.get(email__exact=selected_child_email)
-            child_requests = child.requestforlessons_set.all()
-            child_bookings = child.booking_set.all()
+    if request.user.is_parent:
+        if request.method == "POST":
+            form = SelectChildForm(request.POST)
+            form.set_children(request.user.children.all())
+            if form.is_valid():
+                selected_child_email = form.cleaned_data["child_box"]
+                child = User.objects.get(email__exact=selected_child_email)
+                child_requests = child.requestforlessons_set.all()
+                child_bookings = child.booking_set.all()
 
-            request_child_form = RequestForLessonsForm(request.POST, user=child)
-            if request_child_form.is_valid():
-                request_child_form.save()
-
-            return render(
-                request,
-                "select_child.html",
-                {
-                    "form": form,
-                    "email": selected_child_email,
-                    "bookings": child_bookings,
-                    "requests": child_requests,
-                    "child_form": request_child_form,
-                },
-            )
-    else:
+                request_child_form = RequestForLessonsForm(
+                    request.POST, user=child
+                )
+                if request_child_form.is_valid():
+                    request_child_form.save()
+                return render(
+                    request,
+                        "select_child.html",
+                    {
+                        "form": form,
+                        "email": selected_child_email,
+                        "bookings": child_bookings,
+                        "requests": child_requests,
+                        "child_form": request_child_form,
+                    },
+                )
         form = SelectChildForm()
         form.set_children(request.user.children.all())
-    return render(request, "select_child.html", {"form": form, "email": ""})
-
+        return render(request, "select_child.html", {"form": form, "email": ""})
+    else: 
+        return redirect('account')
 
 @login_required
 def school_terms_list(request):
