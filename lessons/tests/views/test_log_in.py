@@ -139,7 +139,7 @@ class LogInTest(TestCase, LogInTester):
         self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
-        self.assertTrue(form.is_bound)
+        self.assertFalse(form.is_bound)
         self.assertFalse(self._is_logged_in())
         messages_list = list(response.context['messages'])#retrieve list of messages
         self.assertEqual(len(messages_list), 1)

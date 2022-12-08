@@ -1,4 +1,4 @@
-"""Tests of the sign up view"""
+"""Tests of the create admin view"""
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.hashers import check_password
@@ -9,21 +9,21 @@ from lessons.models import SchoolAdmin, User
 
 
 class CreateAdminViewTestCase(TestCase, LogInTester):
-    """Tests of the sign up view"""
+    """Tests of the create admin view"""
 
     def setUp(self):
         self.url = reverse("create_admin")
         self.form_input = {
-            "first_name": "Marty",
-            "last_name": "Major",
-            "email": "marty.major@example.org",
-            "school_name": "King's",
-            "is_director" : True,
-            "can_edit_admins" :False,
+            "first_name": "Bob",
+            "last_name": "Dylan",
+            "email": "bob.dylan@example.org",
+            "school_name": "King's College London",
+            "is_director": True,
+            "can_edit_admins" : False,
             "can_create_admins" : False,
             "can_delete_admins" : False,
-            "password1": "Password123",
-            "password2": "Password123",
+            "password1": "Watermelon123",
+            "password2": "Watermelon123",
         }
 
     def test_create_admin_url(self):
@@ -61,7 +61,7 @@ class CreateAdminViewTestCase(TestCase, LogInTester):
         admin_after_count = SchoolAdmin.objects.count()
         self.assertEqual(user_after_count, user_before_count + 1)
         self.assertEqual(admin_after_count, admin_before_count + 1)
-        response_url = reverse("account")
+        response_url = reverse('account')
         self.assertRedirects(
             response, response_url, status_code=302, target_status_code=200
         )
