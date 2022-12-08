@@ -40,7 +40,7 @@
       {% for request in requests %}
       {% if request.fulfilled is True %}
       <div style="border:1px solid black;">
-        <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
+        <li> {% if user.is_school_admin %} {{request.user.first_name}} {{request.user.last_name}} {% endif %} {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
           {{request.days_between_lessons}} days between lessons</li>
         <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1">Show request</a></div>
       </div>
