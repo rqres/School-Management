@@ -1,3 +1,4 @@
+"""Unit tests of the SchoolAdmin model"""
 from django.test import TestCase
 from lessons.models import SchoolAdmin, User
 from django.core.exceptions import ValidationError
@@ -6,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 
 class SchoolAdminModelTestCase(TestCase):
+    """Unit tests of the SchoolAdmin model"""
     fixtures = [
         "lessons/tests/fixtures/default_director.json",
     ]

@@ -317,13 +317,6 @@ def admin_list(request):
         request, "admin_list.html", {"admins": admins, "current_user": request.user}
     )
 
-    # if request.user.schooladmin.is_director:
-    #     return render(request, "admin_list.html", {"admins": admins})
-    # elif request.user.schooladmin.editAdmins:
-    #     return render(request, "admin_list_edit_only.html", {"admins": admins})
-    # elif request.user.schooladmin.deleteAdmins:
-    #     return render(request, "admin_list_delete_only.html", {"admins": admins})
-
 
 @login_required
 def edit_admin(request, id):

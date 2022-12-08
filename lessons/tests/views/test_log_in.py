@@ -1,3 +1,4 @@
+"""Unit tests of log in view"""
 from django.test import TestCase
 from django.urls import reverse
 from lessons.models import User, Student, SchoolAdmin
@@ -6,6 +7,7 @@ from lessons.forms import LogInForm
 
 # Create your tests here.
 class LogInTest(TestCase, LogInTester):
+    """Unit tests of log in view"""
     def setUp(self):
         self.url = reverse("log_in")
         self.user = User.objects.create_user(
