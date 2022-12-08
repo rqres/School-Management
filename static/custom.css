@@ -19,11 +19,12 @@
 }
 
 #background-image {
-  background: url('images/fox-cover.jpg') no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
+  background-image: url('images/fox-cover.jpg');
+  background-position: center;
   background-size: cover;
-  -o-background-size: cover;
+  background-repeat: repeat;
+  position: relative;
+  overflow-x: hidden;
 }
 
 .h-100 {
