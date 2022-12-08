@@ -15,7 +15,9 @@
             <!-- {% include 'partials/bootstrap_form.html' with form=form %} -->
             <input type="submit" value="Submit" class="btn btn-lg btn-warning">
           </form>
-          <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
+          <div>
+            <a href="{% url 'show_booking' booking.id %}" class="btn btn-bg mt-2 btn-secondary">Return to lessons</a>
+          </div>
         </div>
       </div>
     </div>
