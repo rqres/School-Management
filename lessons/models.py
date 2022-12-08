@@ -46,6 +46,9 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
+    """
+    Defines a user with first name, last name, email and the type of user they are
+    """
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
@@ -71,6 +74,7 @@ class User(AbstractBaseUser):
     REQUIRED_FIELDS = ["first_name", "last_name"]
 
     def __str__(self):
+        """This allows the user to be defined by their email"""
         return self.email
 
     def has_perm(self, perm, obj=None):
@@ -91,37 +95,45 @@ class User(AbstractBaseUser):
 
 
 class Student(models.Model):
+    """Defines a user to be a student with the given name of the school"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for students here:
     school_name = models.CharField(max_length=100, blank=False)
 
     def __str__(self):
+        """This allows the user to be defined by their email"""
         return self.user.email
 
 
 class Teacher(models.Model):
+    """Defines a user to be a teacher with the given name of the school"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # add extra fields for teachers here:
     school_name = models.CharField(max_length=100, blank=False)
 
     def __str__(self):
+        """This allows the user to be defined by their email"""
         return self.user.email
 
 
 class SchoolAdmin(models.Model):
+    """Defines a user to be a school admin with the given name of the school"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     # extra fields for director:
     school_name = models.CharField(max_length=100, blank=False)
+    #This sets the school admin to not also be a director by default
     is_director = models.BooleanField(default=False)
     can_create_admins = models.BooleanField(default=False)
     can_edit_admins = models.BooleanField(default=False)
     can_delete_admins = models.BooleanField(default=False)
 
     def __str__(self):
+        """This allows the user to be defined by their email"""
         return self.user.email
 
 
 class Invoice(models.Model):
+    """Defines an invoice with the given user, its unique reference number and price"""
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     student_num = models.IntegerField(blank=False)
     invoice_num = models.IntegerField(blank=False)
@@ -130,6 +142,7 @@ class Invoice(models.Model):
     is_paid = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        """creates the unique reference number of the invoice by adding the student number and invoice number"""
         self.student_num = self.user.pk + 1000
         self.urn = str(self.student_num) + "-" + str(self.invoice_num)
         super(Invoice, self).save(*args, **kwargs)
@@ -141,10 +154,13 @@ class Invoice(models.Model):
         )
 
     def __str__(self):
+        """This allows the invoice to be defined by its unique reference number"""
         return self.urn
 
 
 class Booking(models.Model):
+    """Defines a booking with the given number of lessons, days between lessons and lesson duration, an invoice,
+    the user the booking is for, the teacher the booking is for and the given description"""
     num_of_lessons = models.IntegerField(blank=False)
     days_between_lessons = models.IntegerField(
         default=7,  # default is one week between each lesson
@@ -222,6 +238,8 @@ class Booking(models.Model):
 
 
 class Lesson(models.Model):
+    """Defines a lesson by the given name of the user, date of the lesson, time of the lesson,
+    the time this lesson is created and a given description"""
     name = models.CharField(max_length=50, blank=False)
     date = models.DateField(blank=False)
     startTime = models.TimeField(blank=False)
@@ -246,6 +264,9 @@ class Lesson(models.Model):
 
 
 class RequestForLessons(models.Model):
+    """Defines a request with the name of the user, the days that the user is available,
+     the number of days between lessons, the desired lesson duration of the user, the time this request is created,
+     and other information that was given by the user"""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     # i am storing the availabilty as a comma separated string of days
     # e.g: "TUE,SAT,SUN" = student is available on tuesday saturday and sunday
@@ -299,6 +320,7 @@ class RequestForLessons(models.Model):
 
 
 class SchoolTerm(models.Model):
+    """Defines school term with the given start date and the given end date"""
     start_date = models.DateField(blank=False)
     end_date = models.DateField(blank=False)
 
@@ -309,6 +331,7 @@ class SchoolTerm(models.Model):
         ordering = ["start_date"]
 
     def clean(self):
+        """Checks if the created school term overlap with one another"""
         if self.start_date is not None and self.end_date is not None:
             if self.start_date > self.end_date:
                 raise ValidationError("Start date cannot be greater than end date")
