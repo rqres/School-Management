@@ -221,38 +221,6 @@ class Command(BaseCommand):
             print(".", end="", flush=True)
         print("")
 
-    def _seed_teachers(self):
-        for i in range(2):
-            fname = self.faker.first_name()
-            lname = self.faker.last_name()
-
-            school_names = [
-                "Imperial",
-                "King's",
-                "Oxford",
-                "Cambridge",
-                "Gummies",
-                "Sesame",
-                "Jelly",
-            ]
-
-            school = random.choice(school_names) + "School"
-            email = fname.lower() + "." + lname.lower() + str(i) + "@example.com"
-
-            user = User.objects.create_user(
-                email,
-                first_name=fname,
-                last_name=lname,
-                password=(self.faker.password()),
-            )
-            user.is_teacher = True
-
-            user.save()
-
-            Teacher.objects.create(user=user, school_name=school)
-            print(".", end="", flush=True)
-        print("")
-
     def _seed_school_terms(self):
         start_dates = [
             date(2022, 9, 1),
