@@ -16,12 +16,18 @@
             <td> {{ booking.num_of_lessons }}</td>
             <td> {{ booking.description }}</td>
             <td>{{ booking.invoice.urn }}</td>
-            <td>{{ booking.student.user.first_name }}</td>
-            <td>{{ booking.teacher.user.first_name }}</td>
-            <td><a href="{% url 'show_booking' booking.id %}">{{ booking.name }}</a></td>
-          </tr>
+            <td>{{ booking.user.email }}</td>
+            <td>{{ booking.teacher.user.email }}</td>
+            <td><a href="{% url 'show_booking' booking.id %}" class="btn btn-sm btn-secondary">Show lessons in Booking</a></td>
+            {% if user.is_school_admin %}
+              <td><a href="{% url 'edit_booking' booking.id %}" class="btn btn-sm btn-secondary">Edit Booking</a></td>
+              <td><a href="{% url 'delete_booking' booking.id %}" class="btn btn-sm btn-secondary">Delete Booking</a></td>
+            {% endif %}
+            </tr>
           {% endfor %}
           </table>
+          {% block message %}
+          {% endblock %}
           <div>
             <a href='{% url 'account' %}' class="btn btn-lg btn-secondary"> Return to Dashboard</a>
           </div>

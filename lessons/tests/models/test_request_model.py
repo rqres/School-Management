@@ -6,22 +6,21 @@ from lessons.models import RequestForLessons, Student, User
 
 class RequestModelTestCase(TestCase):
     fixtures = [
-        "lessons/tests/fixtures/default_student.json",
+        "lessons/tests/fixtures/default_user.json",
         "lessons/tests/fixtures/default_request.json",
     ]
 
     def setUp(self):
-        self.user = User.objects.get(email="john.doe@example.org")
-        student = Student.objects.get(user=self.user)
-        self.request = student.requestforlessons_set.first()
+        self.user = User.objects.get(email="default.user@example.org")
+        self.request = self.user.requestforlessons_set.first()
 
-    def test_corresponding_student_must_not_be_none(self):
-        self.request.student = None
+    def test_corresponding_user_must_not_be_none(self):
+        self.request.user = None
         self._assert_request_is_invalid()
 
     def test_request_is_deleted_when_corresponding_student_is_deleted(self):
         before = list(RequestForLessons.objects.all())
-        self.request.student.delete()
+        self.request.user.delete()
         after = list(RequestForLessons.objects.all())
         self.assertEqual(len(before) - 1, len(after))
 

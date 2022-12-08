@@ -1,8 +1,10 @@
+from copy import Error
 from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import (
+    Lesson,
     Booking,
     Invoice,
     RequestForLessons,
@@ -17,7 +19,9 @@ from django.contrib.auth import authenticate
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100, required=True, widget=forms.TextInput(attrs={'size': 40}))
-    is_parent = forms.BooleanField(label="Are you a Parent?", required=False, widget=forms.CheckboxInput())
+    is_parent = forms.BooleanField(
+        label="Are you a Parent?", required=False, widget=forms.CheckboxInput()
+    )
 
     class Meta:
         model = User
@@ -64,35 +68,87 @@ class StudentSignUpForm(UserCreationForm):
         return user
 
 
-class CreateAdminForm(UserCreationForm):
-    school_name = forms.CharField(max_length=100)
-    directorStatus = forms.BooleanField(label="Director?", required=False)
-    editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
-    deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
-    createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
-
+class EditAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._schooladmin = kwargs.pop("schooladmin", None)
         self._instance = kwargs.pop("instance", None)
-        self.school_name = forms.CharField(max_length=100)
-        self.directorStatus = forms.BooleanField(label="Director?", required=False)
-        self.editAdmins = forms.BooleanField(label="Allow them to edit admins?", required=False)
-        self.deleteAdmins = forms.BooleanField(label="Allow them to delete admins?", required=False)
-        self.createAdmins = forms.BooleanField(label="Allow them to create admins?", required=False)
         super().__init__(*args, **kwargs)
-        # this if statement is executed if the user is using the form to
-        # update an existing request
-        # this block populates the fields with the existing data in the model
+
         if self._instance:
-            self.fields["school_name"] = self.school_name
-            self.fields["directorStatus"] = self.directorStatus
-            self.fields["editAdmins"] = self.editAdmins
-            self.fields["deleteAdmins"]= self.deleteAdmins
-            self.fields["createAdmins"] = self.createAdmins
+            self.fields["first_name"].initial = self._instance.user.first_name
+            self.fields["last_name"].initial = self._instance.user.last_name
+            self.fields["school_name"].initial = self._instance.school_name
+            self.fields["is_director"].initial = self._instance.is_director
+            self.fields["can_edit_admins"].initial = self._instance.can_edit_admins
+            self.fields["can_delete_admins"].initial = self._instance.can_delete_admins
+            self.fields["can_create_admins"].initial = self._instance.can_create_admins
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "school_name", "directorStatus", "editAdmins", "deleteAdmins", "createAdmins"]
+        fields = [
+            "first_name",
+            "last_name",
+            "school_name",
+            "is_director",
+            "can_create_admins",
+            "can_edit_admins",
+            "can_delete_admins",
+        ]
+
+    school_name = forms.CharField(max_length=100)
+    is_director = forms.BooleanField(label="Director?", required=False)
+    can_create_admins = forms.BooleanField(
+        label="Allow them to create admins?", required=False
+    )
+    can_edit_admins = forms.BooleanField(
+        label="Allow them to edit admins?", required=False
+    )
+    can_delete_admins = forms.BooleanField(
+        label="Allow them to delete admins?", required=False
+    )
+
+    def save(self):
+        super().save(commit=False)
+        admin = self._instance
+        admin.user.first_name = self.cleaned_data.get("first_name")
+        admin.user.last_name = self.cleaned_data.get("last_name")
+        admin.school_name = self.cleaned_data.get("school_name")
+        admin.is_director = self.cleaned_data.get("is_director")
+        admin.can_edit_admins = self.cleaned_data.get("can_edit_admins")
+        admin.can_delete_admins = self.cleaned_data.get("can_delete_admins")
+        admin.can_create_admins = self.cleaned_data.get("can_create_admins")
+        admin.user.save()
+        admin.save()
+
+        return admin
+
+
+class CreateAdminForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100)
+    is_director = forms.BooleanField(label="Director?", required=False)
+    can_create_admins = forms.BooleanField(
+        label="Allow them to create admins?", required=False
+    )
+    can_edit_admins = forms.BooleanField(
+        label="Allow them to edit admins?", required=False
+    )
+    can_delete_admins = forms.BooleanField(
+        label="Allow them to delete admins?", required=False
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "school_name",
+            "is_director",
+            "can_create_admins",
+            "can_edit_admins",
+            "can_delete_admins",
+            "password1",
+            "password2",
+        ]
 
     password1 = forms.CharField(
         label="Password",
@@ -117,51 +173,24 @@ class CreateAdminForm(UserCreationForm):
             raise forms.ValidationError("Passwords don't match")
         return password2
 
-    def save(self, edit=False):
-        super().save(commit=False)
-        # Save the provided password in hashed format
-        currentadmin = super(CreateAdminForm, self).save(commit=False)
-        currentadmin.set_password(self.cleaned_data["password1"])
-        if not edit:
-            currentadmin = CreateAdminForm.objects.create(
-                schooladmin=self._schooladmin,
-                school_name=self.cleaned_data.get("school_name"),
-                directorStatus=self.cleaned_data.get("directorStatus"),
-                editAdmins=self.cleaned_data.get("editAdmins"),
-                deleteAdmins=self.cleaned_data.get("deleteAdmins"),
-                createAdmins=self.cleaned_data.get("createAdmins"),
-            )
-        else:
-            # if the user is editing a request, don't create a new object
-            # but instead update its fields
-            currentadmin = self._instance
-            currentadmin.school_name = self.cleaned_data.get("school_name")
-            currentadmin.directorStatus = self.cleaned_data.get("directorStatus")
-            currentadmin.editAdmins = self.cleaned_data.get("editAdmins")
-            currentadmin.deleteAdmins = self.cleaned_data.get("deleteAdmins")
-            currentadmin.createAdmins = self.cleaned_data.get("createAdmins")
-            currentadmin.save()
-
-        return currentadmin
-
     @transaction.atomic
     def save(self, commit=True):
         # Save the provided password in hashed format
-        currentadmin = super(CreateAdminForm, self).save(commit=False)
-        currentadmin.set_password(self.cleaned_data["password1"])
+        user = super(CreateAdminForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
         if commit:
-            currentadmin.is_school_admin = True
-            currentadmin.save()
-        SchoolAdmin.objects.create(
+            user.is_school_admin = True
+            user.save()
+        admin = SchoolAdmin.objects.create(
             user=user,
             school_name=self.cleaned_data.get("school_name"),
-            directorStatus=self.cleaned_data.get("directorStatus"),
-            editAdmins=self.cleaned_data.get("editAdmins"),
-            deleteAdmins=self.cleaned_data.get("deleteAdmins"),
-            createAdmins=self.cleaned_data.get("createAdmins"),
+            is_director=self.cleaned_data.get("is_director"),
+            can_create_admins=self.cleaned_data.get("can_create_admins"),
+            can_edit_admins=self.cleaned_data.get("can_edit_admins"),
+            can_delete_admins=self.cleaned_data.get("can_delete_admins"),
         )
+        return admin
 
-        return currentadmin
 
 class LogInForm(forms.Form):
     email = forms.EmailField(label="Email", required=True)
@@ -184,8 +213,8 @@ class SchoolTermForm(forms.ModelForm):
         model = SchoolTerm
         fields = ["start_date", "end_date"]
         widgets = {
-            "start_date": forms.DateInput(attrs={'type': 'date'}),
-            "end_date": forms.DateInput(attrs={'type': 'date'})
+            "start_date": forms.DateInput(attrs={"type": "date"}),
+            "end_date": forms.DateInput(attrs={"type": "date"}),
         }
 
     def save(self, edit=False):
@@ -207,7 +236,7 @@ class SchoolTermForm(forms.ModelForm):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._student = kwargs.pop("student", None)
+        self._user = kwargs.pop("user", None)
         self._instance = kwargs.pop("instance", None)
         super().__init__(*args, **kwargs)
 
@@ -256,7 +285,7 @@ class RequestForLessonsForm(forms.ModelForm):
         super().save(commit=False)
         if not edit:
             req = RequestForLessons.objects.create(
-                student=self._student,
+                user=self._user,
                 availability=",".join(self.cleaned_data.get("availability_field")),
                 no_of_lessons=self.cleaned_data.get("no_of_lessons"),
                 days_between_lessons=self.cleaned_data.get("days_between_lessons"),
@@ -277,8 +306,93 @@ class RequestForLessonsForm(forms.ModelForm):
         return req
 
 
+class EditBookingForm(forms.ModelForm):
+    teacher = forms.ModelChoiceField(
+        label="Select teacher", queryset=Teacher.objects.all()
+    )
+
+    def __init__(self, *args, **kwargs):
+        self._booking = kwargs.pop("booking", None)
+        super().__init__(*args, **kwargs)
+
+        if self._booking:
+            self.fields["teacher"].initial = self._booking.teacher
+            self.fields["num_of_lessons"].initial = self._booking.num_of_lessons
+            self.fields[
+                "days_between_lessons"
+            ].initial = self._booking.days_between_lessons
+            self.fields["lesson_duration"].initial = self._booking.lesson_duration
+            self.fields["description"].initial = self._booking.description
+
+    class Meta:
+        model = Booking
+        fields = [
+            "num_of_lessons",
+            "days_between_lessons",
+            "lesson_duration",
+            "teacher",
+            "description",
+        ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
+
+    def save(self):
+        super().save(commit=False)
+        self._booking.num_of_lessons = self.cleaned_data.get("num_of_lessons")
+        self._booking.days_between_lessons = self.cleaned_data.get(
+            "days_between_lessons"
+        )
+        self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
+        self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.save()
+        self._booking.update_lessons()
+
+        return self._booking
+
+
+class EditLessonForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        self._lesson = kwargs.pop("lesson", None)
+        super().__init__(*args, **kwargs)
+
+        if self._lesson:
+            self.fields["name"].initial = self._lesson.name
+            self.fields["date"].initial = self._lesson.date
+            self.fields["startTime"].initial = self._lesson.startTime
+            self.fields["description"].initial = self._lesson.description
+
+    class Meta:
+        model = Lesson
+        fields = ["name", "date", "startTime", "description"]
+        widgets = {
+            "date": forms.DateInput(attrs={"type": "date"}),
+            "startTime": forms.TimeInput(attrs={"type": "time"}),
+            "description": forms.Textarea(),
+        }
+
+    def save(self):
+        super().save(commit=False)
+        self._lesson.name = self.cleaned_data.get("name")
+        self._lesson.date = self.cleaned_data.get("date")
+        self._lesson.startTime = self.cleaned_data.get("startTime")
+        self._lesson.description = self.cleaned_data.get("description")
+        self._lesson.save()
+
+        return self._lesson
+
+
 class PaymentForm(forms.Form):
-    invoice_urn = forms.CharField(label="Invoice reference number")
+    def __init__(self, *args, **kwargs):
+        self._user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self._user:
+            invoices = self._user.invoice_set.filter(is_paid=False)
+            self.fields["invoice_urn"].queryset = invoices
+
+    invoice_urn = forms.ModelChoiceField(
+        label="Invoice reference number", queryset=Invoice.objects.all()
+    )
     account_name = forms.CharField(max_length=50)
     account_number = forms.CharField(
         min_length=8,
@@ -402,6 +516,9 @@ class FulfillLessonRequestForm(forms.ModelForm):
             "lesson_duration",
             "description",
         ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
 
     # transaction atomic means that if anything fails in this function
     # then everything will revert to the state it was in before running the function
@@ -417,9 +534,13 @@ class FulfillLessonRequestForm(forms.ModelForm):
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
             description=self.cleaned_data.get("description"),
-            student=self._lesson_request.student,
+            user=self._lesson_request.user,
             teacher=self.cleaned_data.get("teacher"),
         )
+        try:
+            booking.create_lessons()
+        except AttributeError:
+            raise Exception("No School Term in DB")
 
         # booking created, mark request as fulfilled
         self._lesson_request.fulfilled = True

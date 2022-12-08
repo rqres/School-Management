@@ -59,8 +59,7 @@ class RequestForLessonsFormTestCase(TestCase):
 
     def test_form_must_save_correctly(self):
         user = User.objects.get(email="john.doe@example.org")
-        student = Student.objects.get(user=user)
-        form = RequestForLessonsForm(student=student, data=self.form_input)
+        form = RequestForLessonsForm(user=user,data=self.form_input)
         before_count = RequestForLessons.objects.count()
         request = form.save()
         after_count = RequestForLessons.objects.count()
