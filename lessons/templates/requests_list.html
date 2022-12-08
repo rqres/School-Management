@@ -19,11 +19,13 @@
         <li> {% if user.is_school_admin %} {{request.user.first_name}} {{request.user.last_name}} {% endif %} {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
           {{request.days_between_lessons}} days between lessons</li>
         <!-- <button type="button" onclick="cancelRequest({{request.id}}, this);"> Cancel request </button> -->
-        <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
-        <div><a href="{% url 'delete_request' id=request.id %}" class="btn btn-sm btn-secondary">Delete request</a></div>
-        {% if user.is_school_admin %}
-        <div><a href="{% url 'fulfill_request' id=request.id %}" class="btn btn-sm btn-secondary">Fulfill request</a></div>
-        {% endif %}
+        <div>
+          <a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Show request</a>
+          <a href="{% url 'delete_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Delete request</a>
+          {% if user.is_school_admin %}
+            <a href="{% url 'fulfill_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1 ms-1 me-1">Fulfill request</a>
+          {% endif %}
+        </div>
 
       </div>
       <br>
@@ -40,7 +42,7 @@
       <div style="border:1px solid black;">
         <li> {{request.no_of_lessons}} lessons of {{request.lesson_duration}} minutes each, with
           {{request.days_between_lessons}} days between lessons</li>
-        <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary">Show request</a></div>
+        <div><a href="{% url 'show_request' id=request.id %}" class="btn btn-sm btn-secondary mt-1 mb-1">Show request</a></div>
       </div>
       <br>
         {% endif %}
