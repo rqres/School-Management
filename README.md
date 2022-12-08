@@ -4,9 +4,9 @@
 The members of the team are:
 - *Melane Navaratnarajah*
 - *Rares Tamasanu*
-- *<name of team member 3>*
-- *<name of team member 4>*
-- *<name of team member 5>*
+- *Andrew Fenn*
+- *Labdhi Mehta*
+- *Riazwaan Mir*
 
 ## Project structure
 The project is called `msms` (Music School Management System).  It currently consists of a single app `lessons` where all functionality resides.
