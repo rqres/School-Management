@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls.exceptions import Http404
 from .models import (
     Booking,
     Invoice,
@@ -125,6 +126,7 @@ def account(request):
         return redirect("admin:index")
     # elif request.user.is_parent:
     #   etc...
+    # TODO else statement for teachers and parents
     else:
         # UNRECOGNIZED USER TYPE
         # this shouldn't happen, log user out and send him to welcome page
@@ -231,8 +233,7 @@ def show_request(request, id):
     try:
         req = RequestForLessons.objects.get(id=id)
     except ObjectDoesNotExist:
-        return redirect("requests_list")
-
+        raise Http404("Request for lessons does not exist")
     else:
         return render(request, "show_request.html", {"lessons_request": req})
 
@@ -270,44 +271,56 @@ def fulfill_request(request, id):
         {"request_id": id, "form": form, "user_name": user_name},
     )
 
+
 def extract_email(string):
     email = ""
     i = len(string) - 1
-    while (string[i] != " "):
+    while string[i] != " ":
         email += string[i]
         i -= 1
     return email[::-1]
-        
+
+
 @login_required
 def create_request(request):
     if request.user.is_school_admin:
+        # admins shouldn't be able to create requests for themselves
+        # it doesn't make sense
         raise PermissionDenied
-    
+
     copy_of_request = request
-    submitted_data = request.POST.get('submit_field')
+    submitted_data = request.POST.get("submit_field")
     print(submitted_data)
     if submitted_data is not None:
         print(extract_email(submitted_data))
-        request.user = User.objects.filter(email__exact = extract_email(submitted_data)).first()
-        
+        request.user = User.objects.filter(
+            email__exact=extract_email(submitted_data)
+        ).first()
+
     if request.method == "POST":
         form = RequestForLessonsForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            if submitted_data is not None:
-                return redirect("account")
+            # if submitted_data is not None:
+            #     return redirect("account")
             return redirect("requests_list")
     else:
         form = RequestForLessonsForm(user=request.user)
-        
+
     if submitted_data is not None:
-        return render(copy_of_request, "select_child.html", {"form": form, "email": extract_email(submitted_data)})
+        return render(
+            copy_of_request,
+            "select_child.html",
+            {"form": form, "email": extract_email(submitted_data)},
+        )
     return render(request, "create_request.html", {"form": form})
 
 
 @login_required
 def edit_request(request, id):
     if request.user.is_school_admin:
+        # admins don't edit requests
+        # they can however create a booking to their liking when fulfilling the request
         raise PermissionDenied
 
     req = get_object_or_404(RequestForLessons, id=id)
@@ -430,9 +443,7 @@ def select_child(request):
             child_requests = child.requestforlessons_set.all()
             child_bookings = child.booking_set.all()
 
-            request_child_form = RequestForLessonsForm(
-                request.POST, user=child
-            )
+            request_child_form = RequestForLessonsForm(request.POST, user=child)
             if request_child_form.is_valid():
                 request_child_form.save()
 

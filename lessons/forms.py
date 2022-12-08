@@ -260,6 +260,7 @@ class RequestForLessonsForm(forms.ModelForm):
             "days_between_lessons",
             "lesson_duration",
             "other_info",
+            "availability_field",
         ]
         widgets = {
             "other_info": forms.Textarea(),
