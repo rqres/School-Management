@@ -40,7 +40,7 @@ class BookingDeletedTest(TestCase):
     def test_delete_booking_url(self):
         self.assertEqual(self.url, "/account/bookings/delete/1/")
 
-    def test_booking_list_has_updated(self):
+    def test_booking_list_has_updated_after_delete(self):
         """New booking list must not contain deleted booking"""
         self.client.login(email=self.director.user.email, password="Watermelon123")
         num_of_bookings_before = Booking.objects.count()
