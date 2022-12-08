@@ -11,8 +11,8 @@
           <form action="{% url 'create_request' %}" method="post">
             {% csrf_token %}
             <!-- bootstrap doesnt display checkboxes correctly -->
-            {{ form.as_p }}
-            <!-- {% include 'partials/bootstrap_form.html' with form=form %} -->
+            <!--{{ form.as_p }}-->
+            {% include 'partials/bootstrap_form.html' with form=form %}
             <input type="submit" value="Submit" class="btn btn-lg btn-warning">
           </form>
         </div>
