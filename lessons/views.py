@@ -17,6 +17,7 @@ from .forms import (
     RequestForLessonsForm,
     SchoolTermForm,
     StudentSignUpForm,
+    ParentSignUpForm,
     SelectChildForm,
     PaymentForm,
     LogInForm,
@@ -93,6 +94,21 @@ def sign_up_student(request):
     return render(request, "sign_up_student.html", {"form": form})
 
 
+def sign_up_parent(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+
+    if request.method == "POST":
+        form = ParentSignUpForm(request.POST)
+        if form.is_valid():
+            # create user, add it to db, and log them in
+            user = form.save()
+            login(request, user)
+            return redirect("account")
+    else:
+        form = ParentSignUpForm()
+    return render(request, "sign_up_parent.html", {"form": form})
+
 def create_admin(request):
     if request.method == "POST":
         # create a bound version of the form with post data
@@ -114,6 +130,11 @@ def account(request):
     if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
+        )
+    # reditect parents to their dashboard template
+    elif request.user.is_parent and request.user.is_active:
+        return render(
+            request, "account_parent.html", {"student": request.user.student}
         )
     # redirect students to student template
     elif request.user.is_student:
@@ -425,37 +446,37 @@ def register_child(request):
 
 @login_required
 def select_child(request):
-    if request.method == "POST":
-        form = SelectChildForm(request.POST)
-        form.set_children(request.user.children.all())
-        if form.is_valid():
-            selected_child_email = form.cleaned_data["child_box"]
-            child = User.objects.get(email__exact=selected_child_email)
-            child_requests = child.requestforlessons_set.all()
-            child_bookings = child.booking_set.all()
+    if request.user.is_parent:
+        if request.method == "POST":
+            form = SelectChildForm(request.POST)
+            form.set_children(request.user.children.all())
+            if form.is_valid():
+                selected_child_email = form.cleaned_data["child_box"]
+                child = User.objects.get(email__exact=selected_child_email)
+                child_requests = child.requestforlessons_set.all()
+                child_bookings = child.booking_set.all()
 
-            request_child_form = RequestForLessonsForm(
-                request.POST, user=child
-            )
-            if request_child_form.is_valid():
-                request_child_form.save()
-
-            return render(
-                request,
-                "select_child.html",
-                {
-                    "form": form,
-                    "email": selected_child_email,
-                    "bookings": child_bookings,
-                    "requests": child_requests,
-                    "child_form": request_child_form,
-                },
-            )
-    else:
+                request_child_form = RequestForLessonsForm(
+                    request.POST, user=child
+                )
+                if request_child_form.is_valid():
+                    request_child_form.save()
+                return render(
+                    request,
+                        "select_child.html",
+                    {
+                        "form": form,
+                        "email": selected_child_email,
+                        "bookings": child_bookings,
+                        "requests": child_requests,
+                        "child_form": request_child_form,
+                    },
+                )
         form = SelectChildForm()
         form.set_children(request.user.children.all())
-    return render(request, "select_child.html", {"form": form, "email": ""})
-
+        return render(request, "select_child.html", {"form": form, "email": ""})
+    else: 
+        return redirect('account')
 
 @login_required
 def school_terms_list(request):
