@@ -60,8 +60,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
 
     # child-parent relations (many to many)
-    parents = models.ManyToManyField("self", related_name="parents")
-    children = models.ManyToManyField("self", related_name="children")
+    parents = models.ManyToManyField("self")
+    children = models.ManyToManyField("self")
 
     objects = CustomUserManager()
 
