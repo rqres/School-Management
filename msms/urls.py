@@ -43,7 +43,7 @@ urlpatterns = [
     # (all users will be redirected here regardless of usertype)
     path(
         "account/", views.account, name="account"
-    ),  # path to account overview (currently a simple redirect)
+    ),  # path to account overview
 
     # ---------- USER's BOOKINGS SECTION ----------
     path(
@@ -64,10 +64,14 @@ urlpatterns = [
 
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
-        "account/requests/", views.requests_list, name="requests_list"
+        "account/requests/",
+        views.requests_list,
+        name="requests_list"
     ),  # path to view my requests for lessons
     path(
-        "account/requests/create/", views.create_request, name="create_request"
+        "account/requests/create/",
+        views.create_request,
+        name="create_request"
     ),  # path to create new request
     path(
         "account/requests/<int:id>/",
@@ -92,7 +96,9 @@ urlpatterns = [
 
     # ---------- USER's PAYMENT SECTION ----------
     path(
-        "account/payment/", views.payment, name="payment_form"
+        "account/payment/",
+        views.payment,
+        name="payment_form"
     ),  # path to payment page
 
     # ---------- ADMIN SECTION ----------
@@ -117,7 +123,11 @@ urlpatterns = [
         name="delete_school_term",
     ),
 
-    path("account/all_admins/", views.admin_list, name="admin_list"),
+    path(
+        "account/all_admins/",
+        views.admin_list,
+        name="admin_list"
+    ),
     path(
         "account/all_admins/create/",
         views.create_admin,
@@ -135,7 +145,14 @@ urlpatterns = [
     ),
 
 
-    path("account/register_child/", views.register_child, name="register_child"),  # path to register children
-
-    path("account/select_child/", views.select_child, name="select_child"),  # path to book lessons for children
+    path(
+        "account/register_child/",
+        views.register_child,
+        name="register_child"
+    ),  # path to register children
+    path(
+        "account/select_child/",
+        views.select_child,
+        name="select_child"
+    ),  # path to book lessons for children
 ]
