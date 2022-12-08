@@ -53,7 +53,7 @@ urlpatterns = [
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show lessons in a booking
     path(
-        "account/bookings/<int:booking_id>/<int:lesson_id>", views.edit_lesson, name="edit_lesson"
+        "account/bookings/<int:booking_id>/<int:lesson_id>/", views.edit_lesson, name="edit_lesson"
     ),  # path to edit lesson in a booking
     path(
         "account/bookings/edit/<int:booking_id>/", views.edit_booking, name="edit_booking"

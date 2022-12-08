@@ -10,6 +10,10 @@
           <h1 class="card-title home-title home-card-header mx-auto mb-4">Lessons in Booking</h1>
           <h2>Lessons in Booking:</h2>
           <table class="table">
+            <tr>
+              <td class="table-primary"> Date of Lesson</td>
+              <td class="table-primary"> Start Time of Lesson</td>
+            <tr>
               {% for lesson in lessons %}
               <tr>
                   <td> {{ lesson.date }}</td>

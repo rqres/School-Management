@@ -388,8 +388,10 @@ class EditBookingForm(forms.ModelForm):
         )
         self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
         self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.description = self.cleaned_data.get("description")
         self._booking.save()
-
+        self._booking.update_lessons()
+        self._booking.update_invoice()
         return self._booking
 
 
@@ -410,6 +412,7 @@ class EditLessonForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "startTime": forms.TimeInput(attrs={"type": "time"}),
+            "description": forms.Textarea(),
         }
 
     def save(self):
