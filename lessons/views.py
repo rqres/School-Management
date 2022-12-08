@@ -131,6 +131,11 @@ def account(request):
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
         )
+    # reditect parents to their dashboard template
+    elif request.user.is_parent and request.user.is_active:
+        return render(
+            request, "account_parent.html", {"student": request.user.student}
+        )
     # redirect students to student template
     elif request.user.is_student:
         return render(
@@ -468,10 +473,9 @@ def select_child(request):
                         "child_form": request_child_form,
                     },
                 )
-        else: 
-            form = SelectChildForm()
-            form.set_children(request.user.children.all())
-            return render(request, "select_child.html", {"form": form, "email": ""})
+        form = SelectChildForm()
+        form.set_children(request.user.children.all())
+        return render(request, "select_child.html", {"form": form, "email": ""})
     else: 
         return redirect('account')
 

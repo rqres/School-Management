@@ -61,8 +61,7 @@ class LogInTest(TestCase, LogInTester):
      
     def test_parent_can_select_child(self):
         self.client.login(email=self.parent.email, password="Watermelon123")
-        self.client.post(self.reg_page, self.child_form_details, follow=True)
-        self.client.get(reverse('account'))
+        self.client.post(self.reg_page, self.child_form_details, follow=False)
         response = self.client.post(self.sel_page, {"email": self.child.email}, follow=True)
         self.assertEqual(response.status_code, 200)
         
