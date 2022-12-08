@@ -1,9 +1,8 @@
 """Tests of the Show Request view"""
 from django.test import TestCase
 from django.urls import reverse
-from django.urls.exceptions import Http404
 
-from lessons.models import RequestForLessons, SchoolAdmin, User
+from lessons.models import RequestForLessons, User
 
 
 class ShowRequestForLessonsViewTestCase(TestCase):

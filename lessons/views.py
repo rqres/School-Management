@@ -94,21 +94,6 @@ def sign_up_student(request):
     return render(request, "sign_up_student.html", {"form": form})
 
 
-def create_admin(request):
-    if request.method == "POST":
-        # create a bound version of the form with post data
-        form = CreateAdminForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("admin_list")
-    else:
-        form = (
-            CreateAdminForm()
-        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
-    return render(request, "create_admin.html", {"form": form})
-    # successful form means you save user record in database and redirect them to the database
-
-
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
@@ -131,7 +116,7 @@ def account(request):
         # UNRECOGNIZED USER TYPE
         # this shouldn't happen, log user out and send him to welcome page
         logout(request)
-        return redirect("account")
+        return redirect("home")
 
 
 @login_required
@@ -345,17 +330,38 @@ def admin_list(request):
         request, "admin_list.html", {"admins": admins, "current_user": request.user}
     )
 
-    # if request.user.schooladmin.is_director:
-    #     return render(request, "admin_list.html", {"admins": admins})
-    # elif request.user.schooladmin.editAdmins:
-    #     return render(request, "admin_list_edit_only.html", {"admins": admins})
-    # elif request.user.schooladmin.deleteAdmins:
-    #     return render(request, "admin_list_delete_only.html", {"admins": admins})
+
+# todo: hide template buttons for create edit delete based on permissions
+
+
+@login_required
+def create_admin(request):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_create_admins:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        # create a bound version of the form with post data
+        form = CreateAdminForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("admin_list")
+    else:
+        form = (
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
+    return render(request, "create_admin.html", {"form": form})
+    # successful form means you save user record in database and redirect them to the database
 
 
 @login_required
 def edit_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_edit_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
@@ -372,11 +378,15 @@ def edit_admin(request, id):
 
 @login_required
 def delete_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_delete_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
     if admin:
+        admin.user.delete()
         admin.delete()
         print("success!")
 
@@ -400,6 +410,7 @@ def payment(request):
     return render(request, "payment_form.html", {"form": form})
 
 
+@login_required
 def register_child(request):
     if request.user.is_parent:
         if request.method == "POST":

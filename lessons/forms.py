@@ -189,6 +189,14 @@ class CreateAdminForm(UserCreationForm):
             can_edit_admins=self.cleaned_data.get("can_edit_admins"),
             can_delete_admins=self.cleaned_data.get("can_delete_admins"),
         )
+
+        # directors should have all privileges
+        if admin.is_director:
+            admin.can_create_admins = True
+            admin.can_edit_admins = True
+            admin.can_delete_admins = True
+
+        admin.save()
         return admin
 
 
