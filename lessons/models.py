@@ -12,7 +12,7 @@ import random
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, first_name, last_name, password=None):
+    def create_user(self, email, first_name, last_name, password=None, is_active=True):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -24,6 +24,7 @@ class CustomUserManager(BaseUserManager):
             email=self.normalize_email(email),
             first_name=first_name,
             last_name=last_name,
+            is_active=True,
         )
         user.set_password(password)
         user.save(using=self._db)

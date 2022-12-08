@@ -8,19 +8,14 @@ from lessons.forms import LogInForm
 class LogInTest(TestCase, LogInTester):
     def setUp(self):
         self.url = reverse("log_in")
-        user = User.objects.create_user(
+        self.user = User.objects.create_user(
             email="student@example.org",
             first_name="Real",
             last_name="Person",
-            password="password",
+            password="Password123",
+            is_active=True,
         )
-        user.save()
-        self.student = Student.objects.create(
-            user=user, school_name="Queen's Trade School Waitangi"
-        )
-        self.schooladmin = SchoolAdmin.objects.create(
-            user=user, school_name = "King's", is_director=True, can_edit_admins= False, can_create_admins = False, can_delete_admins= False,
-        )
+        self.user.save()
 
     def test_url(self):
         self.assertEqual(self.url, "/log_in/")
@@ -36,7 +31,7 @@ class LogInTest(TestCase, LogInTester):
         self.assertFalse(form.is_bound)
 
     def test_failed_login_pass(self):
-        invalid_pass = ("student@example.org", "passwor")
+        invalid_pass = ("user@example.org", "passwor")
         self.assertFalse(
             self.client.login(email=invalid_pass[0], password=invalid_pass[1])
         )
@@ -49,8 +44,8 @@ class LogInTest(TestCase, LogInTester):
         )
         self.assertFalse(self.is_logged_in())
 
-    def test_unsuccessful_student_log_in(self):
-        form_input = {'email':self.student.user.email, 'password': 'WrongPassword123'}
+    def test_unsuccessful_log_in(self):
+        form_input = {'email':'user@example.org', 'password': 'WrongPassword123'}
         response = self.client.post(self.url, form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'log_in.html')
@@ -59,20 +54,10 @@ class LogInTest(TestCase, LogInTester):
         self.assertTrue(form.is_bound)
         self.assertFalse(self.is_logged_in())
 
-    def test_unsuccessful_director_log_in(self):
-        form_input = {'email':self.schooladmin.user.email, 'password': 'WrongPassword123'}
-        response = self.client.post(self.url, form_input)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'log_in.html')
-        form = response.context['form']
-        self.assertTrue(isinstance(form, LogInForm))
-        self.assertTrue(form.is_bound)
-        self.assertFalse(self.is_logged_in())
-
-    def test_valid_log_in_by_inactive_student(self):
-        self.student.user.is_active=False
-        self.student.user.save()
-        form_input = {'email': self.student.user.email, 'password': self.student.user.password}
+    def test_valid_log_in_by_inactive_user(self):
+        self.user.is_active=False
+        self.user.save()
+        form_input = {'email': 'user@example.org', 'password': 'Password123'}
         response = self.client.post(self.url, form_input, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'log_in.html')
@@ -81,47 +66,13 @@ class LogInTest(TestCase, LogInTester):
         self.assertTrue(form.is_bound)
         self.assertFalse(self.is_logged_in())
 
-    def test_valid_log_in_by_inactive_director(self):
-        self.schooladmin.user.is_active=False
-        self.schooladmin.user.save()
-        form_input = {'email': self.schooladmin.user.email, 'password': self.schooladmin.user.password}
-        response = self.client.post(self.url, form_input, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'log_in.html')
-        form = response.context['form']
-        self.assertTrue(isinstance(form, LogInForm))
-        self.assertTrue(form.is_bound)
-        self.assertFalse(self.schooladmin.is_logged_in())
-
-
-    def test_valid_log_in_by_student(self):
-        form_input = {'username': self.student.user.email, 'password': self.student.user.password}
-        response = self.client.post(self.url, form_input, follow=True)
-        self.assertTrue(self.student.is_logged_in())
-        #responseurl - url we are getting redirected to
-        response_url = reverse('account')
-        #target_status_code - code of eventual redirect
-        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'account_student.html')
-
-    def test_valid_log_in_by_director(self):
-        form_input = {'username': self.schooladmin.user.email, 'password': self.schooladmin.user.password}
-        response = self.client.post(self.url, form_input, follow=True)
-        self.assertTrue(self.schooladmin.is_logged_in())
-        #responseurl - url we are getting redirected to
-        response_url = reverse('account')
-        #target_status_code - code of eventual redirect
-        self.assertRedirects(response, response_url, status_code=302, target_status_code=200)
-        self.assertTemplateUsed(response, 'account_admin.html')
-
-    def test_log_in_with_blank_username(self):
+    def test_log_in_with_blank_email(self):
         form_input = {'email':'', 'password': 'Password123'}
         response = self.client.post(self.url, form_input)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
-        self.assertTrue(form.is_bound)
         self.assertFalse(self.is_logged_in())
 
     def test_log_in_with_blank_password(self):
@@ -131,5 +82,4 @@ class LogInTest(TestCase, LogInTester):
         self.assertTemplateUsed(response, 'log_in.html')
         form = response.context['form']
         self.assertTrue(isinstance(form, LogInForm))
-        self.assertTrue(form.is_bound)
         self.assertFalse(self.is_logged_in())

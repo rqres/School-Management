@@ -1,11 +1,10 @@
 """Tests of the Admin List view"""
 from django.test import TestCase
 from django.urls import reverse
-
 from lessons.models import SchoolAdmin ,User
 
 
-class RequestForLessonsListViewTestCase(TestCase):
+class AdminListViewTestCase(TestCase):
     """Tests of the Admin List view"""
     def setUp(self):
         self.url = reverse("admin_list")
