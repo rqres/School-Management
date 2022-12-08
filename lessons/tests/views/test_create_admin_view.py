@@ -51,7 +51,6 @@ class CreateAdminViewTestCase(TestCase, LogInTester):
         form = response.context["form"]
         self.assertTrue(isinstance(form, CreateAdminForm))
         self.assertTrue(form.is_bound)
-        self.assertFalse(self.is_logged_in())
 
     def test_successful_admin_creation(self):
         user_before_count = User.objects.count()
@@ -61,16 +60,14 @@ class CreateAdminViewTestCase(TestCase, LogInTester):
         admin_after_count = SchoolAdmin.objects.count()
         self.assertEqual(user_after_count, user_before_count + 1)
         self.assertEqual(admin_after_count, admin_before_count + 1)
-        response_url = reverse('account')
-        self.assertRedirects(
-            response, response_url, status_code=302, target_status_code=200
-        )
-        self.assertTemplateUsed(response, "account_admin.html")
-        user = User.objects.get(email="marty.major@example.org")
+        user = User.objects.get(email="bob.dylan@example.org")
         admin = SchoolAdmin.objects.get(user=user)
-        self.assertEqual(admin.user.first_name, "Marty")
-        self.assertEqual(admin.user.last_name, "Major")
-        self.assertEqual(admin.user.email, "marty.major@example.org")
+        self.assertEqual(admin.user.first_name, "Bob")
+        self.assertEqual(admin.user.last_name, "Dylan")
+        self.assertEqual(admin.user.email, "bob.dylan@example.org")
+        self.assertEqual(admin.is_director, True)
+        self.assertEqual(admin.can_edit_admins, False)
+        self.assertEqual(admin.can_delete_admins, False)
+        self.assertEqual(admin.can_create_admins, False)
         self.assertEqual(admin.school_name, "King's College London")
-        self.assertTrue(check_password("Password123", admin.user.password))
-        self.assertTrue(self.is_logged_in())
+        self.assertTrue(check_password("Watermelon123", admin.user.password))

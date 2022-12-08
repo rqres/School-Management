@@ -312,7 +312,6 @@ def edit_request(request, id):
 def admin_list(request):
     if not request.user.is_school_admin:
         raise PermissionDenied
-
     admins = SchoolAdmin.objects.all().exclude(user=request.user)
     return render(
         request, "admin_list.html", {"admins": admins, "current_user": request.user}

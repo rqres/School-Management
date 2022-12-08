@@ -1,3 +1,4 @@
+"""Unit tests for the create admin form"""
 from django.test import TestCase
 from django import forms
 from django.contrib.auth.hashers import check_password
