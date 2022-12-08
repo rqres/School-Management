@@ -173,7 +173,7 @@ def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         lessons = booking.lesson_set.all()
-        if request.user.is_school_admin is False and booking.user != request.user:
+        if request.user.is_school_admin is False and booking.user != request.user and not request.user.parents:
             # Users can only their bookings
             return redirect("account")
     except ObjectDoesNotExist:

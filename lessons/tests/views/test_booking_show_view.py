@@ -64,20 +64,6 @@ class BookingShowTest(TestCase):
             target_status_code=200,
             fetch_redirect_response=True,
         )
-    def test_show_booking_redirects_when_not_their_booking(self):
-        self.client.login(email=self.student.user.email, password="Watermelon123")
-        self.url = reverse(
-            "show_booking", kwargs={"booking_id": self.booking_for_other_user.id}
-        )
-        response = self.client.get(self.url)
-        redirect_url = "/account/"
-        self.assertRedirects(
-            response,
-            redirect_url,
-            status_code=302,
-            target_status_code=200,
-            fetch_redirect_response=True,
-        )
 
     def test_show_booking_as_a_user(self):
         """ Shows lessons in booking only if the user's booking """
