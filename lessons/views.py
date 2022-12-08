@@ -3,20 +3,22 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, render, redirect
+from django.urls.exceptions import Http404
 from .models import (
     Booking,
     Invoice,
     RequestForLessons,
-    User,
     SchoolTerm,
     SchoolAdmin,
     User,
+    Lesson,
 )
 from .forms import (
     EditAdminForm,
     RequestForLessonsForm,
     SchoolTermForm,
     StudentSignUpForm,
+    ParentSignUpForm,
     SelectChildForm,
     PaymentForm,
     LogInForm,
@@ -27,7 +29,6 @@ from .forms import (
     EditLessonForm,
     CreateAdminForm,
 )
-from .models import Lesson, Booking, Invoice, RequestForLessons, SchoolTerm, User
 
 
 #  Create your views here.
@@ -94,6 +95,22 @@ def sign_up_student(request):
     return render(request, "sign_up_student.html", {"form": form})
 
 
+def sign_up_parent(request):
+    if request.user.is_authenticated:
+        return redirect("account")
+
+    if request.method == "POST":
+        form = ParentSignUpForm(request.POST)
+        if form.is_valid():
+            # create user, add it to db, and log them in
+            user = form.save()
+            login(request, user)
+            return redirect("account")
+    else:
+        form = ParentSignUpForm()
+    return render(request, "sign_up_parent.html", {"form": form})
+
+
 def create_admin(request):
     if request.method == "POST":
         # create a bound version of the form with post data
@@ -107,14 +124,18 @@ def create_admin(request):
         )  # create a form with CreateAdminForm constructor, pass that form to template to render it
     return render(request, "create_admin.html", {"form": form})
     # successful form means you save user record in database and redirect them to the database
-
-
+    
 @login_required
 def account(request):
     # redirect school admins to their dashboard template
     if request.user.is_school_admin and request.user.is_active:
         return render(
             request, "account_admin.html", {"school_admin": request.user.schooladmin}
+        )
+    # reditect parents to their dashboard template
+    elif request.user.is_parent and request.user.is_active:
+        return render(
+            request, "account_parent.html", {"student": request.user.student}
         )
     # redirect students to student template
     elif request.user.is_student:
@@ -126,21 +147,22 @@ def account(request):
         return redirect("admin:index")
     # elif request.user.is_parent:
     #   etc...
+    # TODO else statement for teachers and parents
     else:
-        # UNRECOGNIZED USER TYPE
-        # this shouldn't happen, log user out and send him to welcome page
-        logout(request)
-        return redirect("account")
+        return render(
+            request, "account_user.html", {"user": request.user}
+        )
 
 
 @login_required
 def bookings_list(request):
-    if request.user.is_student is False and request.user.is_school_admin is False:
-        return redirect("account")
     if request.user.is_school_admin is True:
-        bookings = Booking.objects.all()
+        try:
+            bookings = Booking.objects.all()
+        except ObjectDoesNotExist:
+            return redirect("bookings_list")
     else:
-        bookings = request.user.student.booking_set.all()
+        bookings = request.user.booking_set.all()
     return render(
         request, "bookings_list.html", {"bookings": bookings, "user": request.user}
     )
@@ -151,6 +173,9 @@ def show_booking(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
         lessons = booking.lesson_set.all()
+        if request.user.is_school_admin is False and booking.user != request.user:
+            # Users can only their bookings
+            return redirect("account")
     except ObjectDoesNotExist:
         return redirect("bookings_list")
     else:
@@ -170,11 +195,11 @@ def edit_lesson(request, booking_id, lesson_id):
             form = EditLessonForm(request.POST, lesson=lesson)
             if form.is_valid():
                 lesson = form.save()
-                return redirect("show_booking")
+                return redirect("show_booking", booking_id=booking.id)
             else:
                 form = EditLessonForm(lesson=lesson)
     except ObjectDoesNotExist:
-        return redirect("show_booking")
+        return redirect("show_booking", booking_id=booking.id)
     else:
         form = EditLessonForm(lesson=lesson)
         return render(
@@ -223,7 +248,7 @@ def requests_list(request):
     if request.user.is_school_admin:
         requests = RequestForLessons.objects.all()
     else:
-        requests = request.user.student.requestforlessons_set.all()
+        requests = request.user.requestforlessons_set.all()
 
     return render(request, "requests_list.html", {"requests": requests})
 
@@ -233,8 +258,7 @@ def show_request(request, id):
     try:
         req = RequestForLessons.objects.get(id=id)
     except ObjectDoesNotExist:
-        return redirect("requests_list")
-
+        raise Http404("Request for lessons does not exist")
     else:
         return render(request, "show_request.html", {"lessons_request": req})
 
@@ -250,6 +274,9 @@ def delete_request(request, id):
 
 
 def fulfill_request(request, id):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
     lesson_request = RequestForLessons.objects.get(id=id)
 
     if request.method == "POST":
@@ -261,44 +288,69 @@ def fulfill_request(request, id):
     else:
         form = FulfillLessonRequestForm(lesson_request=lesson_request)
 
-    student_name = (
-        lesson_request.student.user.first_name
-        + " "
-        + lesson_request.student.user.last_name
-    )
+    user_name = lesson_request.user.first_name + " " + lesson_request.user.last_name
 
     return render(
         request,
         "fulfill_request_form.html",
-        {"request_id": id, "form": form, "student_name": student_name},
+        {"request_id": id, "form": form, "user_name": user_name},
     )
+
+
+def extract_email(string):
+    email = ""
+    i = len(string) - 1
+    while string[i] != " ":
+        email += string[i]
+        i -= 1
+    return email[::-1]
 
 
 @login_required
 def create_request(request):
-    if not request.user.is_student:
+    if request.user.is_school_admin:
+        # admins shouldn't be able to create requests for themselves
+        # it doesn't make sense
         raise PermissionDenied
 
+    copy_of_request = request
+    submitted_data = request.POST.get("submit_field")
+    print(submitted_data)
+    if submitted_data is not None:
+        print(extract_email(submitted_data))
+        request.user = User.objects.filter(
+            email__exact=extract_email(submitted_data)
+        ).first()
+
     if request.method == "POST":
-        form = RequestForLessonsForm(request.POST, student=request.user.student)
+        form = RequestForLessonsForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
+            # if submitted_data is not None:
+            #     return redirect("account")
             return redirect("requests_list")
     else:
-        form = RequestForLessonsForm(student=request.user.student)
+        form = RequestForLessonsForm(user=request.user)
+
+    if submitted_data is not None:
+        return render(
+            copy_of_request,
+            "select_child.html",
+            {"form": form, "email": extract_email(submitted_data)},
+        )
     return render(request, "create_request.html", {"form": form})
 
 
 @login_required
 def edit_request(request, id):
-    if not request.user.is_student:
+    if request.user.is_school_admin:
+        # admins don't edit requests
+        # they can however create a booking to their liking when fulfilling the request
         raise PermissionDenied
 
     req = get_object_or_404(RequestForLessons, id=id)
     if request.method == "POST":
-        form = RequestForLessonsForm(
-            request.POST, instance=req, student=request.user.student
-        )
+        form = RequestForLessonsForm(request.POST, instance=req, user=request.user)
         if form.is_valid():
             req = form.save(edit=True)
             req.save()
@@ -317,10 +369,33 @@ def admin_list(request):
         request, "admin_list.html", {"admins": admins, "current_user": request.user}
     )
 
+@login_required
+def create_admin(request):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_create_admins:
+        raise PermissionDenied
+
+    if request.method == "POST":
+        # create a bound version of the form with post data
+        form = CreateAdminForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("admin_list")
+    else:
+        form = (
+            CreateAdminForm()
+        )  # create a form with CreateAdminForm constructor, pass that form to template to render it
+    return render(request, "create_admin.html", {"form": form})
+    # successful form means you save user record in database and redirect them to the database
 
 @login_required
 def edit_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_edit_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
@@ -337,11 +412,15 @@ def edit_admin(request, id):
 
 @login_required
 def delete_admin(request, id):
-    if not (request.user.is_school_admin and request.user.schooladmin.is_director):
+    if not request.user.is_school_admin:
+        raise PermissionDenied
+
+    if not request.user.schooladmin.can_delete_admins:
         raise PermissionDenied
 
     admin = get_object_or_404(SchoolAdmin, pk=id)
     if admin:
+        admin.user.delete()
         admin.delete()
         print("success!")
 
@@ -351,7 +430,7 @@ def delete_admin(request, id):
 @login_required
 def payment(request):
     if request.method == "POST":
-        form = PaymentForm(request.POST, student=request.user)
+        form = PaymentForm(request.POST, user=request.user)
         if form.is_valid():
             try:
                 invoice = Invoice.objects.get(urn=form.cleaned_data.get("invoice_urn"))
@@ -359,12 +438,13 @@ def payment(request):
                 invoice.save()
                 return redirect("account")
             except ObjectDoesNotExist:
-                form = PaymentForm(student=request.user)
+                form = PaymentForm(user=request.user)
     else:
-        form = PaymentForm(student=request.user)
+        form = PaymentForm(user=request.user)
     return render(request, "payment_form.html", {"form": form})
 
 
+@login_required
 def register_child(request):
     if request.user.is_parent:
         if request.method == "POST":
@@ -399,37 +479,37 @@ def register_child(request):
 
 @login_required
 def select_child(request):
-    if request.method == "POST":
-        form = SelectChildForm(request.POST)
-        form.set_children(request.user.children.all())
-        if form.is_valid():
-            selected_child_email = form.cleaned_data["child_box"]
-            child = User.objects.get(email__exact=selected_child_email)
-            child_requests = child.student.requestforlessons_set.all()
-            child_bookings = child.student.booking_set.all()
+    if request.user.is_parent:
+        if request.method == "POST":
+            form = SelectChildForm(request.POST)
+            form.set_children(request.user.children.all())
+            if form.is_valid():
+                selected_child_email = form.cleaned_data["child_box"]
+                child = User.objects.get(email__exact=selected_child_email)
+                child_requests = child.requestforlessons_set.all()
+                child_bookings = child.booking_set.all()
 
-            request_child_form = RequestForLessonsForm(
-                request.POST, student=child.student
-            )
-            if request_child_form.is_valid():
-                request_child_form.save()
-
-            return render(
-                request,
-                "select_child.html",
-                {
-                    "form": form,
-                    "email": selected_child_email,
-                    "bookings": child_bookings,
-                    "requests": child_requests,
-                    "child_form": request_child_form,
-                },
-            )
-    else:
+                request_child_form = RequestForLessonsForm(
+                    request.POST, user=child
+                )
+                if request_child_form.is_valid():
+                    request_child_form.save()
+                return render(
+                    request,
+                        "select_child.html",
+                    {
+                        "form": form,
+                        "email": selected_child_email,
+                        "bookings": child_bookings,
+                        "requests": child_requests,
+                        "child_form": request_child_form,
+                    },
+                )
         form = SelectChildForm()
         form.set_children(request.user.children.all())
-    return render(request, "select_child.html", {"form": form, "email": ""})
-
+        return render(request, "select_child.html", {"form": form, "email": ""})
+    else: 
+        return redirect('account')
 
 @login_required
 def school_terms_list(request):

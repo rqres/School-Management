@@ -1,3 +1,4 @@
+from copy import Error
 from django import forms
 from django.core.validators import RegexValidator
 from django.contrib.auth.forms import UserCreationForm
@@ -18,9 +19,6 @@ from django.contrib.auth import authenticate
 
 class StudentSignUpForm(UserCreationForm):
     school_name = forms.CharField(max_length=100, required=True)
-    is_parent = forms.BooleanField(
-        label="Are you a Parent?", required=False, widget=forms.CheckboxInput()
-    )
 
     class Meta:
         model = User
@@ -57,7 +55,53 @@ class StudentSignUpForm(UserCreationForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.is_student = True
-            user.is_parent = self.cleaned_data["is_parent"]
+            user.save()
+
+        Student.objects.create(
+            user=user, school_name=self.cleaned_data.get("school_name")
+        )
+
+        return user
+    
+class ParentSignUpForm(UserCreationForm):
+    school_name = forms.CharField(max_length=100, required=True)
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email", "school_name"]
+
+    password1 = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput,
+        validators=[
+            RegexValidator(
+                regex=r"^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9]).*$",
+                message="Password must contain at least one uppercase"
+                "character, one lowercase character, and one digit.",
+            )
+        ],
+    )
+
+    password2 = forms.CharField(
+        label="Password confirmation", widget=forms.PasswordInput
+    )
+
+    def clean_password2(self):
+        # Check that the two password entries match
+        password1 = self.cleaned_data.get("password1")
+        password2 = self.cleaned_data.get("password2")
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+        return password2
+
+    @transaction.atomic
+    def save(self, commit=True):
+        # Save the provided password in hashed format
+        user = super(ParentSignUpForm, self).save(commit=False)
+        user.set_password(self.cleaned_data["password1"])
+        if commit:
+            user.is_student = True
+            user.is_parent = True
             user.save()
 
         Student.objects.create(
@@ -188,7 +232,14 @@ class CreateAdminForm(UserCreationForm):
             can_edit_admins=self.cleaned_data.get("can_edit_admins"),
             can_delete_admins=self.cleaned_data.get("can_delete_admins"),
         )
-    #if director is true, set all privileges to true and then .save again
+
+        #if director is true, set all privileges to true and then .save again
+        if admin.is_director:
+            admin.can_create_admins = True
+            admin.can_edit_admins = True
+            admin.can_delete_admins = True
+
+        admin.save()
         return admin
 
 
@@ -236,7 +287,7 @@ class SchoolTermForm(forms.ModelForm):
 
 class RequestForLessonsForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self._student = kwargs.pop("student", None)
+        self._user = kwargs.pop("user", None)
         self._instance = kwargs.pop("instance", None)
         super().__init__(*args, **kwargs)
 
@@ -260,6 +311,7 @@ class RequestForLessonsForm(forms.ModelForm):
             "days_between_lessons",
             "lesson_duration",
             "other_info",
+            "availability_field",
         ]
         widgets = {
             "other_info": forms.Textarea(),
@@ -285,7 +337,7 @@ class RequestForLessonsForm(forms.ModelForm):
         super().save(commit=False)
         if not edit:
             req = RequestForLessons.objects.create(
-                student=self._student,
+                user=self._user,
                 availability=",".join(self.cleaned_data.get("availability_field")),
                 no_of_lessons=self.cleaned_data.get("no_of_lessons"),
                 days_between_lessons=self.cleaned_data.get("days_between_lessons"),
@@ -333,6 +385,9 @@ class EditBookingForm(forms.ModelForm):
             "teacher",
             "description",
         ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
 
     def save(self):
         super().save(commit=False)
@@ -342,8 +397,10 @@ class EditBookingForm(forms.ModelForm):
         )
         self._booking.lesson_duration = self.cleaned_data.get("lesson_duration")
         self._booking.teacher = self.cleaned_data.get("teacher")
+        self._booking.description = self.cleaned_data.get("description")
         self._booking.save()
-
+        self._booking.update_lessons()
+        self._booking.update_invoice()
         return self._booking
 
 
@@ -364,6 +421,7 @@ class EditLessonForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "startTime": forms.TimeInput(attrs={"type": "time"}),
+            "description": forms.Textarea(),
         }
 
     def save(self):
@@ -379,10 +437,10 @@ class EditLessonForm(forms.ModelForm):
 
 class PaymentForm(forms.Form):
     def __init__(self, *args, **kwargs):
-        self._student = kwargs.pop("student", None)
+        self._user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-        if self._student:
-            invoices = self._student.student.invoice_set.filter(is_paid=False)
+        if self._user:
+            invoices = self._user.invoice_set.filter(is_paid=False)
             self.fields["invoice_urn"].queryset = invoices
 
     invoice_urn = forms.ModelChoiceField(
@@ -511,6 +569,9 @@ class FulfillLessonRequestForm(forms.ModelForm):
             "lesson_duration",
             "description",
         ]
+        widgets = {
+            "description": forms.Textarea(),
+        }
 
     # transaction atomic means that if anything fails in this function
     # then everything will revert to the state it was in before running the function
@@ -526,10 +587,13 @@ class FulfillLessonRequestForm(forms.ModelForm):
             days_between_lessons=self.cleaned_data.get("days_between_lessons"),
             lesson_duration=self.cleaned_data.get("lesson_duration"),
             description=self.cleaned_data.get("description"),
-            student=self._lesson_request.student,
+            user=self._lesson_request.user,
             teacher=self.cleaned_data.get("teacher"),
         )
-        booking.create_lessons()
+        try:
+            booking.create_lessons()
+        except AttributeError:
+            raise Exception("No School Term in DB")
 
         # booking created, mark request as fulfilled
         self._lesson_request.fulfilled = True

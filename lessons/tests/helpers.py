@@ -29,7 +29,7 @@ def create_test_bookings(booking_count):
             )
             booking = Booking.objects.create(
                 num_of_lessons = booking_count,
-                student = student,
+                user = user,
                 teacher = new_teacher,
                 description = f'Gutitar lesson on basics{booking_id}',
                 days_between_lessons = 7,

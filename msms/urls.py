@@ -34,13 +34,16 @@ urlpatterns = [
     path(
         "sign_up/student/", views.sign_up_student, name="sign_up_student"
     ),  # path for the student sign-up page
+    path(
+        "sign_up/parent/", views.sign_up_parent, name="sign_up_parent"
+    ),  # path for the parent sign-up page
 
 
     # ---------- UNIVERSAL ACCOUNT DASHBOARD ----------
     # (all users will be redirected here regardless of usertype)
     path(
         "account/", views.account, name="account"
-    ),  # path to account overview (currently a simple redirect)
+    ),  # path to account overview
 
     # ---------- USER's BOOKINGS SECTION ----------
     path(
@@ -50,7 +53,7 @@ urlpatterns = [
         "account/bookings/<int:booking_id>/", views.show_booking, name="show_booking"
     ),  # path to show lessons in a booking
     path(
-        "account/bookings/<int:booking_id>/<int:lesson_id>", views.edit_lesson, name="edit_lesson"
+        "account/bookings/<int:booking_id>/<int:lesson_id>/", views.edit_lesson, name="edit_lesson"
     ),  # path to edit lesson in a booking
     path(
         "account/bookings/edit/<int:booking_id>/", views.edit_booking, name="edit_booking"
@@ -61,10 +64,14 @@ urlpatterns = [
 
     # ---------- USER's REQUESTS FOR LESSONS SECTION ----------
     path(
-        "account/requests/", views.requests_list, name="requests_list"
+        "account/requests/",
+        views.requests_list,
+        name="requests_list"
     ),  # path to view my requests for lessons
     path(
-        "account/requests/create/", views.create_request, name="create_request"
+        "account/requests/create/",
+        views.create_request,
+        name="create_request"
     ),  # path to create new request
     path(
         "account/requests/<int:id>/",
@@ -81,10 +88,17 @@ urlpatterns = [
         views.delete_request,
         name="delete_request",
     ),
+    path(
+        "account/requests/<int:id>/fulfill/",
+        views.fulfill_request,
+        name="fulfill_request",
+    ),
 
     # ---------- USER's PAYMENT SECTION ----------
     path(
-        "account/payment/", views.payment, name="payment_form"
+        "account/payment/",
+        views.payment,
+        name="payment_form"
     ),  # path to payment page
 
     # ---------- ADMIN SECTION ----------
@@ -112,7 +126,8 @@ urlpatterns = [
     path(
         "account/all_admins/",
         views.admin_list,
-        name="admin_list"),
+        name="admin_list"
+    ),
     path(
         "account/all_admins/create/",
         views.create_admin,
@@ -135,6 +150,9 @@ urlpatterns = [
         views.register_child,
         name="register_child"
     ),  # path to register children
-
-    path("account/select_child/", views.select_child, name="select_child"),  # path to book lessons for children
+    path(
+        "account/select_child/",
+        views.select_child,
+        name="select_child"
+    ),  # path to book lessons for children
 ]

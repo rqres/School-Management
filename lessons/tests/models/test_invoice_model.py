@@ -15,7 +15,7 @@ class InvoiceTest(TestCase):
         self.student = Student.objects.get(user=self.user_student)
 
         self.invoice = Invoice(
-            student=self.student,
+            user=self.user_student,
             student_num=self.student.user.pk + 1000,
             invoice_num=Invoice.objects.filter(student_num=self.student.user.pk).count()
             + 1,
@@ -24,7 +24,7 @@ class InvoiceTest(TestCase):
         self.invoice.save()
 
         self.second_invoice = Invoice.objects.create(
-            student=self.student,
+            user=self.user_student,
             student_num=self.student.user.pk + 1000,
             invoice_num=Invoice.objects.filter(
                 student_num=self.invoice.student_num
@@ -61,9 +61,8 @@ class InvoiceTest(TestCase):
 
     def test_student_num_field_is_valid(self):
         test_user = User.objects.get(pk=int(self.invoice.student_num - 1000))
-        student = Student.objects.get(user=test_user)
         try:
-            student.full_clean()
+            test_user.full_clean()
         except ValidationError:
             self.fail("Invalid student number assigned")
 
