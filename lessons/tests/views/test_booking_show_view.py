@@ -88,7 +88,7 @@ class BookingShowTest(TestCase):
         self.assertNotContains(response,"Edit Lesson") # Edit button
 
 
-    def donot_test_show_booking_displays_correctly_as_a_director(self):
+    def test_show_booking_displays_correctly_as_a_director(self):
         self.client.login(email=self.director.user.email, password="Watermelon123")
         lessons_in_booking = Lesson.objects.filter(booking=self.booking_to_show)
         response = self.client.get(self.url)
@@ -96,7 +96,10 @@ class BookingShowTest(TestCase):
         self.assertTemplateUsed(response,"show_booking.html")
         self.assertContains(response,"Edit Lesson") # Edit button
         for lesson in lessons_in_booking:
-            self.assertContains(response, lesson.date)
-            #self.assertContains(response, lesson.startTime)
-
+            self.assertContains(response, f'{lesson.date.day}, {lesson.date.year}')
+            if lesson.startTime.hour > 12:
+                self.assertContains(response, f'{lesson.startTime.hour-12} p.m.')
+            else:
+                self.assertContains(response, f'{lesson.startTime.hour} a.m.')
+ 
    
