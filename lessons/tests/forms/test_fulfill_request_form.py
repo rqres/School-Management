@@ -54,7 +54,7 @@ class FulfillRequestFormTestCase(TestCase):
         description_field = form.fields["description"].widget
         self.assertTrue(isinstance(description_field, forms.Textarea))
 
-    def test_form_is_prefilled_with_data(self):
+    def test_fulfill_form_is_prefilled_with_data(self):
         form = FulfillLessonRequestForm(lesson_request=self.request)
         self.assertEqual(
             form.fields["num_of_lessons"].initial, self.request.no_of_lessons
