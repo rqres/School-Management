@@ -367,6 +367,7 @@ class EditLessonForm(forms.ModelForm):
         widgets = {
             "date": forms.DateInput(attrs={"type": "date"}),
             "startTime": forms.TimeInput(attrs={"type": "time"}),
+            "description": forms.Textarea(),
         }
 
     def save(self):

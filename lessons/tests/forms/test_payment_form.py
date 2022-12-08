@@ -1,4 +1,4 @@
-"""Unit tests of the log in form."""
+"""Unit tests of the payment form."""
 from django import forms
 from django.test import TestCase
 from lessons.forms import PaymentForm
@@ -6,7 +6,7 @@ from lessons.models import Invoice, Student, User
 from djmoney.money import Money
 
 class PaymentFormTestCase(TestCase):
-    """Unit tests of the log in form."""
+    """Unit tests of the payment form."""
 
     fixtures = [
         "lessons/tests/fixtures/default_student.json",

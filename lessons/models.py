@@ -166,7 +166,7 @@ class Booking(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, blank=False)
     teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE, blank=False)
     description = models.CharField(max_length=50, blank=True)
-    # startTime = models.TimeField(blank=false)
+   
     def save(self, *args, **kwargs):
         self.create_invoice()
         super(Booking, self).save(*args, **kwargs)
@@ -231,14 +231,14 @@ class Lesson(models.Model):
 
     def clean(self):
         # Check that date is within one of the school terms
-        pass
-        currentTerm = None
-        schoolTerms = SchoolTerm.objects.all()
-        for term in schoolTerms:
-            if self.date > term.start_date and self.date < term.end_date:
-                currentTerm = term
-        if currentTerm is None:
-            raise ValidationError("Date of lesson does not lie in the terms")
+        if self.date is not None:
+            currentTerm = None
+            schoolTerms = SchoolTerm.objects.all()
+            for term in schoolTerms:
+                if self.date > term.start_date and self.date < term.end_date:
+                    currentTerm = term
+            if currentTerm is None:
+                raise ValidationError("Date of lesson does not lie in the terms")
 
     class Meta:
         # Model options
