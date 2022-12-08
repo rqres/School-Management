@@ -35,7 +35,7 @@ class LogInTest(TestCase, LogInTester):
     # from django import forms
     # from lessons.forms import LogInForm
     #
-    # class AdminLogInFormTestCase(TestCase):
+    # class LogInFormTestCase(TestCase):
     #     """Unit tests of the log in form."""
     #
     #     def setUp(self):
