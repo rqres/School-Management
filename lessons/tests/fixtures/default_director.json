@@ -20,7 +20,10 @@
     "pk": 6,
     "fields": {
       "school_name": "King's College London",
-      "is_director": true
+      "is_director": true,
+      "can_create_admins": true,
+      "can_edit_admins": true,
+      "can_delete_admins": true
     }
   }
 ]

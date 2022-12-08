@@ -3,11 +3,11 @@ from django.test import TestCase
 from django import forms
 from lessons.forms import LogInForm
 
-class AdminLogInFormTestCase(TestCase):
+class LogInFormTestCase(TestCase):
     """Unit tests of the log in form."""
 
     def setUp(self):
-        self.form_input = {'email':'marty.major@example.org', 'password':'Password123'}
+        self.form_input = {'email':'user@example.org', 'password':'Password123'}
 
     #check if login page includes username and password field
     def test_form_contains_required_fields(self):
@@ -34,12 +34,12 @@ class AdminLogInFormTestCase(TestCase):
 
     #accepts incorrect username but just won't let them log in
     def test_form_accepts_incorrect_username(self):
-        self.form_input['email'] = 'jane.d@example.org'
+        self.form_input['email'] = 'userexample'
         form = LogInForm(data=self.form_input)
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
 
     #accepts incorrect password but just won't let them log in
     def test_form_accepts_incorrect_password(self):
-        self.form_input['password'] = 'pwd'
+        self.form_input['password'] = 'passwprd'
         form = LogInForm(data=self.form_input)
         self.assertTrue(form.is_valid())
