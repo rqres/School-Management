@@ -5,7 +5,7 @@ from lessons.tests.helpers import LogInTester
 
 
 # Create your tests here.
-class LogInTest(TestCase, LogInTester):
+class LogInFormTestCase(TestCase, LogInTester):
     def setUp(self):
         self.sample_email = "admin@important.com"
         self.url = reverse("log_in")

@@ -1,4 +1,4 @@
-from lessons.models import SchoolTerm, Booking, User, Student, Teacher
+from lessons.models import SchoolTerm, Booking, User, Student, Teacher, SchoolAdmin
 
 class LogInTester:
     def is_logged_in(self):
@@ -7,7 +7,9 @@ class LogInTester:
 fixtures = [
     "lessons/tests/fixtures/default_student.json",
     "lessons/tests/fixtures/default_teacher.json",
+    "lessons/tests/fixtures/default_director.json",
 ]
+
 def create_test_bookings(booking_count):
         user = User.objects.get(email="john.doe@example.org")
         student = Student.objects.get(user=user)
